@@ -1,0 +1,38 @@
+.editDomain {
+    &__title {
+        background-color: #ed6c02;
+        color: #fff;
+    }
+    &__domainName {
+        color: rgb(238, 255, 0);
+        font-weight: 700;
+    }
+    &__btnEdit {
+        background-color: #ed6c02 !important;
+        color: #fff !important;
+        font-weight: 700 !important;
+        transition: 0.3s;
+        &:hover {
+            background-color: #d86303 !important;
+        }
+    }
+    &__box {
+        padding: 10px 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+    &__phoneNumber {
+        width: 100% !important;
+    }
+    &__Tooltip {
+        background-color: #d86303 !important;
+    }
+}
+.MuiTooltip-tooltip {
+    background-color: #198754 !important; // Цвет фона
+    color: #fff !important; // Цвет текста
+}
+.MuiTooltip-arrow {
+    color: #198754 !important;
+}

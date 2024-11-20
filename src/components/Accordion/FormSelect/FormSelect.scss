@@ -1,0 +1,21 @@
+.formSelect {
+    &__title {
+        background-color: #1baa59 !important;
+        color: #fff;
+    }
+    &__namCategory {
+        color: #dc3545;
+        font-weight: 700;
+    }
+    &__nameTemplate {
+        font-weight: 700;
+    }
+    &__btnClose {
+        font-weight: 500 !important;
+        background-color: #d32f2f !important;
+        color: #fff !important;
+    }
+    &__nativeSelect > select {
+        padding: 0 10px !important;
+    }
+}

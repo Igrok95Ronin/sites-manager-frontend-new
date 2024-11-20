@@ -1,0 +1,176 @@
+.accordion {
+    padding: 55px 0 0;
+    &__box {
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+    &__wrapper {
+        border: 1px solid transparent;
+    }
+    &__ul {
+        list-style: none;
+        margin: 0;
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 20px;
+        grid-row-gap: 50px;
+    }
+    &__name-category {
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    &__number-templates {
+        font-weight: 700;
+    }
+    &__ul {
+        li {
+            box-shadow: rgba(3, 102, 214, 0.3) 0 0 0 3px;
+            border-radius: 3px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 10px;
+        }
+    }
+    &__imgWrp {
+        box-shadow: 2px 3px 15px #c9c6c6;
+        border-radius: 5px;
+        width: 100%;
+        max-height: 120px;
+    }
+    &__img {
+        width: 100%;
+        height: 100%;
+        min-height: 120px;
+        border-radius: 5px;
+        object-fit: contain;
+    }
+    &__nameTemplate {
+        margin-bottom: 10px;
+        margin-top: 10px;
+        font-weight: 700;
+        font-size: 18px;
+    }
+    &__btnWrp {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    &__view,
+    &__select {
+        color: #fff;
+        font-weight: 700;
+        text-decoration: none;
+        background-color: #dc3545;
+        text-transform: uppercase !important;
+        border: 0 !important;
+        padding: 6px 12px !important;
+        font-size: 14px !important;
+        border-radius: 4px !important;
+        line-height: 1.42857143 !important;
+        transition: 0.3s;
+        box-shadow:
+            0 2px 2px 0 rgba(0, 0, 0, 0.14),
+            0 3px 1px -2px rgba(0, 0, 0, 0.2),
+            0 1px 5px 0 rgba(0, 0, 0, 0.12);
+        &:hover {
+            background-color: #c52535;
+        }
+    }
+    &__block-category {
+        padding: 2px 10px;
+        border: 1px solid #198754;
+        background: #198754;
+        border-radius: 2px;
+        min-width: 90px;
+    }
+    &__select {
+        background-color: #198754 !important;
+        cursor: pointer;
+        &:hover {
+            background-color: #136e44;
+        }
+    }
+    &__view {
+        background-color: #dc3545 !important;
+        border: 0 !important;
+        border-radius: 4px !important;
+        box-shadow: 0 2px 2px 0 #00000024, 0 3px 1px -2px #0003, 0 1px 5px 0 #0000001f;
+        color: #fff !important;
+        font-size: 14px !important;
+        font-weight: 700;
+        line-height: 1.42857143 !important;
+        padding: 6px 12px !important;
+        text-decoration: none;
+        text-transform: uppercase !important;
+        transition: .3s;
+        &:hover {
+            background-color: #c72838 !important;
+        }
+    }
+    &__container {
+        max-width: 1300px;
+        margin: 20px auto;
+    }
+}
+
+.flag {
+    display: inline-block;
+    position: relative;
+    width: 16px;
+    height: 11px;
+    background: url("../../assets/img/flags.png") no-repeat;
+    margin-right: 5px;
+}
+.flag-at {
+    background-position: -176px 0;
+}
+.flag-be {
+    background-position: -32px -11px;
+}
+.flag-cz {
+    background-position: -16px -33px;
+}
+.flag-fr {
+    background-position: -80px -44px;
+}
+.flag-gb {
+    background-position: -112px -44px;
+}
+.flag-hu {
+    background-position: -224px -55px;
+}
+.flag-no {
+    background-position: -256px -99px;
+}
+.flag-pl {
+    background-position: -176px -110px;
+}
+.flag-ru {
+    background-position: -96px -121px;
+}
+
+@media (max-width: 1200px) {
+    .accordion__ul {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+@media (max-width: 1023px) {
+    .accordion__ul {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+@media (max-width: 767px) {
+    .accordion__ul {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+@media (max-width: 600px) {
+    .accordion__ul {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 350px) {
+    .accordion__ul {
+        grid-template-columns: 1fr;
+    }
+}

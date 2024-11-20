@@ -1,0 +1,14 @@
+.addDomain {
+    &__box {
+        display: flex;
+        justify-content: flex-end;
+    }
+    &__container {
+        max-width: 1300px;
+        margin: 10px auto 0px;
+    }
+    &__btn {
+        font-size: 40px !important;
+        color: #4caf50 !important;
+    }
+}

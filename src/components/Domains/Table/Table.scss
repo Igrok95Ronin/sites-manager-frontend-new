@@ -1,0 +1,170 @@
+.table {
+    &__headerCell {
+        background-color: #4caf50 !important;
+        position: sticky;
+        top: 0;
+        color: #fff !important;
+    }
+    &__headerCell > span {
+        background-color: #198754 !important;
+        padding: 3px 5px !important;
+        border-radius: 3px !important;
+        color: #fff !important;
+        transition: 0.3s;
+        &:hover {
+            color: #f6f6f6 !important;
+        }
+    }
+    &__headerCell > span > svg {
+        fill: #fff !important;
+    }
+    &__container {
+        max-height: 70vh;
+    }
+    &__link {
+        color: #1976d2;
+        font-weight: 500;
+        font-size: 15px;
+        transition: 0.3s;
+        &:hover {
+            color: #198754;
+            border-bottom: 1px dashed #198754;
+        }
+    }
+    &__btn {
+        color: black;
+    }
+    &__pending span {
+        font-weight: 500;
+        background-color: #ed6c02;
+        color: #fff;
+        padding: 2px 5px;
+        border-radius: 2px;
+    }
+    &__active span {
+        font-weight: 500;
+        background-color: #2e7d32;
+        color: #fff;
+        padding: 2px 5px;
+        border-radius: 2px;
+    }
+    &__subDomains {
+        display: flex !important;
+        align-items: flex-end !important;
+        padding-left: 30px !important;
+    }
+    &__subDomainsArrow {
+        margin-right: 8px;
+        width: 0.6em !important;
+    }
+    &__imgLine {
+        display: flex !important;
+        align-items: center !important;
+        height: 17px !important;
+    }
+    // стили для меню
+    &__menu > button {
+        width: 36px !important;
+        height: 35px !important;
+        margin: 0 5px;
+    }
+    &__menu {
+        align-items: flex-end !important;
+    }
+
+    &__menu > div > button {
+        width: 36px !important;
+        height: 35px !important;
+        margin-left: 5px !important;
+        margin-right: 5px !important;
+        margin: 1px 5px 9px;
+        svg {
+            width: 0.9em;
+        }
+    }
+    &__menu > div > button:nth-child(1) {
+        background-color: #d32f2f !important;
+        color: #fff !important;
+        transition: 0.2s;
+        &:hover {
+            background-color: #b91f1f !important;
+        }
+    }
+    &__menu > div > button:nth-child(2) {
+        background-color: #b2bd1b !important;
+        color: #fff !important;
+        transition: 0.2s;
+        &:hover {
+            background-color: #9da717 !important;
+        }
+    }
+    &__menu > div > button:nth-child(3) {
+        background-color: #1ebb62 !important;
+        color: #fff !important;
+        transition: 0.2s;
+        margin-right: 10px !important;
+        &:hover {
+            background-color: #1baa59 !important;
+        }
+    }
+    &__menu > div > button:nth-child(4) {
+        background-color: #ed6c02 !important;
+        color: #fff !important;
+        transition: 0.2s;
+        margin-right: 10px !important;
+        &:hover {
+            background-color: #d86303 !important;
+        }
+    }
+}
+
+// стили для меню
+.MuiSpeedDial-actions {
+    margin-right: 40px !important;
+    flex-direction: row !important;
+    margin-bottom: -48px !important;
+    padding-bottom: 3px !important;
+}
+
+.table__myError .MuiPaper-root {
+    font-weight: 500;
+    background-color: #d32f2f !important;
+    color: #fff;
+}
+.table__mySuccess .MuiPaper-root {
+    font-weight: 500;
+    background-color: #2e7d32 !important;
+    color: #fff;
+}
+
+// Media
+@media (max-width: 850px) {
+    .table__headerCell,
+    .table__bodyCell {
+        padding: 10px !important;
+    }
+}
+@media (max-width: 787px) {
+    .table__header > tr > th:nth-child(3),
+    .table__body > tr > td:nth-child(3) {
+        display: none;
+    }
+}
+@media (max-width: 630px) {
+    .table__header > tr > th:nth-child(4),
+    .table__body > tr > td:nth-child(4) {
+        display: none;
+    }
+}
+@media (max-width: 550px) {
+    .table__header > tr > th:nth-child(5),
+    .table__body > tr > td:nth-child(5) {
+        display: none;
+    }
+}
+@media (max-width: 452px) {
+    .table__header > tr > th:nth-child(2),
+    .table__body > tr > td:nth-child(2) {
+        display: none;
+    }
+}

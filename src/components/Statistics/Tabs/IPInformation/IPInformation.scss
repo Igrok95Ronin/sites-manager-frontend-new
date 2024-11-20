@@ -1,0 +1,23 @@
+.IPInformation {
+    &__title {
+        color: rgb(5, 89, 185) !important;
+    }
+    &__key {
+        color: #0f374a;
+        font-weight: 500;
+    }
+    &__string {
+        color: #800;
+    }
+    &__number {
+        color: #cd5c12;
+    }
+    &__boolean {
+        color: #78a960;
+    }
+    &__container > div {
+        display: flex !important;
+        flex-direction: column;
+        gap: 5px;
+    }
+}

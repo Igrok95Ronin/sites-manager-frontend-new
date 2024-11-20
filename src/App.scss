@@ -1,0 +1,40 @@
+* {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  outline: none;
+  font-family:
+    "Roboto",
+    system-ui,
+    -apple-system,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  box-sizing: border-box;
+  text-decoration: none;
+}
+/* Селектор для стилизации самого скроллбара */
+::-webkit-scrollbar {
+  width: 7px; /* Устанавливает ширину скроллбара (вертикального или горизонтального) */
+}
+
+/* Селектор для стилизации трека скроллбара (области, по которой движется бегунок) */
+::-webkit-scrollbar-track {
+  background-color: #f1f1f1; /* Устанавливает цвет фона трека скроллбара */
+}
+
+/* Селектор для стилизации бегунка скроллбара (движущейся части, которую пользователь перетаскивает) */
+::-webkit-scrollbar-thumb {
+  background-color: #4caf50; /* Устанавливает цвет бегунка */
+  border-radius: 5px; /* Закругляет углы бегунка */
+}
+
+/* Селектор для стилизации бегунка скроллбара при наведении мыши */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #555; /* Изменяет цвет бегунка, когда пользователь наводит на него мышь */
+  cursor:all-scroll;
+}
+html {
+  scroll-behavior: smooth;
+}
+

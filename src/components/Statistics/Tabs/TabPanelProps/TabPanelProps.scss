@@ -1,0 +1,13 @@
+.tabPanelProps {
+    &__wrapper {
+        display: flex;
+        justify-content: space-between;
+    }
+    &__settings {
+        display: flex;
+        justify-content: end;
+    }
+    &__tabPanel > div {
+        padding-top: 0 !important;
+    }
+}

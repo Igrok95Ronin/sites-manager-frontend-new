@@ -1,0 +1,52 @@
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact",
+    "javascriptreact": "html"
+  },
+  "prettier.singleQuote": true,
+  "prettier.trailingComma": "all",
+  "prettier.tabWidth": 2,
+  "prettier.useTabs": false,
+  "prettier.semi": true,
+  "prettier.bracketSpacing": true,
+  "prettier.jsxBracketSameLine": false,
+  "prettier.arrowParens": "always",
+  "prettier.endOfLine": "lf",
+
+  "todohighlight.isEnable": true,
+  "todohighlight.isCaseSensitive": true,
+  "todo-highlight.keywords": [
+    "DEBUG:",
+    "REVIEW:",
+    {
+      "text": "TODO:",
+      "color": "yellow",
+      "backgroundColor": "black",
+      "isWholeLine": false
+    },
+    {
+      "text": "FIXME:",
+      "color": "red",
+      "backgroundColor": "black",
+      "isWholeLine": false
+    },
+    {
+      "text": "BUG:",
+      "color": "white",
+      "backgroundColor": "red",
+      "isWholeLine": false
+    }
+  ],
+  "todohighlight.defaultStyle": {
+    "color": "red",
+    "backgroundColor": "#ffab00",
+    "overviewRulerColor": "#ffab00",
+    "cursor": "pointer",
+    "border": "1px solid #eee",
+    "borderRadius": "2px",
+    "isWholeLine": false
+    //other styling properties goes here ...
+  }
+}

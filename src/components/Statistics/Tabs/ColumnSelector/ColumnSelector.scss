@@ -1,0 +1,15 @@
+.columnSelector {
+    &__btnPosition {
+        position: fixed !important;
+        bottom: 23px !important;
+        width: 574px !important;
+    }
+}
+
+//               {/* primary (по умолчанию синий цвет)
+// secondary (по умолчанию фиолетовый цвет)
+// success (зелёный цвет)
+// error (красный цвет)
+// warning (оранжевый цвет)
+// info (голубой цвет)
+// inherit (наследует цвет от родительского компонента) */}
