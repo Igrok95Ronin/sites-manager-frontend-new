@@ -295,7 +295,7 @@ export default function ReactVirtualizedTable() {
       // Создаем объект для инициализации checkedRows
       const initialCheckedRows = {};
       response.data.forEach((row) => {
-        initialCheckedRows[row.ID] = row.isChecked || false; // Предполагаем, что сервер возвращает свойство isChecked
+        initialCheckedRows[row.ID] = row.IsChecked || false; // Предполагаем, что сервер возвращает свойство isChecked
       });
 
       // Объединяем новое состояние checkedRows с существующим

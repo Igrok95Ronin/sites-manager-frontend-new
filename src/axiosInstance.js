@@ -3,7 +3,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 // Получаем URL API из переменных окружения
-const APIURL = process.env.REACT_APP_APIURL;
+// const APIURL = process.env.REACT_APP_APIURL;
 
 // Функция для кодирования логина и пароля в Base64
 const encodeCredentials = (username, password) => {
@@ -12,7 +12,7 @@ const encodeCredentials = (username, password) => {
 
 // Создаем экземпляр Axios с базовыми настройками
 const axiosInstance = axios.create({
-  baseURL: APIURL,
+  baseURL: 'http://localhost:8082',
   headers: {
     'Content-Type': 'application/json',
     // Другие глобальные заголовки, если необходимо
@@ -36,7 +36,7 @@ axiosInstance.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 export default axiosInstance;
