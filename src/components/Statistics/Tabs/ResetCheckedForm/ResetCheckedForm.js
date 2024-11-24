@@ -16,7 +16,7 @@ export default function ResetCheckedForm({
   setResetCheckedForm,
   setError,
   setLoading,
-  setCheckedRows
+  setCheckedRows,
 }) {
   const [securityPassword, setSecurityPassword] = useState(''); // Локальное состояние для пароля
 
@@ -36,10 +36,10 @@ export default function ResetCheckedForm({
         p_word: securityPassword, // Название домена который удаляем
       });
 
-    //   console.log('Response:', response.data);
+      //   console.log('Response:', response.data);
       // Закрываем диалог после отправки формы
       handleClose();
-      setCheckedRows({})
+      setCheckedRows({});
     } catch (error) {
       setError(error);
       setTimeout(() => {

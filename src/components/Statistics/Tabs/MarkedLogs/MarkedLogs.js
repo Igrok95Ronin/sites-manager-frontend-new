@@ -11,7 +11,7 @@ const APIURL = process.env.REACT_APP_APIURL; // Получем url из конф
 const MarkedLogs = () => {
   const [dataLogs, setDataLogs] = useState([]);
   const [page, setPage] = useState(1);
-  const limit = 300;
+  const limit = 20;
   const [hasMore, setHasMore] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const [totalCountAll, setTotalCountAll] = useState(0);

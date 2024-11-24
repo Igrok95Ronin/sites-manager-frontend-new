@@ -24,8 +24,9 @@ import Tabs from './Tabs/Tabs.js';
 import ColumnSelector from './Tabs/ColumnSelector/ColumnSelector.js';
 
 import './Statistics.scss';
+import axios from 'axios';
 
-const APIURL = process.env.REACT_APP_APIURL; // Получем url из конфига
+const APIURL = process.env.REACT_APP_APIURL; // Получаем URL из конфига
 
 // Изначальные столбцы
 const columns = [
@@ -84,7 +85,7 @@ const columns = [
   { label: 'JSHeapSizeLimit', dataKey: 'jsHeapSizeLimit' }, // Поля из поля JSData
 ];
 
-// Поля которые мы передаем чтобы показывать при клике на Поля Headers
+// Поля, которые мы передаем, чтобы показывать при клике на Поля Headers
 const headerFieldsDataKeys = [
   'Accept',
   'Accept-Encoding',
@@ -100,7 +101,8 @@ const headerFieldsDataKeys = [
   'sec-ch-ua',
   'sec-ch-ua-platform',
 ];
-// Поля которые мы передаем чтобы показывать при клике на Поля JSData
+
+// Поля, которые мы передаем, чтобы показывать при клике на Поля JSData
 const jsDataFieldsDataKeys = [
   'innerWidth',
   'innerHeight',
@@ -225,12 +227,6 @@ export default function ReactVirtualizedTable() {
       [rowId]: isChecked,
     }));
 
-    // console.log(
-    //   `Чекбокс для строки с ID ${rowId} ${
-    //     isChecked ? 'отмечен' : 'снят'
-    //   }`,
-    // );
-
     // Опционально: Отправляем обновление на сервер
     try {
       setLoading(true);
@@ -245,6 +241,8 @@ export default function ReactVirtualizedTable() {
       setLoading(false);
     }
   };
+
+  // console.log(checkedRows);
 
   const handleSort = (property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -353,48 +351,71 @@ export default function ReactVirtualizedTable() {
     });
   }, [rows, order, orderBy]);
 
-  function fixedHeaderContent() {
-    return (
-      <TableRow>
-        <TableCell variant="head" align="left">
-          {/* Пустая ячейка для заголовка чекбокса */}
-        </TableCell>
-        {visibleColumns.map((column) => (
-          <TableCell
-            key={column.dataKey}
-            variant="head"
-            align="left"
-            sx={{ backgroundColor: 'background.paper', cursor: 'pointer' }}
-            onClick={() => handleSort(column.dataKey)}
-          >
-            <TableSortLabel
-              active={orderBy === column.dataKey}
-              direction={orderBy === column.dataKey ? order : 'asc'}
-            >
-              {column.label}
-            </TableSortLabel>
-          </TableCell>
-        ))}
-      </TableRow>
-    );
-  }
+  // Определение состояния для чекбоксов "Выбрать все" и "Некоторые выбраны"
+  const allChecked =
+    rows.length > 0 && rows.every((row) => checkedRows[row.ID]);
+  const someChecked = rows.some((row) => checkedRows[row.ID]);
 
-  // Фильтруем данные по Domain
-  const filteredDomain = sortedRows
-    ? sortedRows.filter((item) => {
-        const fieldValue = item['Domain'];
+  // Функция для обработки клика на чекбокс заголовка
+  // const handleSelectAllClick = async (event) => {
+  //   const isChecked = event.target.checked;
 
-        // Проверяем, что значение поля не undefined и не null
-        if (fieldValue !== undefined && fieldValue !== null) {
-          return fieldValue
-            .toString()
-            .toLowerCase()
-            .includes(searchDomain.toLowerCase());
-        }
+  //   // Обновляем состояние checkedRows
+  //   const newCheckedRows = {};
+  //   rows.forEach(row => {
+  //     newCheckedRows[row.ID] = isChecked;
+  //   });
+  //   setCheckedRows(newCheckedRows);
 
-        return false;
-      })
-    : [];
+  //   // Опционально: Отправляем обновления на сервер
+  //   try {
+  //     setLoading(true);
+  //     await Promise.all(
+  //       rows.map(row =>
+  //         axios.patch(`${APIURL}/multiplestatusupdate`, {
+  //           id: row.ID,
+  //           isChecked: isChecked,
+  //         })
+  //       )
+  //     );
+  //     // console.log(`Статусы чекбоксов обновлены на сервере.`);
+  //   } catch (error) {
+  //     console.error('Ошибка при обновлении статуса на сервере:', error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  const handleSelectAllClick = async (event) => {
+    const isChecked = event.target.checked;
+
+    // Обновляем состояние checkedRows
+    const newCheckedRows = {};
+    rows.forEach((row) => {
+      newCheckedRows[row.ID] = isChecked;
+    });
+    setCheckedRows(newCheckedRows);
+
+    // Создаем массив обновлений
+    const updates = rows.map((row) => ({
+      id: row.ID,
+      isChecked: isChecked,
+    }));
+
+    // Отправляем массив обновлений на сервер одним запросом
+    try {
+      setLoading(true);
+      await axios.patch(`${APIURL}/multiplestatusupdate`, {
+        updates: updates,
+      });
+      // console.log(`Статусы чекбоксов обновлены на сервере.`);
+    } catch (error) {
+      console.error('Ошибка при обновлении статусов на сервере:', error);
+      // При ошибке можно откатить изменения состояния, если требуется
+      // Например, сбросить checkedRows до предыдущего состояния
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Работа с полями
   function rowContent(_index, row) {
@@ -435,7 +456,7 @@ export default function ReactVirtualizedTable() {
           }}
         >
           <Checkbox
-            checked={checkedRows[row.ID] || false}
+            checked={isChecked}
             onChange={handleCheckboxChange(row.ID)}
           />
         </TableCell>
@@ -613,6 +634,55 @@ export default function ReactVirtualizedTable() {
       </>
     );
   }
+
+  // Функция для рендеринга заголовка таблицы с чекбоксом "Выбрать все"
+  function fixedHeaderContent() {
+    return (
+      <TableRow>
+        <TableCell variant="head" align="left">
+          <Checkbox
+            indeterminate={someChecked && !allChecked}
+            checked={allChecked}
+            onChange={handleSelectAllClick}
+          />
+          {/* Пустая ячейка для заголовка чекбокса */}
+        </TableCell>
+        {visibleColumns.map((column) => (
+          <TableCell
+            key={column.dataKey}
+            variant="head"
+            align="left"
+            sx={{ backgroundColor: 'background.paper', cursor: 'pointer' }}
+            onClick={() => handleSort(column.dataKey)}
+          >
+            <TableSortLabel
+              active={orderBy === column.dataKey}
+              direction={orderBy === column.dataKey ? order : 'asc'}
+            >
+              {column.label}
+            </TableSortLabel>
+          </TableCell>
+        ))}
+      </TableRow>
+    );
+  }
+
+  // Фильтруем данные по Domain
+  const filteredDomain = sortedRows
+    ? sortedRows.filter((item) => {
+        const fieldValue = item['Domain'];
+
+        // Проверяем, что значение поля не undefined и не null
+        if (fieldValue !== undefined && fieldValue !== null) {
+          return fieldValue
+            .toString()
+            .toLowerCase()
+            .includes(searchDomain.toLowerCase());
+        }
+
+        return false;
+      })
+    : [];
 
   return (
     <>
