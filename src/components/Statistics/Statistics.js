@@ -50,16 +50,16 @@ const columns = [
   { label: 'AcceptEncoding', dataKey: 'Accept-Encoding' }, // Поля из поля Headers
   { label: 'AcceptLanguage', dataKey: 'Accept-Language' }, // Поля из поля Headers
   { label: 'Connection', dataKey: 'Connection' }, // Поля из поля Headers
-  // { label: 'SecChUaMobile', dataKey: 'sec-ch-ua-mobile' }, // Поля из поля Headers
+  { label: 'SecChUaMobile', dataKey: 'sec-ch-ua-mobile' }, // Поля из поля Headers
   { label: 'Referer', dataKey: 'Referer' }, // Поля из поля Headers
   { label: 'SecFetchDest', dataKey: 'Sec-Fetch-Dest' }, // Поля из поля Headers
   { label: 'SecFetchMode', dataKey: 'Sec-Fetch-Mode' }, // Поля из поля Headers
   { label: 'SecFetchSite', dataKey: 'Sec-Fetch-Site' }, // Поля из поля Headers
+  // { label: 'SecFetchUser', dataKey: 'Sec-Fetch-User' }, // Поля из поля Headers
   { label: 'UserAgent', dataKey: 'User-Agent' }, // Поля из поля Headers
-  { label: 'XRealIP', dataKey: 'X-Real-IP' }, // Поля из поля Headers
   { label: 'SecChUa', dataKey: 'sec-ch-ua' }, // Поля из поля Headers
   { label: 'SecChUaPlatform', dataKey: 'sec-ch-ua-platform' }, // Поля из поля Headers
-  // { label: 'GoogleChromeSecUa', dataKey: 'GoogleChromeSecUa' }, // Поля из поля Headers
+  // { label: 'UpgradeInsecureRequests', dataKey: 'Upgrade-Insecure-Requests' }, // Поля из поля Headers
   { label: 'InnerWidth', dataKey: 'innerWidth' }, // Поля из поля JSData
   { label: 'InnerHeight', dataKey: 'innerHeight' }, // Поля из поля JSData
   { label: 'OuterWidth', dataKey: 'outerWidth' }, // Поля из поля JSData
@@ -96,8 +96,8 @@ const headerFieldsDataKeys = [
   'Sec-Fetch-Dest',
   'Sec-Fetch-Mode',
   'Sec-Fetch-Site',
+  'sec-ch-ua-mobile',
   'User-Agent',
-  'X-Real-IP',
   'sec-ch-ua',
   'sec-ch-ua-platform',
 ];
@@ -511,27 +511,12 @@ export default function ReactVirtualizedTable() {
                   color="secondary"
                   onClick={() => {
                     try {
-                      let data = row[column.dataKey];
-
+                      const data = row[column.dataKey];
                       let obj = {};
 
                       if (column.dataKey === 'Headers') {
-                        // Парсим с помощью регулярных выражений
-                        data = data.replaceAll('""', '"');
-
-                        const regex = /"([^"]+)":\s*"((?:[^"\\]|\\.)*?)"/g;
-                        let match;
-                        const pairs = [];
-
-                        while ((match = regex.exec(data)) !== null) {
-                          const key = match[1];
-                          const value = match[2];
-                          pairs.push({ key, value });
-                        }
-
-                        pairs.forEach((pair) => {
-                          obj[pair.key] = pair.value;
-                        });
+                        // Парсим с помощью JSON.parse()
+                        obj = JSON.parse(data);
                       } else if (column.dataKey === 'JsData') {
                         // Парсим с помощью JSON.parse()
                         obj = JSON.parse(data);
