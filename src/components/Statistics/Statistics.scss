@@ -1,13 +1,16 @@
 .statistics {
-    &__btn-filter {
-        padding: 0;
-        color: #1976d2;
-        font-weight: 500;
-        font-size: 15px;
-        transition: 0.3s;
-        &:hover {
-            color: #198754;
-            border-bottom: 1px dashed #198754;
-        }
+  &__btn-filter {
+    padding: 0;
+    color: #1976d2;
+    font-weight: 500;
+    font-size: 15px;
+    transition: 0.3s;
+    &:hover {
+      color: #198754;
+      border-bottom: 1px dashed #198754;
     }
+  }
+  &__allChecked {
+    background-color: #fff;
+  }
 }

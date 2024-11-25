@@ -624,7 +624,11 @@ export default function ReactVirtualizedTable() {
   function fixedHeaderContent() {
     return (
       <TableRow>
-        <TableCell variant="head" align="left">
+        <TableCell
+          className="statistics__allChecked"
+          variant="head"
+          align="left"
+        >
           <Checkbox
             indeterminate={someChecked && !allChecked}
             checked={allChecked}
