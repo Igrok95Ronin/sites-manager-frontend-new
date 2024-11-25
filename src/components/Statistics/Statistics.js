@@ -22,6 +22,8 @@ import { startOfDay, endOfDay } from 'date-fns';
 
 import Tabs from './Tabs/Tabs.js';
 import ColumnSelector from './Tabs/ColumnSelector/ColumnSelector.js';
+import useLocalStorage from './Tabs/UseLocalStorage/UseLocalStorage.js';
+
 
 import './Statistics.scss';
 import axios from 'axios';
@@ -200,7 +202,11 @@ export default function ReactVirtualizedTable() {
   const [orderBy, setOrderBy] = useState(defaultVisibleColumns[0].dataKey);
 
   // Используем defaultVisibleColumns в качестве начального состояния
-  const [visibleColumns, setVisibleColumns] = useState(defaultVisibleColumns);
+  // const [visibleColumns, setVisibleColumns] = useState(defaultVisibleColumns);
+  const [userVisibleColumns, setUserVisibleColumns] = useLocalStorage('visibleColumns', defaultVisibleColumns);
+  const [visibleColumns, setVisibleColumns] = useState(userVisibleColumns);
+
+
 
   // Состояние для хранения выбранных дат
   const [startDate, setStartDate] = useState(null);
@@ -312,13 +318,12 @@ export default function ReactVirtualizedTable() {
   // Используем `useEffect` для отслеживания изменений `expandedCell`
   useEffect(() => {
     if (expandedCell) {
-      // Если `expandedCell` установлен, показываем меньше столбцов
       setVisibleColumns(expandedVisibleColumns);
     } else {
-      // Если `expandedCell` сброшен, возвращаем столбцы по умолчанию
-      setVisibleColumns(defaultVisibleColumns);
+      setVisibleColumns(userVisibleColumns);
     }
-  }, [expandedCell]);
+  }, [expandedCell, userVisibleColumns]);
+  
 
   useEffect(() => {
     // Сбрасываем данные и загружаем заново при изменении диапазона дат или limit
@@ -338,6 +343,7 @@ export default function ReactVirtualizedTable() {
       }
     }
   }, [visibleColumns, orderBy]);
+  
 
   const sortedRows = React.useMemo(() => {
     return [...rows].sort((a, b) => {
@@ -629,12 +635,12 @@ export default function ReactVirtualizedTable() {
           variant="head"
           align="left"
         >
+          {/* Пустая ячейка для заголовка чекбокса */}
           <Checkbox
             indeterminate={someChecked && !allChecked}
             checked={allChecked}
             onChange={handleSelectAllClick}
           />
-          {/* Пустая ячейка для заголовка чекбокса */}
         </TableCell>
         {visibleColumns.map((column) => (
           <TableCell
@@ -689,8 +695,8 @@ export default function ReactVirtualizedTable() {
         ColumnSelector={
           <ColumnSelector
             columns={columns}
-            visibleColumns={visibleColumns}
-            setVisibleColumns={setVisibleColumns}
+            visibleColumns={userVisibleColumns}
+            setVisibleColumns={setUserVisibleColumns}
             startDate={startDate}
             setStartDate={setStartDate}
             endDate={endDate}
@@ -702,6 +708,7 @@ export default function ReactVirtualizedTable() {
             headerFieldsDataKeys={headerFieldsDataKeys}
             jsDataFieldsDataKeys={jsDataFieldsDataKeys}
             setCheckedRows={setCheckedRows}
+            defaultVisibleColumns={defaultVisibleColumns}
           />
         }
       />

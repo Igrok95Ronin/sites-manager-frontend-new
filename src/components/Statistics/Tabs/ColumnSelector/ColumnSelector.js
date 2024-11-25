@@ -14,7 +14,10 @@ import {
   Select,
   MenuItem,
 } from '@mui/material';
-import SettingsIcon from '@mui/icons-material/Settings';
+// import SettingsIcon from '@mui/icons-material/Settings';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import ViewWeekIcon from '@mui/icons-material/ViewWeek';
+
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import SimCardDownloadIcon from '@mui/icons-material/SimCardDownload';
 import Tooltip from '@mui/material/Tooltip';
@@ -46,6 +49,7 @@ const ColumnSelector = ({
   headerFieldsDataKeys,
   jsDataFieldsDataKeys,
   setCheckedRows,
+  defaultVisibleColumns,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   // Локальное состояние для поля limit
@@ -82,16 +86,12 @@ const ColumnSelector = ({
     );
 
     if (isColumnVisible) {
-      // Проверяем, что остается хотя бы один столбец
-      if (visibleColumns.length > 1) {
-        newVisibleColumns = visibleColumns.filter(
-          (col) => col.dataKey !== column.dataKey,
-        );
-      } else {
-        // Не позволяем скрыть последний столбец
-        return;
-      }
+      // Удаляем столбец из видимых
+      newVisibleColumns = visibleColumns.filter(
+        (col) => col.dataKey !== column.dataKey,
+      );
     } else {
+      // Добавляем столбец к видимым
       newVisibleColumns = [...visibleColumns, column];
     }
 
@@ -101,6 +101,8 @@ const ColumnSelector = ({
         columns.findIndex((col) => col.dataKey === a.dataKey) -
         columns.findIndex((col) => col.dataKey === b.dataKey),
     );
+
+    // Обновляем состояние
     setVisibleColumns(newVisibleColumns);
   };
 
@@ -156,7 +158,7 @@ const ColumnSelector = ({
       {/* Кнопка скачать файл */}
       <Tooltip title="Скачать файл" arrow>
         <Button
-          sx={{ padding: 0, minWidth: '25px' }}
+          sx={{ padding: '6px 0 6px 8px', minWidth: '25px' }}
           startIcon={<SimCardDownloadIcon />}
           onClick={() => {
             setShowDownloadFileLogsADS(true);
@@ -166,17 +168,42 @@ const ColumnSelector = ({
       {/* Кнопка снять все отмеченные чекбоксы */}
       <Tooltip title="Снять все отмеченные чекбоксы" arrow>
         <Button
-          sx={{ padding: 0, minWidth: '25px' }}
+          sx={{ padding: '6px 0 6px 8px', minWidth: '25px' }}
           startIcon={<RotateLeftIcon />}
           onClick={() => {
             setResetCheckedForm(true);
           }}
         ></Button>
       </Tooltip>
+      {/* Кнопка Столбцы по умолчанию */}
+      <Tooltip title="Столбцы по умолчанию" arrow>
+        <Button
+          sx={{ padding: '6px 0 6px 8px', minWidth: '25px' }}
+          startIcon={<ViewWeekIcon />}
+          onClick={() => {
+            // Показываем стандартное окно подтверждения
+            const confirmed = window.confirm(
+              'Вы уверены, что хотите сбросить столбцы к значениям по умолчанию?',
+            );
+            if (confirmed) {
+              setVisibleColumns(defaultVisibleColumns); // Сбрасываем видимые столбцы
+            }
+          }}
+        ></Button>
+      </Tooltip>
+
       {/* Кнопка настроек */}
-      <Button startIcon={<SettingsIcon />} onClick={handleClick}>
-        Настроить столбцы
-      </Button>
+      <Tooltip title="Настроить столбцы" arrow>
+        <Button
+          sx={{
+            padding: '6px 0 6px 0px',
+            minWidth: '25px',
+            marginRight: '20px',
+          }}
+          startIcon={<MoreVertIcon />}
+          onClick={handleClick}
+        ></Button>
+      </Tooltip>
 
       <Menu
         anchorEl={anchorEl}
