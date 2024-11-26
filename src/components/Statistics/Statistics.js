@@ -23,7 +23,7 @@ import { startOfDay, endOfDay } from 'date-fns';
 import Tabs from './Tabs/Tabs.js';
 import ColumnSelector from './Tabs/ColumnSelector/ColumnSelector.js';
 import useLocalStorage from './Tabs/UseLocalStorage/UseLocalStorage.js';
-
+import IPInfo from './Tabs/IPInfo/IPInfo.js';
 
 import './Statistics.scss';
 import axios from 'axios';
@@ -203,10 +203,11 @@ export default function ReactVirtualizedTable() {
 
   // Используем defaultVisibleColumns в качестве начального состояния
   // const [visibleColumns, setVisibleColumns] = useState(defaultVisibleColumns);
-  const [userVisibleColumns, setUserVisibleColumns] = useLocalStorage('visibleColumns', defaultVisibleColumns);
+  const [userVisibleColumns, setUserVisibleColumns] = useLocalStorage(
+    'visibleColumns',
+    defaultVisibleColumns,
+  );
   const [visibleColumns, setVisibleColumns] = useState(userVisibleColumns);
-
-
 
   // Состояние для хранения выбранных дат
   const [startDate, setStartDate] = useState(null);
@@ -323,7 +324,6 @@ export default function ReactVirtualizedTable() {
       setVisibleColumns(userVisibleColumns);
     }
   }, [expandedCell, userVisibleColumns]);
-  
 
   useEffect(() => {
     // Сбрасываем данные и загружаем заново при изменении диапазона дат или limit
@@ -343,7 +343,6 @@ export default function ReactVirtualizedTable() {
       }
     }
   }, [visibleColumns, orderBy]);
-  
 
   const sortedRows = React.useMemo(() => {
     return [...rows].sort((a, b) => {
@@ -617,6 +616,8 @@ export default function ReactVirtualizedTable() {
               >
                 {row[column.dataKey]}
               </Button>
+            ) : column.dataKey === 'IP' ? (
+              <IPInfo IP={row[column.dataKey]} />
             ) : (
               row[column.dataKey]
             )}
