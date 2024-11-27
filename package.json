@@ -37,7 +37,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "npm run build && scp -r build/* root@167.235.30.219|0:/home/sites-manager-frontend/"
+    "deploy": "npm run build && scp -r build/* root@167.235.30.219:/home/sites-manager-frontend/"
   },
   "eslintConfig": {
     "extends": [

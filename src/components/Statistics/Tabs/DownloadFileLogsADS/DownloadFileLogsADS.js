@@ -41,10 +41,10 @@ const DownloadFileLogsADS = ({
   const [limit, setLimit] = useState('');
   const [fields, setFields] = useState({
     createdAt: true,
-    gclid: false,
-    IP: false,
-    headers: false,
-    jsData: false,
+    gclid: true,
+    IP: true,
+    headers: true,
+    jsData: true,
     timeSpent: true,
     clickCoordinates: true,
     scrollCoordinates: true,
