@@ -12,5 +12,9 @@
   }
   &__allChecked {
     background-color: #fff;
+    padding: 0 !important;
+  }
+  &__checked {
+    padding: 0 !important;
   }
 }
