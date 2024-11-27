@@ -12,7 +12,7 @@ const encodeCredentials = (username, password) => {
 
 // Создаем экземпляр Axios с базовыми настройками
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8082',
+  baseURL: 'https://api-sites.jquery.link',
   headers: {
     'Content-Type': 'application/json',
     // Другие глобальные заголовки, если необходимо
