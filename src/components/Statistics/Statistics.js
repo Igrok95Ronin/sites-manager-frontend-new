@@ -17,6 +17,7 @@ import DataObjectIcon from '@mui/icons-material/DataObject';
 import RestartAltIcon from '@mui/icons-material/RestartAlt'; // Импортируем иконку для сброса
 import Checkbox from '@mui/material/Checkbox'; // Импортируем компонент Checkbox
 import { JSONTree } from 'react-json-tree';
+import Tooltip from '@mui/material/Tooltip';
 
 import { startOfDay, endOfDay } from 'date-fns';
 
@@ -214,7 +215,7 @@ export default function ReactVirtualizedTable() {
   const [endDate, setEndDate] = useState(null);
 
   const loadingRef = useRef(false);
-  const [searchField, setSearchField] = useState(columns[14].dataKey); // Выбираем поле для поиска
+  const [searchField, setSearchField] = useState(columns[1].dataKey); // Выбираем поле для поиска
 
   const [searchDomain, setSearchDomain] = React.useState(''); // Поисковый запрос
 
@@ -497,17 +498,6 @@ export default function ReactVirtualizedTable() {
                 >
                   {row[column.dataKey]}
                 </Button>
-
-                {/* Кнопка для сброса фильтра */}
-                <IconButton
-                  color="error"
-                  onClick={() => {
-                    setSearchDomain(''); // Сбрасываем фильтр домена
-                  }}
-                  sx={{ marginLeft: '5px' }} // Добавляем отступ для разделения кнопок
-                >
-                  <RestartAltIcon />
-                </IconButton>
               </>
             ) : column.dataKey === 'Headers' || column.dataKey === 'JsData' ? (
               <>
@@ -552,26 +542,6 @@ export default function ReactVirtualizedTable() {
                 >
                   <DataObjectIcon sx={{ width: '20px' }} />
                 </Button>
-
-                <IconButton
-                  color="error"
-                  onClick={() => {
-                    setExpandedCell(null);
-                    setFormattedJSON((prevState) => {
-                      const newState = { ...prevState };
-                      if (newState[row.ID]) {
-                        delete newState[row.ID][column.dataKey];
-                        if (Object.keys(newState[row.ID]).length === 0) {
-                          delete newState[row.ID];
-                        }
-                      }
-                      return newState;
-                    });
-                  }}
-                  sx={{ marginLeft: '5px' }}
-                >
-                  <RestartAltIcon sx={{ width: '20px' }} />
-                </IconButton>
 
                 {expandedCell &&
                   expandedCell.rowId === row.ID &&
@@ -636,7 +606,7 @@ export default function ReactVirtualizedTable() {
           variant="head"
           align="left"
         >
-          {/* Пустая ячейка для заголовка чекбокса */}
+          {/* Чекбокс "Выбрать все" */}
           <Checkbox
             indeterminate={someChecked && !allChecked}
             checked={allChecked}
@@ -657,11 +627,57 @@ export default function ReactVirtualizedTable() {
             >
               {column.label}
             </TableSortLabel>
+  
+            {/* Добавляем кнопку сброса фильтра рядом с заголовком "Domain" */}
+            {column.dataKey === 'Domain' && (
+              <Tooltip title="Сбросить фильтр" arrow>
+                <IconButton
+                  color="error"
+                  onClick={(event) => {
+                    event.stopPropagation(); // Предотвращаем сортировку при клике на кнопку
+                    setSearchDomain(''); // Сбрасываем фильтр домена
+                  }}
+                  sx={{ marginLeft: '5px' }} // Добавляем отступ
+                >
+                  <RestartAltIcon sx={{width: '18px'}} />
+                </IconButton>
+              </Tooltip>
+            )}
+  
+            {/* Добавляем кнопку сброса для столбцов "Headers" и "JsData" */}
+            {(column.dataKey === 'Headers' || column.dataKey === 'JsData') && (
+              <Tooltip title="Сбросить расширения" arrow>
+                <IconButton
+                  color="error"
+                  onClick={(event) => {
+                    event.stopPropagation(); // Предотвращаем сортировку при клике на кнопку
+                    setExpandedCell(null); // Сбрасываем текущее расширение
+                    // Очищаем formattedJSON для всех строк в этом столбце
+                    setFormattedJSON((prevState) => {
+                      const newState = { ...prevState };
+                      Object.keys(newState).forEach((rowId) => {
+                        if (newState[rowId]) {
+                          delete newState[rowId][column.dataKey];
+                          if (Object.keys(newState[rowId]).length === 0) {
+                            delete newState[rowId];
+                          }
+                        }
+                      });
+                      return newState;
+                    });
+                  }}
+                  sx={{ marginLeft: '5px' }}
+                >
+                  <RestartAltIcon sx={{ width: '18px' }} />
+                </IconButton>
+              </Tooltip>
+            )}
           </TableCell>
         ))}
       </TableRow>
     );
   }
+  
 
   // Фильтруем данные по Domain
   const filteredDomain = sortedRows
