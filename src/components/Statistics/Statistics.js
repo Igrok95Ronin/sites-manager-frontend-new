@@ -627,7 +627,7 @@ export default function ReactVirtualizedTable() {
             >
               {column.label}
             </TableSortLabel>
-  
+
             {/* Добавляем кнопку сброса фильтра рядом с заголовком "Domain" */}
             {column.dataKey === 'Domain' && (
               <Tooltip title="Сбросить фильтр" arrow>
@@ -637,13 +637,12 @@ export default function ReactVirtualizedTable() {
                     event.stopPropagation(); // Предотвращаем сортировку при клике на кнопку
                     setSearchDomain(''); // Сбрасываем фильтр домена
                   }}
-                  sx={{ marginLeft: '5px' }} // Добавляем отступ
                 >
-                  <RestartAltIcon sx={{width: '18px'}} />
+                  <RestartAltIcon sx={{ width: '18px' }} />
                 </IconButton>
               </Tooltip>
             )}
-  
+
             {/* Добавляем кнопку сброса для столбцов "Headers" и "JsData" */}
             {(column.dataKey === 'Headers' || column.dataKey === 'JsData') && (
               <Tooltip title="Сбросить расширения" arrow>
@@ -666,7 +665,6 @@ export default function ReactVirtualizedTable() {
                       return newState;
                     });
                   }}
-                  sx={{ marginLeft: '5px' }}
                 >
                   <RestartAltIcon sx={{ width: '18px' }} />
                 </IconButton>
@@ -677,7 +675,6 @@ export default function ReactVirtualizedTable() {
       </TableRow>
     );
   }
-  
 
   // Фильтруем данные по Domain
   const filteredDomain = sortedRows

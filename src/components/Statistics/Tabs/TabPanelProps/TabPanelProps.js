@@ -76,9 +76,17 @@ export default function FullWidthTabs({
   // Фильтруем данные по Headers
   const filteredData = rows
     ? rows.filter((item) => {
-        const fieldValue = item[searchField];
+        let fieldValue = item[searchField];
         // Проверяем, что значение поля не undefined и не null
         if (fieldValue !== undefined && fieldValue !== null) {
+          // Если поле для поиска - CreatedAt, форматируем его
+          if (searchField === 'CreatedAt') {
+            const date = new Date(fieldValue);
+            fieldValue = date.toLocaleDateString('ru-RU'); // Преобразуем в формат DD.MM.YYYY
+          } else {
+            fieldValue = fieldValue.toString();
+          }
+
           return fieldValue
             .toString()
             .toLowerCase()
