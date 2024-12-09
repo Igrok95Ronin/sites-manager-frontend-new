@@ -17,4 +17,16 @@
   &__checked {
     padding: 0 !important;
   }
+  &__gclid {
+    max-width: 200px !important;
+    overflow: auto;
+  }
+  &__gclid::-webkit-scrollbar {
+    width: 8px; /* ширина вертикального скроллбара */
+    height: 5px; /* высота горизонтального скроллбара */
+  }
+  &__gclid::-webkit-scrollbar-thumb {
+    background: #888; /* цвет ползунка */
+    border-radius: 4px;
+  }
 }

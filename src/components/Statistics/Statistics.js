@@ -588,6 +588,8 @@ export default function ReactVirtualizedTable() {
               </Button>
             ) : column.dataKey === 'IP' ? (
               <IPInfo IP={row[column.dataKey]} />
+            ) : column.dataKey === 'Gclid' ? (
+              <p className='statistics__gclid'>{row[column.dataKey]}</p>
             ) : (
               row[column.dataKey]
             )}

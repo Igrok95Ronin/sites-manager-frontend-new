@@ -185,6 +185,7 @@ function ThemedAccordion({ items }) {
                                     <img
                                       className="accordion__img"
                                       src={
+                                        item.ScreenshotTemplate &&
                                         item.ScreenshotTemplate[siteIdx]
                                           ? `https://api-sites.jquery.link/templates/${item.NameCategory.toLowerCase()}/${site.toLowerCase()}/assets/img/websiteScreenshot.jpg`
                                           : plug
