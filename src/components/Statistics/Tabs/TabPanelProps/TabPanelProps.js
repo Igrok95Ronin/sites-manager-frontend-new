@@ -58,11 +58,11 @@ export default function FullWidthTabs({
   ColumnSelector,
   loadingRef,
   searchField,
+  searchQuery,
+  setSearchQuery,
 }) {
   const theme = useTheme();
   const [value, setValue] = React.useState(0);
-  const [searchQuery, setSearchQuery] = React.useState(''); // Поисковый запрос
-
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };

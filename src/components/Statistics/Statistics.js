@@ -215,6 +215,7 @@ export default function ReactVirtualizedTable() {
   const [endDate, setEndDate] = useState(null);
 
   const loadingRef = useRef(false);
+  const [searchQuery, setSearchQuery] = React.useState(''); // Поисковый запрос
   const [searchField, setSearchField] = useState(columns[1].dataKey); // Выбираем поле для поиска
 
   const [searchDomain, setSearchDomain] = React.useState(''); // Поисковый запрос
@@ -249,8 +250,6 @@ export default function ReactVirtualizedTable() {
       setLoading(false);
     }
   };
-
-  // console.log(checkedRows);
 
   const handleSort = (property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -317,6 +316,22 @@ export default function ReactVirtualizedTable() {
     }
   };
 
+  const filteredData = React.useMemo(() => {
+    return rows.filter((item) => {
+      let fieldValue = item[searchField];
+      if (fieldValue !== undefined && fieldValue !== null) {
+        if (searchField === 'CreatedAt') {
+          const date = new Date(fieldValue);
+          fieldValue = date.toLocaleDateString('ru-RU');
+        } else {
+          fieldValue = fieldValue.toString();
+        }
+        return fieldValue.toLowerCase().includes(searchQuery.toLowerCase());
+      }
+      return false;
+    });
+  }, [rows, searchField, searchQuery]);
+
   // Используем `useEffect` для отслеживания изменений `expandedCell`
   useEffect(() => {
     if (expandedCell) {
@@ -359,55 +374,27 @@ export default function ReactVirtualizedTable() {
 
   // Определение состояния для чекбоксов "Выбрать все" и "Некоторые выбраны"
   const allChecked =
-    rows.length > 0 && rows.every((row) => checkedRows[row.ID]);
-  const someChecked = rows.some((row) => checkedRows[row.ID]);
+    filteredData.length > 0 && filteredData.every((row) => checkedRows[row.ID]);
+  const someChecked = filteredData.some((row) => checkedRows[row.ID]);
 
   // Функция для обработки клика на чекбокс заголовка
-  // const handleSelectAllClick = async (event) => {
-  //   const isChecked = event.target.checked;
-
-  //   // Обновляем состояние checkedRows
-  //   const newCheckedRows = {};
-  //   rows.forEach(row => {
-  //     newCheckedRows[row.ID] = isChecked;
-  //   });
-  //   setCheckedRows(newCheckedRows);
-
-  //   // Опционально: Отправляем обновления на сервер
-  //   try {
-  //     setLoading(true);
-  //     await Promise.all(
-  //       rows.map(row =>
-  //         axios.patch(`${APIURL}/multiplestatusupdate`, {
-  //           id: row.ID,
-  //           isChecked: isChecked,
-  //         })
-  //       )
-  //     );
-  //     // console.log(`Статусы чекбоксов обновлены на сервере.`);
-  //   } catch (error) {
-  //     console.error('Ошибка при обновлении статуса на сервере:', error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
   const handleSelectAllClick = async (event) => {
     const isChecked = event.target.checked;
 
-    // Обновляем состояние checkedRows
-    const newCheckedRows = {};
-    rows.forEach((row) => {
+    // Обновляем состояние checkedRows только для отфильтрованных строк
+    const newCheckedRows = { ...checkedRows };
+    filteredData.forEach((row) => {
       newCheckedRows[row.ID] = isChecked;
     });
     setCheckedRows(newCheckedRows);
 
-    // Создаем массив обновлений
-    const updates = rows.map((row) => ({
+    // Создаем массив обновлений для отфильтрованных строк
+    const updates = filteredData.map((row) => ({
       id: row.ID,
       isChecked: isChecked,
     }));
 
-    // Отправляем массив обновлений на сервер одним запросом
+    // Отправляем массив обновлений на сервер
     try {
       setLoading(true);
       await axios.patch(`${APIURL}/multiplestatusupdate`, {
@@ -417,7 +404,6 @@ export default function ReactVirtualizedTable() {
     } catch (error) {
       console.error('Ошибка при обновлении статусов на сервере:', error);
       // При ошибке можно откатить изменения состояния, если требуется
-      // Например, сбросить checkedRows до предыдущего состояния
     } finally {
       setLoading(false);
     }
@@ -589,7 +575,7 @@ export default function ReactVirtualizedTable() {
             ) : column.dataKey === 'IP' ? (
               <IPInfo IP={row[column.dataKey]} />
             ) : column.dataKey === 'Gclid' ? (
-              <p className='statistics__gclid'>{row[column.dataKey]}</p>
+              <p className="statistics__gclid">{row[column.dataKey]}</p>
             ) : (
               row[column.dataKey]
             )}
@@ -727,6 +713,8 @@ export default function ReactVirtualizedTable() {
             defaultVisibleColumns={defaultVisibleColumns}
           />
         }
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
       />
     </>
   );
