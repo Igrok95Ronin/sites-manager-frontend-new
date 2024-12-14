@@ -187,7 +187,7 @@ function ThemedAccordion({ items }) {
                                       src={
                                         item.ScreenshotTemplate &&
                                         item.ScreenshotTemplate[siteIdx]
-                                          ? `https://api-sites.jquery.link/templates/${item.NameCategory.toLowerCase()}/${site.toLowerCase()}/assets/img/websiteScreenshot.jpg`
+                                          ? `${APIURL}/templates/${item.NameCategory.toLowerCase()}/${site.toLowerCase()}/assets/img/websiteScreenshot.jpg`
                                           : plug
                                       }
                                       alt="websiteScreenshot"
@@ -201,7 +201,7 @@ function ThemedAccordion({ items }) {
                                       className="accordion__view"
                                       variant="outlined"
                                       target="__blank"
-                                      href={`https://api-sites.jquery.link/viewtemplate/?lang=${item.NameCategory}&name=${site}`}
+                                      href={`${APIURL}/viewtemplate/?lang=${item.NameCategory}&name=${site}`}
                                     >
                                       VIEW
                                     </Button>
