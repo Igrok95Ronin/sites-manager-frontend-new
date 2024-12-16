@@ -218,8 +218,6 @@ export default function ReactVirtualizedTable() {
   const [searchQuery, setSearchQuery] = React.useState(''); // Поисковый запрос
   const [searchField, setSearchField] = useState(columns[1].dataKey); // Выбираем поле для поиска
 
-  const [searchDomain, setSearchDomain] = React.useState(''); // Поисковый запрос
-
   const [formattedJSON, setFormattedJSON] = useState({});
   const [expandedCell, setExpandedCell] = useState(null);
 
@@ -478,7 +476,8 @@ export default function ReactVirtualizedTable() {
                   variant="outlined"
                   color="secondary"
                   onClick={() => {
-                    setSearchDomain(row[column.dataKey]); // Устанавливаем домен для фильтрации
+                    // setSearchDomain(row[column.dataKey]); // Устанавливаем домен для фильтрации
+                    setSearchQuery(row[column.dataKey]);
                   }}
                   sx={{ textTransform: 'none' }}
                 >
@@ -623,7 +622,7 @@ export default function ReactVirtualizedTable() {
                   color="error"
                   onClick={(event) => {
                     event.stopPropagation(); // Предотвращаем сортировку при клике на кнопку
-                    setSearchDomain(''); // Сбрасываем фильтр домена
+                    setSearchQuery(''); // Сбрасываем фильтр домена
                   }}
                 >
                   <RestartAltIcon sx={{ width: '18px' }} />
@@ -664,27 +663,10 @@ export default function ReactVirtualizedTable() {
     );
   }
 
-  // Фильтруем данные по Domain
-  const filteredDomain = sortedRows
-    ? sortedRows.filter((item) => {
-        const fieldValue = item['Domain'];
-
-        // Проверяем, что значение поля не undefined и не null
-        if (fieldValue !== undefined && fieldValue !== null) {
-          return fieldValue
-            .toString()
-            .toLowerCase()
-            .includes(searchDomain.toLowerCase());
-        }
-
-        return false;
-      })
-    : [];
-
   return (
     <>
       <Tabs
-        rows={filteredDomain}
+        rows={sortedRows}
         VirtuosoTableComponents={VirtuosoTableComponents}
         fixedHeaderContent={fixedHeaderContent}
         rowContent={rowContent}
