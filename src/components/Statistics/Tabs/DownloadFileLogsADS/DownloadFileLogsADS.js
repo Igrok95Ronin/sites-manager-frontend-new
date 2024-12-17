@@ -35,8 +35,8 @@ const DownloadFileLogsADS = ({
   setShowDownloadFileLogsADS,
 }) => {
   // Состояния для формы
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
   const [domain, setDomain] = useState('');
   const [limit, setLimit] = useState('');
   const [fields, setFields] = useState({

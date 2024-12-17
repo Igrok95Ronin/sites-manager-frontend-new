@@ -435,15 +435,23 @@ export default function ReactVirtualizedTable() {
     // Определяем, отмечена ли текущая строка
     const isChecked = checkedRows[row.ID] || false;
 
+    // Определяем, был ли клик по номеру телефона
+    const isClickOnNumberTrue = row['ClickOnNumber'];
+
+    // Определяем цвет фона для всей строки единоразово
+    const rowBackgroundColor = isClickOnNumberTrue
+      ? '#c8e6c9' // Зелёный фон, если клик по номеру
+      : isChecked
+      ? '#e0f7fa' // Голубой фон, если чекбокс отмечен
+      : 'inherit'; // По умолчанию без изменения
+
     return (
       <>
         {/* Добавили ячейку с чекбоксом в начало каждой строки. */}
         <TableCell
           className="statistics__checked"
           align="left"
-          style={{
-            backgroundColor: isChecked ? '#e0f7fa' : 'inherit', // Применяем цвет фона
-          }}
+          style={{ backgroundColor: rowBackgroundColor }}
         >
           <Checkbox
             checked={isChecked}
@@ -455,9 +463,7 @@ export default function ReactVirtualizedTable() {
           <TableCell
             key={column.dataKey}
             align="left"
-            style={{
-              backgroundColor: isChecked ? '#e0f7fa' : 'inherit', // Применяем цвет фона
-            }}
+            style={{ backgroundColor: rowBackgroundColor }}
           >
             {column.dataKey === 'ClickOnNumber' ? (
               row[column.dataKey] ? (
