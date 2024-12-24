@@ -4,6 +4,7 @@ import axios from 'axios';
 const APIURL = process.env.REACT_APP_APIURL; // Получем url из конфига
 const RequestEditSubDomain = ({
   editSubDomain,
+  visiblePhoneNumber,
   phoneNumber,
   setLoading,
   setData,
@@ -23,6 +24,7 @@ const RequestEditSubDomain = ({
             `${APIURL}/editsubdomain`,
             {
               subDomain: editSubDomain,
+              visiblePhoneNumber: visiblePhoneNumber,
               phoneNumber: phoneNumber,
             },
             {},
@@ -47,6 +49,7 @@ const RequestEditSubDomain = ({
     setLoading,
     setError,
     editSubDomain,
+    visiblePhoneNumber,
     phoneNumber,
     setData,
     setShowEditSubDomain,

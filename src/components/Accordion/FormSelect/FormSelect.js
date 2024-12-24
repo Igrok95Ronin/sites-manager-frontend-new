@@ -28,7 +28,9 @@ export default function FormSelect({
   const [siteLanguage, setSiteLanguage] = React.useState(langs[0]);
   const [selectedDomain, setSelectedDomain] = React.useState('');
   const [isPhoneValid, setIsPhoneValid] = React.useState(false); // Валидация номера телефона
-  const [phoneNumber, setPhoneNumber] = React.useState('111222333');
+  const [visiblePhoneNumber, setVisiblePhoneNumber] =
+    React.useState('000 111 222'); // Отображаемый номер телефона
+  const [phoneNumber, setPhoneNumber] = React.useState('tel:+111222333'); // Номер телефона
   const pathTemplate = `templates/${nameCategory}/${nameTemplate}`; // Путь до шаблона
   // Создаем состояние для хранения ошибок, которые могут возникнуть при запросе
   const [error, setError] = React.useState(null);
@@ -115,6 +117,26 @@ export default function FormSelect({
               </NativeSelect>
             </FormControl>
 
+            {/* Отображаемый номер телефона */}
+            <FormControl fullWidth>
+              <TextField
+                id="standard-basic"
+                label="Отображаемый номер телефона"
+                variant="standard"
+                name="visiblePhoneNumber"
+                margin="dense"
+                type="text"
+                value={visiblePhoneNumber}
+                onChange={(e) => setVisiblePhoneNumber(e.target.value)}
+                helperText={
+                  visiblePhoneNumber.length < 5 &&
+                  'Поле обязательно для заполнения'
+                }
+                required
+                error={visiblePhoneNumber.length < 5}
+              />
+            </FormControl>
+
             <FormControl fullWidth>
               <TextField
                 id="standard-basic"
@@ -189,6 +211,7 @@ export default function FormSelect({
           setSendRequestCreateConfig={setSendRequestCreateConfig}
           sendRequestCreateConfig={sendRequestCreateConfig}
           selectedDomain={selectedDomain}
+          visiblePhoneNumber={visiblePhoneNumber}
           phoneNumber={phoneNumber}
           siteLanguage={siteLanguage}
           pathTemplate={pathTemplate}

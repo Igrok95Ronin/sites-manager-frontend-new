@@ -66,6 +66,7 @@ export default function EditDomain({
   const [dataConfig, setDataConfig] = React.useState();
   //   Номер телефона
   const [isPhoneValid, setIsPhoneValid] = React.useState(false); // Валидация номера телефона
+  const [visiblePhoneNumber, setVisiblePhoneNumber] = React.useState(''); // Отображаемый номер телефона
   const [phoneNumber, setPhoneNumber] = React.useState('');
   // Used
   const useds = ['yes', 'no'];
@@ -111,6 +112,7 @@ export default function EditDomain({
     if (dataConfig !== undefined) {
       // Обновляем номер телефона, язык и used из данных конфига
       if (dataConfig.phoneNumber) {
+        setVisiblePhoneNumber(dataConfig.visiblePhoneNumber);
         setPhoneNumber(dataConfig.phoneNumber);
         setSiteLanguage(dataConfig.lang);
         // Если конфиг есть то ставим yes
@@ -235,6 +237,24 @@ export default function EditDomain({
               </Select>
             </FormControl>
 
+            {/* Отображаемый номер телефона */}
+            <TextField
+              id="standard-basic"
+              label="Отображаемый номер телефона"
+              variant="standard"
+              name="visiblePhoneNumber"
+              margin="dense"
+              type="text"
+              value={visiblePhoneNumber}
+              onChange={(e) => setVisiblePhoneNumber(e.target.value)}
+              helperText={
+                visiblePhoneNumber.length < 5 &&
+                'Поле обязательно для заполнения'
+              }
+              required
+              error={visiblePhoneNumber.length < 5}
+            />
+
             {/* Поле номер телефона */}
             <TextField
               className="editDomain__phoneNumber"
@@ -276,6 +296,7 @@ export default function EditDomain({
           domain={editDomain}
           googleAccount={selectedGoogleAccount}
           used={used}
+          visiblePhoneNumber={visiblePhoneNumber}
           phoneNumber={phoneNumber}
           siteLanguage={siteLanguage}
           setLoading={setLoading}

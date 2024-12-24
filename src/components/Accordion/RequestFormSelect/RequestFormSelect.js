@@ -8,6 +8,7 @@ const RequestFormSelect = ({
   setSendRequestCreateConfig,
   sendRequestCreateConfig,
   selectedDomain,
+  visiblePhoneNumber,
   phoneNumber,
   siteLanguage,
   pathTemplate,
@@ -32,6 +33,7 @@ const RequestFormSelect = ({
             {
               domain: selectedDomain,
               templatePath: pathTemplate,
+              visiblePhoneNumber: visiblePhoneNumber,
               phoneNumber: phoneNumber,
               lang: siteLanguage,
             },
@@ -63,6 +65,7 @@ const RequestFormSelect = ({
     setSendRequestCreateConfig,
     selectedDomain,
     pathTemplate,
+    visiblePhoneNumber,
     phoneNumber,
     siteLanguage,
     loading,

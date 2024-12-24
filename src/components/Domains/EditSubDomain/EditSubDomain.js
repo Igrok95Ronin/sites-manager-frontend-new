@@ -45,6 +45,7 @@ export default function EditSubDomain({
 
   //   Номер телефона
   const [isPhoneValid, setIsPhoneValid] = React.useState(false); // Валидация номера телефона
+  const [visiblePhoneNumber, setVisiblePhoneNumber] = React.useState(''); // Отображаемый номер телефона
   const [phoneNumber, setPhoneNumber] = React.useState('');
   // Данные Конфиг файла
   const [dataConfig, setDataConfig] = React.useState();
@@ -87,6 +88,7 @@ export default function EditSubDomain({
     if (dataConfig !== undefined) {
       // Обновляем номер телефона
       if (dataConfig.phoneNumber) {
+        setVisiblePhoneNumber(dataConfig.visiblePhoneNumber);
         setPhoneNumber(dataConfig.phoneNumber);
       }
     }
@@ -126,6 +128,24 @@ export default function EditSubDomain({
             noValidate
             autoComplete="off"
           >
+            {/* Отображаемый номер телефона */}
+            <TextField
+              id="standard-basic"
+              label="Отображаемый номер телефона"
+              variant="standard"
+              name="visiblePhoneNumber"
+              margin="dense"
+              type="text"
+              value={visiblePhoneNumber}
+              onChange={(e) => setVisiblePhoneNumber(e.target.value)}
+              helperText={
+                visiblePhoneNumber.length < 5 &&
+                'Поле обязательно для заполнения'
+              }
+              required
+              error={visiblePhoneNumber.length < 5}
+            />
+
             <TextField
               className="editDomain__phoneNumber"
               id="standard-basic"
@@ -161,6 +181,7 @@ export default function EditSubDomain({
           submitSubdomainEditRequest={submitSubdomainEditRequest}
           setSubmitSubdomainEditRequest={setSubmitSubdomainEditRequest}
           editSubDomain={editSubDomain}
+          visiblePhoneNumber={visiblePhoneNumber}
           phoneNumber={phoneNumber}
           setLoading={setLoading}
           setData={setData}
