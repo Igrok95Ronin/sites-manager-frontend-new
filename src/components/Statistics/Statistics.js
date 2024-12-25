@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import axiosInstance from '../../axiosInstance'; // Используем централизованный экземпляр Axios
+import axios from 'axios';
+
 import Table from '@mui/material/Table';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
@@ -9,86 +11,495 @@ import TableSortLabel from '@mui/material/TableSortLabel';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableBody from '@mui/material/TableBody';
+import Checkbox from '@mui/material/Checkbox';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
+
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
-import Button from '@mui/material/Button'; // Импортируем компонент Button
-import IconButton from '@mui/material/IconButton'; // Импортируем IconButton
 import DataObjectIcon from '@mui/icons-material/DataObject';
-import RestartAltIcon from '@mui/icons-material/RestartAlt'; // Импортируем иконку для сброса
-import Checkbox from '@mui/material/Checkbox'; // Импортируем компонент Checkbox
-import { JSONTree } from 'react-json-tree';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import Tooltip from '@mui/material/Tooltip';
 
+import { JSONTree } from 'react-json-tree';
 import { startOfDay, endOfDay } from 'date-fns';
 
 import Tabs from './Tabs/Tabs.js';
 import ColumnSelector from './Tabs/ColumnSelector/ColumnSelector.js';
-import useLocalStorage from './Tabs/UseLocalStorage/UseLocalStorage.js';
 import IPInfo from './Tabs/IPInfo/IPInfo.js';
 
 import './Statistics.scss';
-import axios from 'axios';
 
-const APIURL = process.env.REACT_APP_APIURL; // Получаем URL из конфига
+// ИКОНКИ, используемые в label (пример)
+import KeyIcon from '@mui/icons-material/Key';
+// (ниже просто примеры, если вам они нужны)
+import DomainIcon from '@mui/icons-material/Domain';
+import HomeIcon from '@mui/icons-material/Home';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import MouseIcon from '@mui/icons-material/Mouse';
+import TouchAppIcon from '@mui/icons-material/TouchApp';
+import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
+import TimerIcon from '@mui/icons-material/Timer';
+import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
+import StorageIcon from '@mui/icons-material/Storage';
+import LanguageIcon from '@mui/icons-material/Language';
+import WifiIcon from '@mui/icons-material/Wifi';
+import CloudQueueIcon from '@mui/icons-material/CloudQueue';
+import DnsIcon from '@mui/icons-material/Dns';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+import ViewCompactIcon from '@mui/icons-material/ViewCompact';
+import DeveloperBoardIcon from '@mui/icons-material/DeveloperBoard';
+import DeviceHubIcon from '@mui/icons-material/DeviceHub';
+import WindowIcon from '@mui/icons-material/Window';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import CorporateFareIcon from '@mui/icons-material/CorporateFare';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LinkIcon from '@mui/icons-material/Link';
+import DevicesIcon from '@mui/icons-material/Devices';
+import BrowserUpdatedIcon from '@mui/icons-material/BrowserUpdated';
+import LaptopIcon from '@mui/icons-material/Laptop';
+import AspectRatioIcon from '@mui/icons-material/AspectRatio';
+import InfoIcon from '@mui/icons-material/Info'; // Для общего обозначения информации (AppCodeName)
+import AppRegistrationIcon from '@mui/icons-material/AppRegistration'; // AppName
+import TranslateIcon from '@mui/icons-material/Translate'; // Language
+import ExtensionIcon from '@mui/icons-material/Extension'; // ProductSub
+import StoreIcon from '@mui/icons-material/Store'; // Vendor
+import SpeedIcon from '@mui/icons-material/Speed'; // EffectiveType
+import PluginsIcon from '@mui/icons-material/Widgets'; // PluginsLength
+import MemoryIcon from '@mui/icons-material/Memory'; // TotalJSHeapSize
+import DataUsageIcon from '@mui/icons-material/DataUsage'; // UsedJSHeapSize
+import BuildIcon from '@mui/icons-material/Build';
+import DesktopWindowsIcon from '@mui/icons-material/DesktopWindows';
+import ImportantDevicesIcon from '@mui/icons-material/ImportantDevices';
+import DeviceUnknownIcon from '@mui/icons-material/DeviceUnknown';
+import PanToolIcon from '@mui/icons-material/PanTool';
+import NetworkCheckIcon from '@mui/icons-material/NetworkCheck';
+import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
+import DataThresholdingIcon from '@mui/icons-material/DataThresholding';
 
-// Изначальные столбцы
-const columns = [
-  { label: 'ID', dataKey: 'ID' },
-  { label: 'Domain', dataKey: 'Domain' },
-  { label: 'Host', dataKey: 'Host' },
-  { label: 'Gclid', dataKey: 'Gclid' },
-  { label: 'Company ID', dataKey: 'CompanyID' },
-  { label: 'Account ID', dataKey: 'AccountID' },
-  { label: 'Keyword', dataKey: 'Keyword' },
-  { label: 'IP', dataKey: 'IP' },
-  { label: 'Created At', dataKey: 'CreatedAt' },
-  { label: 'Click Coordinates', dataKey: 'ClickCoordinates' },
-  { label: 'Click on Number', dataKey: 'ClickOnNumber' },
-  { label: 'Scroll Coordinates', dataKey: 'ScrollCoordinates' },
-  { label: 'Time Spent', dataKey: 'TimeSpent' },
-  { label: 'Device', dataKey: 'Device' },
-  { label: 'Headers', dataKey: 'Headers' },
-  { label: 'JsData', dataKey: 'JsData' },
-  { label: 'Accept', dataKey: 'Accept' }, // Поля из поля Headers
-  { label: 'AcceptEncoding', dataKey: 'Accept-Encoding' }, // Поля из поля Headers
-  { label: 'AcceptLanguage', dataKey: 'Accept-Language' }, // Поля из поля Headers
-  { label: 'Connection', dataKey: 'Connection' }, // Поля из поля Headers
-  { label: 'SecChUaMobile', dataKey: 'sec-ch-ua-mobile' }, // Поля из поля Headers
-  { label: 'Referer', dataKey: 'Referer' }, // Поля из поля Headers
-  { label: 'SecFetchDest', dataKey: 'Sec-Fetch-Dest' }, // Поля из поля Headers
-  { label: 'SecFetchMode', dataKey: 'Sec-Fetch-Mode' }, // Поля из поля Headers
-  { label: 'SecFetchSite', dataKey: 'Sec-Fetch-Site' }, // Поля из поля Headers
-  // { label: 'SecFetchUser', dataKey: 'Sec-Fetch-User' }, // Поля из поля Headers
-  { label: 'UserAgent', dataKey: 'User-Agent' }, // Поля из поля Headers
-  { label: 'SecChUa', dataKey: 'sec-ch-ua' }, // Поля из поля Headers
-  { label: 'SecChUaPlatform', dataKey: 'sec-ch-ua-platform' }, // Поля из поля Headers
-  // { label: 'UpgradeInsecureRequests', dataKey: 'Upgrade-Insecure-Requests' }, // Поля из поля Headers
-  { label: 'InnerWidth', dataKey: 'innerWidth' }, // Поля из поля JSData
-  { label: 'InnerHeight', dataKey: 'innerHeight' }, // Поля из поля JSData
-  { label: 'OuterWidth', dataKey: 'outerWidth' }, // Поля из поля JSData
-  { label: 'OuterHeight', dataKey: 'outerHeight' }, // Поля из поля JSData
-  { label: 'ScreenWidth', dataKey: 'screenWidth' }, // Поля из поля JSData
-  { label: 'ScreenHeight', dataKey: 'screenHeight' }, // Поля из поля JSData
-  { label: 'AppCodeName', dataKey: 'appCodeName' }, // Поля из поля JSData
-  { label: 'AppName', dataKey: 'appName' }, // Поля из поля JSData
-  { label: 'AppVersion', dataKey: 'appVersion' }, // Поля из поля JSData
-  { label: 'Language', dataKey: 'language' }, // Поля из поля JSData
-  { label: 'Platform', dataKey: 'platform' }, // Поля из поля JSData
-  { label: 'Product', dataKey: 'product' }, // Поля из поля JSData
-  { label: 'ProductSub', dataKey: 'productSub' }, // Поля из поля JSData
-  { label: 'UserAgent', dataKey: 'userAgent' }, // Поля из поля JSData
-  { label: 'Vendor', dataKey: 'vendor' }, // Поля из поля JSData
-  { label: 'MaxTouchPoints', dataKey: 'maxTouchPoints' }, // Поля из поля JSData
-  { label: 'Downlink', dataKey: 'downlink' }, // Поля из поля JSData
-  { label: 'EffectiveType', dataKey: 'effectiveType' }, // Поля из поля JSData
-  { label: 'RTT', dataKey: 'rtt' }, // Поля из поля JSData
-  { label: 'PluginsLength', dataKey: 'pluginsLength' }, // Поля из поля JSData
-  { label: 'TotalJSHeapSize', dataKey: 'totalJSHeapSize' }, // Поля из поля JSData
-  { label: 'UsedJSHeapSize', dataKey: 'usedJSHeapSize' }, // Поля из поля JSData
-  { label: 'JSHeapSizeLimit', dataKey: 'jsHeapSizeLimit' }, // Поля из поля JSData
+// =========================================
+// 1) ХУК: храним в localStorage только массив строк (dataKey).
+// =========================================
+function useLocalStorageDataKeys(key, initialValue) {
+  const [dataKeys, setDataKeys] = useState(() => {
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch (error) {
+      console.error(`Ошибка при чтении ${key} из localStorage:`, error);
+      return initialValue;
+    }
+  });
+
+  const setValue = (value) => {
+    try {
+      const valueToStore = value instanceof Function ? value(dataKeys) : value;
+
+      setDataKeys(valueToStore);
+      window.localStorage.setItem(key, JSON.stringify(valueToStore));
+    } catch (error) {
+      console.error(`Ошибка при записи ${key} в localStorage:`, error);
+    }
+  };
+
+  return [dataKeys, setValue];
+}
+
+// =========================================
+// 2) "Эталонный" список столбцов (allColumns) с иконками и т.п.
+// =========================================
+export const allColumns = [
+  {
+    label: (
+      <Tooltip title="Уникальный идентификатор (ID)" arrow placement="top">
+        <KeyIcon />
+      </Tooltip>
+    ),
+    dataKey: 'ID',
+  },
+  {
+    label: (
+      <Tooltip title="Домен (Domain)" arrow placement="top">
+        <DomainIcon />
+      </Tooltip>
+    ),
+    dataKey: 'Domain',
+  },
+  {
+    label: (
+      <Tooltip title="Хост (Host)" arrow placement="top">
+        <HomeIcon />
+      </Tooltip>
+    ),
+    dataKey: 'Host',
+  },
+  {
+    label: (
+      <Tooltip title="Gclid" arrow placement="top">
+        <AccountTreeIcon />
+      </Tooltip>
+    ),
+    dataKey: 'Gclid',
+  },
+  {
+    label: (
+      <Tooltip title="ID компании (CompanyID)" arrow placement="top">
+        <CorporateFareIcon />
+      </Tooltip>
+    ),
+    dataKey: 'CompanyID',
+  },
+  {
+    label: (
+      <Tooltip title="ID аккаунта (AccountID)" arrow placement="top">
+        <AccountCircleIcon />
+      </Tooltip>
+    ),
+    dataKey: 'AccountID',
+  },
+  {
+    label: (
+      <Tooltip title="Ключевое слово (Keyword)" arrow placement="top">
+        <LanguageIcon />
+      </Tooltip>
+    ),
+    dataKey: 'Keyword',
+  },
+  {
+    label: (
+      <Tooltip title="IP-адрес (IP)" arrow placement="top">
+        <LocationOnIcon />
+      </Tooltip>
+    ),
+    dataKey: 'IP',
+  },
+  {
+    label: (
+      <Tooltip title="Дата создания (CreatedAt)" arrow placement="top">
+        <AccessTimeIcon />
+      </Tooltip>
+    ),
+    dataKey: 'CreatedAt',
+  },
+  {
+    label: (
+      <Tooltip title="Координаты клика (ClickCoordinates)" arrow placement="top">
+        <MouseIcon />
+      </Tooltip>
+    ),
+    dataKey: 'ClickCoordinates',
+  },
+  {
+    label: (
+      <Tooltip title="Клик на номер (ClickOnNumber)" arrow placement="top">
+        <TouchAppIcon />
+      </Tooltip>
+    ),
+    dataKey: 'ClickOnNumber',
+  },
+  {
+    label: (
+      <Tooltip title="Координаты скролла (ScrollCoordinates)" arrow placement="top">
+        <CompareArrowsIcon />
+      </Tooltip>
+    ),
+    dataKey: 'ScrollCoordinates',
+  },
+  {
+    label: (
+      <Tooltip title="Время на странице (TimeSpent)" arrow placement="top">
+        <TimerIcon />
+      </Tooltip>
+    ),
+    dataKey: 'TimeSpent',
+  },
+  {
+    label: (
+      <Tooltip title="Устройство (Device)" arrow placement="top">
+        <PhoneIphoneIcon />
+      </Tooltip>
+    ),
+    dataKey: 'Device',
+  },
+  {
+    label: (
+      <Tooltip title="Заголовки (Headers)" arrow placement="top">
+        <StorageIcon />
+      </Tooltip>
+    ),
+    dataKey: 'Headers',
+  },
+  {
+    label: (
+      <Tooltip title="Данные (JS)" arrow placement="top">
+        <DataObjectIcon />
+      </Tooltip>
+    ),
+    dataKey: 'JsData',
+  },
+  {
+    label: (
+      <Tooltip title="Accept (Accept)" arrow placement="top">
+        <CloudQueueIcon />
+      </Tooltip>
+    ),
+    dataKey: 'Accept',
+  },
+  {
+    label: (
+      <Tooltip title="Accept-Encoding" arrow placement="top">
+        <WifiIcon />
+      </Tooltip>
+    ),
+    dataKey: 'Accept-Encoding',
+  },
+  {
+    label: (
+      <Tooltip title="Accept-Language" arrow placement="top">
+        <LanguageIcon />
+      </Tooltip>
+    ),
+    dataKey: 'Accept-Language',
+  },
+  {
+    label: (
+      <Tooltip title="Подключение (Connection)" arrow placement="top">
+        <DnsIcon />
+      </Tooltip>
+    ),
+    dataKey: 'Connection',
+  },
+  {
+    label: (
+      <Tooltip title="Мобильное устройство (SecChUaMobile)" arrow placement="top">
+        <SmartToyIcon />
+      </Tooltip>
+    ),
+    dataKey: 'sec-ch-ua-mobile',
+  },
+  {
+    label: (
+      <Tooltip title="Referer" arrow placement="top">
+        <LinkIcon />
+      </Tooltip>
+    ),
+    dataKey: 'Referer',
+  },
+  {
+    label: (
+      <Tooltip title="Цель запроса (Sec-Fetch-Dest)" arrow placement="top">
+        <ViewCompactIcon />
+      </Tooltip>
+    ),
+    dataKey: 'Sec-Fetch-Dest',
+  },
+  {
+    label: (
+      <Tooltip title="Режим запроса (Sec-Fetch-Mode)" arrow placement="top">
+        <DeveloperBoardIcon />
+      </Tooltip>
+    ),
+    dataKey: 'Sec-Fetch-Mode',
+  },
+  {
+    label: (
+      <Tooltip title="Сайт запроса (Sec-Fetch-Site)" arrow placement="top">
+        <DeviceHubIcon />
+      </Tooltip>
+    ),
+    dataKey: 'Sec-Fetch-Site',
+  },
+  {
+    label: (
+      <Tooltip title="User-Agent" arrow placement="top">
+        <DevicesIcon />
+      </Tooltip>
+    ),
+    dataKey: 'User-Agent',
+  },
+  {
+    label: (
+      <Tooltip title="sec-ch-ua" arrow placement="top">
+        <BrowserUpdatedIcon />
+      </Tooltip>
+    ),
+    dataKey: 'sec-ch-ua',
+  },
+  {
+    label: (
+      <Tooltip title="Платформа (sec-ch-ua-platform)" arrow placement="top">
+        <LaptopIcon />
+      </Tooltip>
+    ),
+    dataKey: 'sec-ch-ua-platform',
+  },
+  {
+    label: (
+      <Tooltip title="Размеры окна (Ширина x Высота) (InnerWidth x InnerHeight)" arrow placement="top">
+        <WindowIcon />
+      </Tooltip>
+    ),
+    dataKey: 'windowSize',
+  },
+  {
+    label: (
+      <Tooltip title="Внешние размеры окна (Ширина x Высота) (OuterWidth x OuterHeight)" arrow placement="top">
+        <AspectRatioIcon />
+      </Tooltip>
+    ),
+    dataKey: 'outerWindowSize',
+  },
+  {
+    label: (
+      <Tooltip title="Ширина х Высота экрана (ScreenWidth x ScreenHeight)" arrow placement="top">
+        <VisibilityIcon />
+      </Tooltip>
+    ),
+    dataKey: 'screenSize',
+  },
+  {
+    label: (
+      <Tooltip title="Кодовое имя приложения (AppCodeName)" arrow placement="top">
+        <InfoIcon />
+      </Tooltip>
+    ),
+    dataKey: 'appCodeName',
+  },
+  {
+    label: (
+      <Tooltip title="Имя приложения (AppName)" arrow placement="top">
+        <AppRegistrationIcon />
+      </Tooltip>
+    ),
+    dataKey: 'appName',
+  },
+  {
+    label: (
+      <Tooltip title="Версия приложения (AppVersion)" arrow placement="top">
+        <BuildIcon />
+      </Tooltip>
+    ),
+    dataKey: 'appVersion',
+  },
+  {
+    label: (
+      <Tooltip title="Язык пользователя (Language)" arrow placement="top">
+        <TranslateIcon />
+      </Tooltip>
+    ),
+    dataKey: 'language',
+  },
+  {
+    label: (
+      <Tooltip title="Платформа устройства (Platform)" arrow placement="top">
+        <DesktopWindowsIcon />
+      </Tooltip>
+    ),
+    dataKey: 'platform',
+  },
+  {
+    label: (
+      <Tooltip title="Продукт браузера или устройства (Product)" arrow placement="top">
+        <ImportantDevicesIcon />
+      </Tooltip>
+    ),
+    dataKey: 'product',
+  },
+  {
+    label: (
+      <Tooltip title="Дополнительная информация о продукте (ProductSub)" arrow placement="top">
+        <ExtensionIcon />
+      </Tooltip>
+    ),
+    dataKey: 'productSub',
+  },
+  {
+    label: (
+      <Tooltip title="User-Agent клиента (UserAgent)" arrow placement="top">
+        <DeviceUnknownIcon />
+      </Tooltip>
+    ),
+    dataKey: 'userAgent',
+  },
+  {
+    label: (
+      <Tooltip title="Вендор устройства (Vendor)" arrow placement="top">
+        <StoreIcon />
+      </Tooltip>
+    ),
+    dataKey: 'vendor',
+  },
+  {
+    label: (
+      <Tooltip title="Максимальное количество точек касания (MaxTouchPoints)" arrow placement="top">
+        <PanToolIcon />
+      </Tooltip>
+    ),
+    dataKey: 'maxTouchPoints',
+  },
+  {
+    label: (
+      <Tooltip title="Пропускная способность соединения (Downlink)" arrow placement="top">
+        <NetworkCheckIcon />
+      </Tooltip>
+    ),
+    dataKey: 'downlink',
+  },
+  {
+    label: (
+      <Tooltip title="Тип соединения (EffectiveType)" arrow placement="top">
+        <SpeedIcon />
+      </Tooltip>
+    ),
+    dataKey: 'effectiveType',
+  },
+  {
+    label: (
+      <Tooltip title="Время задержки (RTT)" arrow placement="top">
+        <HourglassBottomIcon />
+      </Tooltip>
+    ),
+    dataKey: 'rtt',
+  },
+  {
+    label: (
+      <Tooltip title="Количество установленных плагинов (PluginsLength)" arrow placement="top">
+        <PluginsIcon />
+      </Tooltip>
+    ),
+    dataKey: 'pluginsLength',
+  },
+  {
+    label: (
+      <Tooltip title="Общий размер кучи JS (TotalJSHeapSize)" arrow placement="top">
+        <MemoryIcon />
+      </Tooltip>
+    ),
+    dataKey: 'totalJSHeapSize',
+  },
+  {
+    label: (
+      <Tooltip title="Использованный размер кучи JS (UsedJSHeapSize)" arrow placement="top">
+        <DataUsageIcon />
+      </Tooltip>
+    ),
+    dataKey: 'usedJSHeapSize',
+  },
+  {
+    label: (
+      <Tooltip title="Лимит размера кучи JS (JSHeapSizeLimit)" arrow placement="top">
+        <DataThresholdingIcon />
+      </Tooltip>
+    ),
+    dataKey: 'jsHeapSizeLimit',
+  },
 ];
 
-// Поля, которые мы передаем, чтобы показывать при клике на Поля Headers
+// =========================================
+// 3) Другие вспомогательные переменные
+// =========================================
 const headerFieldsDataKeys = [
   'Accept',
   'Accept-Encoding',
@@ -105,7 +516,6 @@ const headerFieldsDataKeys = [
   'sec-ch-ua-platform',
 ];
 
-// Поля, которые мы передаем, чтобы показывать при клике на Поля JSData
 const jsDataFieldsDataKeys = [
   'innerWidth',
   'innerHeight',
@@ -132,46 +542,37 @@ const jsDataFieldsDataKeys = [
   'jsHeapSizeLimit',
 ];
 
-// Столбцы, видимые по умолчанию
-const defaultVisibleColumns = columns.filter((column) =>
-  [
-    'ID',
-    'Domain',
-    // 'CompanyID',
-    // 'AccountID',
-    'CreatedAt',
-    'ClickOnNumber',
-    // 'Keyword',
-    'TimeSpent',
-    // 'Device',
-    'IP',
-    'Headers',
-    'JsData',
-    // 'Gclid',
-    'ScrollCoordinates',
-    'ClickCoordinates',
-  ].includes(column.dataKey),
-);
+// Какие столбцы показываем по умолчанию (только dataKey!)
+const defaultVisibleDataKeys = [
+  'ID',
+  'Domain',
+  'CreatedAt',
+  'ClickOnNumber',
+  'TimeSpent',
+  'IP',
+  'Headers',
+  'JsData',
+  'ScrollCoordinates',
+  'ClickCoordinates',
+];
 
-// Столбцы, которые вы хотите отображать, когда `expandedCell` установлен
-const expandedVisibleColumns = columns.filter((column) =>
-  [
-    'ID',
-    'Domain',
-    'CompanyID',
-    'AccountID',
-    'CreatedAt',
-    // 'ClickOnNumber',
-    'Keyword',
-    'TimeSpent',
-    // 'Device',
-    // 'IP',
-    'Headers',
-    'JsData',
-  ].includes(column.dataKey),
-);
+// Если ячейка «расширена», хотим показывать какие-то доп. поля
+// (здесь для примера, как у вас было)
+// const expandedDataKeys = [
+//   'ID',
+//   'Domain',
+//   'CompanyID',
+//   'AccountID',
+//   'CreatedAt',
+//   'Keyword',
+//   'TimeSpent',
+//   'Headers',
+//   'JsData',
+// ];
 
-// Определение VirtuosoTableComponents
+// =========================================
+// 4) Определяем VirtuosoTableComponents (как у вас)
+// =========================================
 const VirtuosoTableComponents = {
   Scroller: React.forwardRef((props, ref) => <TableContainer component={Paper} {...props} ref={ref} />),
   Table: (props) => <Table {...props} sx={{ borderCollapse: 'separate', tableLayout: 'auto' }} />,
@@ -180,76 +581,66 @@ const VirtuosoTableComponents = {
   TableBody: React.forwardRef((props, ref) => <TableBody {...props} ref={ref} />),
 };
 
+// =========================================
+// 5) Главный компонент: ReactVirtualizedTable
+// =========================================
 export default function ReactVirtualizedTable() {
+  // -----------------------------------
+  // (A) Храним массив строк (dataKey) в localStorage:
+  // -----------------------------------
+  const [visibleDataKeys, setVisibleDataKeys] = useLocalStorageDataKeys(
+    'visibleColumnsDataKeys',
+    defaultVisibleDataKeys,
+  );
+
+  // На основе visibleDataKeys восстанавливаем объекты столбцов (с иконками)
+  const visibleColumns = React.useMemo(() => {
+    return allColumns.filter((col) => visibleDataKeys.includes(col.dataKey));
+  }, [visibleDataKeys]);
+
+  // «Расширенный» набор dataKeys (если нужно)
+  const [expandedCell, setExpandedCell] = useState(null);
+  // const expandedColumns = React.useMemo(() => {
+  //   return allColumns.filter((col) => expandedDataKeys.includes(col.dataKey));
+  // }, []);
+
+  // -----------------------------------
+  // (B) Прочие состояния
+  // -----------------------------------
   const [rows, setRows] = useState([]);
-  const [limit, setLimit] = useState(100); // Теперь limit можно изменять
+  const [limit, setLimit] = useState(100);
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
   const [order, setOrder] = useState('desc');
-  // Обновляем orderBy на первый видимый столбец по умолчанию
-  const [orderBy, setOrderBy] = useState(defaultVisibleColumns[0].dataKey);
+  // Сортируем первоначально по первому столбцу из defaultVisibleDataKeys
+  const [orderBy, setOrderBy] = useState(defaultVisibleDataKeys[0] || 'ID');
 
-  // Используем defaultVisibleColumns в качестве начального состояния
-  // const [visibleColumns, setVisibleColumns] = useState(defaultVisibleColumns);
-  const [userVisibleColumns, setUserVisibleColumns] = useLocalStorage('visibleColumns', defaultVisibleColumns);
-  const [visibleColumns, setVisibleColumns] = useState(userVisibleColumns);
-
-  // Состояние для хранения выбранных дат
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
 
   const loadingRef = useRef(false);
-  const [searchQuery, setSearchQuery] = React.useState(''); // Поисковый запрос
-  const [searchField, setSearchField] = useState(columns[1].dataKey); // Выбираем поле для поиска
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [searchField, setSearchField] = useState('Domain'); // пример: ищем по "Domain"
 
+  // Для показа JSON-структур
   const [formattedJSON, setFormattedJSON] = useState({});
-  const [expandedCell, setExpandedCell] = useState(null);
 
-  // Ваши хуки и состояния...
-  const [checkedRows, setCheckedRows] = useState({}); // Состояние для хранения отмеченных строк
+  // Чекбоксы внутри таблицы
+  const [checkedRows, setCheckedRows] = useState({});
 
-  // Функция для обработки изменения состояния чекбокса
-  const handleCheckboxChange = (rowId) => async (event) => {
-    const isChecked = event.target.checked;
-
-    // Обновляем состояние checkedRows
-    setCheckedRows((prev) => ({
-      ...prev,
-      [rowId]: isChecked,
-    }));
-
-    // Опционально: Отправляем обновление на сервер
-    try {
-      setLoading(true);
-      await axiosInstance.post(`${APIURL}/updatecheckedstatus`, {
-        id: rowId,
-        isChecked: isChecked,
-      });
-      // console.log(`Статус чекбокса для строки с ID ${rowId} обновлен на сервере.`);
-    } catch (error) {
-      console.error('Ошибка при обновлении статуса на сервере:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSort = (property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
-    setOrderBy(property);
-  };
-
+  // -----------------------------------
+  // (C) Загрузка данных
+  // -----------------------------------
   const loadMoreRows = async () => {
     if (loadingRef.current || !hasMore) return;
-
     loadingRef.current = true;
     setLoading(true);
     try {
       const params = { limit, offset };
 
-      // Добавляем параметры даты, если они выбраны
+      // Если выбраны даты
       if (startDate) {
         const start = startOfDay(startDate);
         params.startDate = start.toISOString();
@@ -259,35 +650,21 @@ export default function ReactVirtualizedTable() {
         params.endDate = end.toISOString();
       }
 
-      // console.log('Запрос к серверу с параметрами:', params);
       const requestStartTime = performance.now();
-
-      const response = await axiosInstance.get(`${APIURL}/userslogsads`, {
-        params,
-      });
-
+      const response = await axiosInstance.get(`${process.env.REACT_APP_APIURL}/userslogsads`, { params });
       const requestEndTime = performance.now();
-
-      // Вычисляем время отклика
-      const responseTime = requestEndTime - requestStartTime;
-
-      // Выводим время отклика в консоль
-      console.log(`Время отклика сервера: ${responseTime.toFixed(2)} мс`);
-
-      // console.log('Ответ от сервера:', response.data);
+      console.log(`Время отклика сервера: ${(requestEndTime - requestStartTime).toFixed(2)} мс`);
 
       if (response.data.length < limit) setHasMore(false);
 
       setRows((prevRows) => [...prevRows, ...response.data]);
       setOffset((prevOffset) => prevOffset + response.data.length);
 
-      // Создаем объект для инициализации checkedRows
+      // Инициализация checkedRows
       const initialCheckedRows = {};
       response.data.forEach((row) => {
-        initialCheckedRows[row.ID] = row.IsChecked || false; // Предполагаем, что сервер возвращает свойство isChecked
+        initialCheckedRows[row.ID] = row.IsChecked || false;
       });
-
-      // Объединяем новое состояние checkedRows с существующим
       setCheckedRows((prevCheckedRows) => ({
         ...prevCheckedRows,
         ...initialCheckedRows,
@@ -300,42 +677,26 @@ export default function ReactVirtualizedTable() {
     }
   };
 
-  const filteredData = React.useMemo(() => {
-    return rows.filter((item) => {
-      let fieldValue = item[searchField];
-      if (fieldValue !== undefined && fieldValue !== null) {
-        if (searchField === 'CreatedAt') {
-          const date = new Date(fieldValue);
-          fieldValue = date.toLocaleDateString('ru-RU');
-        } else {
-          fieldValue = fieldValue.toString();
-        }
-        return fieldValue.toLowerCase().includes(searchQuery.toLowerCase());
-      }
-      return false;
-    });
-  }, [rows, searchField, searchQuery]);
-
-  // Используем `useEffect` для отслеживания изменений `expandedCell`
+  // Сбрасываем и загружаем заново при изменении дат или limit
   useEffect(() => {
-    if (expandedCell) {
-      setVisibleColumns(expandedVisibleColumns);
-    } else {
-      setVisibleColumns(userVisibleColumns);
-    }
-  }, [expandedCell, userVisibleColumns]);
-
-  useEffect(() => {
-    // Сбрасываем данные и загружаем заново при изменении диапазона дат или limit
     setRows([]);
     setOffset(0);
     setHasMore(true);
-    loadingRef.current = false; // Сбрасываем флаг загрузки
+    loadingRef.current = false;
     loadMoreRows();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startDate, endDate, limit]);
 
-  // Проверяем, что текущий столбец для сортировки видим
+  // -----------------------------------
+  // (D) Сортировка и поиск
+  // -----------------------------------
+  const handleSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  // Если current orderBy не входит в видимые столбцы, переключаем на первый видимый
   useEffect(() => {
     if (!visibleColumns.some((col) => col.dataKey === orderBy)) {
       if (visibleColumns.length > 0) {
@@ -346,56 +707,93 @@ export default function ReactVirtualizedTable() {
 
   const sortedRows = React.useMemo(() => {
     return [...rows].sort((a, b) => {
-      if (a[orderBy] < b[orderBy]) {
-        return order === 'asc' ? -1 : 1;
-      }
-      if (a[orderBy] > b[orderBy]) {
-        return order === 'asc' ? 1 : -1;
-      }
+      if (a[orderBy] < b[orderBy]) return order === 'asc' ? -1 : 1;
+      if (a[orderBy] > b[orderBy]) return order === 'asc' ? 1 : -1;
       return 0;
     });
   }, [rows, order, orderBy]);
 
-  // Определение состояния для чекбоксов "Выбрать все" и "Некоторые выбраны"
-  const allChecked = filteredData.length > 0 && filteredData.every((row) => checkedRows[row.ID]);
-  const someChecked = filteredData.some((row) => checkedRows[row.ID]);
+  // Фильтрация по полю searchField и поисковой строке searchQuery
+  const filteredData = React.useMemo(() => {
+    return sortedRows.filter((item) => {
+      let fieldValue = item[searchField];
+      if (fieldValue === undefined || fieldValue === null) return false;
 
-  // Функция для обработки клика на чекбокс заголовка
-  const handleSelectAllClick = async (event) => {
-    const isChecked = event.target.checked;
-
-    // Обновляем состояние checkedRows только для отфильтрованных строк
-    const newCheckedRows = { ...checkedRows };
-    filteredData.forEach((row) => {
-      newCheckedRows[row.ID] = isChecked;
+      if (searchField === 'CreatedAt') {
+        // пример: преобразовать дату к строке
+        const date = new Date(fieldValue);
+        fieldValue = date.toLocaleDateString('ru-RU');
+      } else {
+        fieldValue = fieldValue.toString();
+      }
+      return fieldValue.toLowerCase().includes(searchQuery.toLowerCase());
     });
-    setCheckedRows(newCheckedRows);
+  }, [sortedRows, searchField, searchQuery]);
 
-    // Создаем массив обновлений для отфильтрованных строк
-    const updates = filteredData.map((row) => ({
-      id: row.ID,
-      isChecked: isChecked,
-    }));
+  // -----------------------------------
+  // (E) Логика «расширенной» таблицы (если expandedCell)
+  // -----------------------------------
+  useEffect(() => {
+    if (expandedCell) {
+      // Если есть «расширенный» режим, показываем expandedColumns
+      // вместо обычных visibleColumns (ваша логика).
+      // Можно и другие варианты: объединять и т.д.
+    }
+  }, [expandedCell]);
 
-    // Отправляем массив обновлений на сервер
+  // -----------------------------------
+  // (F) Функции чекбоксов внутри таблицы
+  // -----------------------------------
+  const handleCheckboxChange = (rowId) => async (event) => {
+    const isChecked = event.target.checked;
+    setCheckedRows((prev) => ({ ...prev, [rowId]: isChecked }));
+
     try {
       setLoading(true);
-      await axios.patch(`${APIURL}/multiplestatusupdate`, {
-        updates: updates,
+      await axiosInstance.post(`${process.env.REACT_APP_APIURL}/updatecheckedstatus`, {
+        id: rowId,
+        isChecked: isChecked,
       });
-      // console.log(`Статусы чекбоксов обновлены на сервере.`);
     } catch (error) {
-      console.error('Ошибка при обновлении статусов на сервере:', error);
-      // При ошибке можно откатить изменения состояния, если требуется
+      console.error('Ошибка при обновлении статуса:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Работа с полями
+  // Выделить все/снять все (только для отфильтрованных)
+  const handleSelectAllClick = async (event) => {
+    const isChecked = event.target.checked;
+    const newCheckedRows = { ...checkedRows };
+
+    filteredData.forEach((row) => {
+      newCheckedRows[row.ID] = isChecked;
+    });
+    setCheckedRows(newCheckedRows);
+
+    const updates = filteredData.map((row) => ({
+      id: row.ID,
+      isChecked,
+    }));
+
+    try {
+      setLoading(true);
+      await axios.patch(`${process.env.REACT_APP_APIURL}/multiplestatusupdate`, {
+        updates,
+      });
+    } catch (error) {
+      console.error('Ошибка при обновлении статусов:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // -----------------------------------
+  // (G) Отрисовка строк
+  // -----------------------------------
   function rowContent(_index, row) {
-    function valueRenderer(valueAsString, value, ...keyPath) {
-      // Проверяем, является ли значение строкой и начинается ли оно с 'http://' или 'https://'
+    // valueRenderer для JSONTree (ссылки и т.д.)
+    function valueRenderer(valueAsString, value) {
       if (typeof value === 'string' && /^https?:\/\//i.test(value)) {
         return (
           <a
@@ -412,99 +810,110 @@ export default function ReactVirtualizedTable() {
           </a>
         );
       }
-
-      // По умолчанию возвращаем значение без изменений
       return valueAsString;
     }
 
-    // Определяем, отмечена ли текущая строка
     const isChecked = checkedRows[row.ID] || false;
-
-    // Определяем, был ли клик по номеру телефона
     const isClickOnNumberTrue = row['ClickOnNumber'];
 
-    // Определяем цвет фона для всей строки единоразово
-    const rowBackgroundColor = isClickOnNumberTrue
-      ? '#c8e6c9' // Зелёный фон, если клик по номеру
-      : isChecked
-      ? '#e0f7fa' // Голубой фон, если чекбокс отмечен
-      : 'inherit'; // По умолчанию без изменения
+    const rowBackgroundColor = isClickOnNumberTrue ? '#c8e6c9' : isChecked ? '#e0f7fa' : 'inherit';
 
     return (
       <>
-        {/* Добавили ячейку с чекбоксом в начало каждой строки. */}
+        {/* Чекбокс каждой строки */}
         <TableCell className="statistics__checked" align="left" style={{ backgroundColor: rowBackgroundColor }}>
           <Checkbox checked={isChecked} onChange={handleCheckboxChange(row.ID)} />
         </TableCell>
 
-        {visibleColumns.map((column) => (
-          <TableCell key={column.dataKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
-            {column.dataKey === 'ClickOnNumber' ? (
-              row[column.dataKey] ? (
-                <CheckIcon color="success" />
-              ) : (
-                <CloseIcon color="error" />
-              )
-            ) : column.dataKey === 'CreatedAt' ? (
-              new Date(row[column.dataKey]).toLocaleString('ru-RU', {
-                timeZone: 'Europe/Moscow',
-              })
-            ) : column.dataKey === 'Domain' ? (
-              <>
-                {/* Кнопка для фильтрации по домену */}
+        {visibleColumns.map((column) => {
+          const cellKey = column.dataKey;
+          const cellValue = row[cellKey];
+
+          // Логика для объединения значений innerWidth и innerHeight
+          if (cellKey === 'windowSize') {
+            return (
+              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+                {`${row.innerWidth || 'N/A'} x ${row.innerHeight || 'N/A'}`}
+              </TableCell>
+            );
+          }
+
+          // Логика для объединения значений outerWidth и outerHeight
+          if (cellKey === 'outerWindowSize') {
+            return (
+              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+                {`${row.outerWidth || 'N/A'} x ${row.outerHeight || 'N/A'}`}
+              </TableCell>
+            );
+          }
+
+          // Логика для объединения значений screenWidth и screenHeight
+          if (cellKey === 'screenSize') {
+            return (
+              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+                {`${row.screenWidth || 'N/A'} x ${row.screenHeight || 'N/A'}`}
+              </TableCell>
+            );
+          }
+
+          // Примеры разных вариантов отрисовки
+          if (cellKey === 'ClickOnNumber') {
+            return (
+              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+                {cellValue ? <CheckIcon color="success" /> : <CloseIcon color="error" />}
+              </TableCell>
+            );
+          }
+
+          if (cellKey === 'CreatedAt') {
+            return (
+              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+                {new Date(cellValue).toLocaleString('ru-RU', {
+                  timeZone: 'Europe/Moscow',
+                })}
+              </TableCell>
+            );
+          }
+
+          if (cellKey === 'Domain') {
+            return (
+              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
                 <Button
                   variant="text"
                   size="small"
                   color="secondary"
-                  onClick={() => {
-                    // setSearchDomain(row[column.dataKey]); // Устанавливаем домен для фильтрации
-                    setSearchQuery(row[column.dataKey]);
-                  }}
+                  onClick={() => setSearchQuery(cellValue)}
                   sx={{
-                    textTransform: 'none', // Убираем автоматическое преобразование текста
-                    whiteSpace: 'nowrap', // Запрещаем перенос текста
+                    textTransform: 'none',
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  {row[column.dataKey]}
+                  {cellValue}
                 </Button>
-              </>
-            ) : column.dataKey === 'Headers' || column.dataKey === 'JsData' ? (
-              <>
+              </TableCell>
+            );
+          }
+
+          if (cellKey === 'Headers' || cellKey === 'JsData') {
+            return (
+              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
                 <Button
                   variant="outlined"
                   color="secondary"
                   onClick={() => {
                     try {
-                      const data = row[column.dataKey];
-                      let obj = {};
-
-                      if (column.dataKey === 'Headers') {
-                        // Парсим с помощью JSON.parse()
-                        obj = JSON.parse(data);
-                      } else if (column.dataKey === 'JsData') {
-                        // Парсим с помощью JSON.parse()
-                        obj = JSON.parse(data);
-                      }
-
-                      // Сохраняем данные по row.ID и column.dataKey
+                      const data = JSON.parse(cellValue);
                       setFormattedJSON((prevState) => ({
                         ...prevState,
                         [row.ID]: {
                           ...prevState[row.ID],
-                          [column.dataKey]: obj,
+                          [cellKey]: data,
                         },
                       }));
-
-                      setExpandedCell({
-                        rowId: row.ID,
-                        dataKey: column.dataKey,
-                      }); // Устанавливаем текущую ячейку
+                      setExpandedCell({ rowId: row.ID, dataKey: cellKey });
                     } catch (error) {
                       console.error('Error parsing data:', error);
-                      setExpandedCell({
-                        rowId: row.ID,
-                        dataKey: column.dataKey,
-                      });
+                      setExpandedCell({ rowId: row.ID, dataKey: cellKey });
                     }
                   }}
                   sx={{ textTransform: 'none', padding: '5px', minWidth: '0' }}
@@ -514,9 +923,9 @@ export default function ReactVirtualizedTable() {
 
                 {expandedCell &&
                   expandedCell.rowId === row.ID &&
-                  expandedCell.dataKey === column.dataKey &&
+                  expandedCell.dataKey === cellKey &&
                   formattedJSON[row.ID] &&
-                  formattedJSON[row.ID][column.dataKey] && (
+                  formattedJSON[row.ID][cellKey] && (
                     <div
                       style={{
                         maxHeight: '500px',
@@ -531,56 +940,83 @@ export default function ReactVirtualizedTable() {
                       }}
                     >
                       <JSONTree
-                        data={formattedJSON[row.ID][column.dataKey]}
+                        data={formattedJSON[row.ID][cellKey]}
                         theme="monokai"
                         invertTheme={false}
-                        shouldExpandNode={(keyPath, data, level) => level !== 0}
+                        shouldExpandNode={(kp, d, lvl) => lvl !== 0}
                         valueRenderer={valueRenderer}
                       />
                     </div>
                   )}
-              </>
-            ) : column.dataKey === 'Referer' ? (
-              <Button
-                href={row[column.dataKey]}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  color: '#1976d2',
-                  fontWeight: '500',
-                  textDecoration: 'underline',
-                  cursor: 'pointer',
-                  textTransform: 'lowercase',
-                }}
-              >
-                {row[column.dataKey]}
-              </Button>
-            ) : column.dataKey === 'IP' ? (
-              <IPInfo IP={row[column.dataKey]} />
-            ) : column.dataKey === 'Gclid' ? (
-              <>
-                <p className="statistics__gclid" title={row[column.dataKey]}>
-                  {row[column.dataKey]}
+              </TableCell>
+            );
+          }
+
+          if (cellKey === 'Referer') {
+            return (
+              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+                <Button
+                  href={cellValue}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: '#1976d2',
+                    fontWeight: '500',
+                    textDecoration: 'underline',
+                    cursor: 'pointer',
+                    textTransform: 'lowercase',
+                  }}
+                >
+                  {cellValue}
+                </Button>
+              </TableCell>
+            );
+          }
+
+          if (cellKey === 'IP') {
+            return (
+              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+                <IPInfo IP={cellValue} />
+              </TableCell>
+            );
+          }
+
+          if (cellKey === 'Gclid') {
+            return (
+              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+                <p className="statistics__gclid" title={cellValue}>
+                  {cellValue}
                 </p>
-                <p className="statistics__gclidLen">{row[column.dataKey].length}</p>
-              </>
-            ) : (
-              row[column.dataKey]
-            )}
-          </TableCell>
-        ))}
+                <p className="statistics__gclidLen">{cellValue?.length}</p>
+              </TableCell>
+            );
+          }
+
+          // По умолчанию просто отрисовать значение
+          return (
+            <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+              {cellValue}
+            </TableCell>
+          );
+        })}
       </>
     );
   }
 
-  // Функция для рендеринга заголовка таблицы с чекбоксом "Выбрать все"
+  // -----------------------------------
+  // (H) Заголовок таблицы
+  // -----------------------------------
   function fixedHeaderContent() {
+    // Чекбокс «Выбрать все»
+    const allChecked = filteredData.length > 0 && filteredData.every((row) => checkedRows[row.ID]);
+    const someChecked = filteredData.some((row) => checkedRows[row.ID]) && !allChecked;
+
     return (
       <TableRow>
-        <TableCell className="statistics__allChecked" variant="head" align="left">
-          {/* Чекбокс "Выбрать все" */}
-          <Checkbox indeterminate={someChecked && !allChecked} checked={allChecked} onChange={handleSelectAllClick} />
+        <TableCell variant="head" align="left">
+          <Checkbox indeterminate={someChecked} checked={allChecked} onChange={handleSelectAllClick} />
         </TableCell>
+
         {visibleColumns.map((column) => (
           <TableCell
             key={column.dataKey}
@@ -593,14 +1029,14 @@ export default function ReactVirtualizedTable() {
               {column.label}
             </TableSortLabel>
 
-            {/* Добавляем кнопку сброса фильтра рядом с заголовком "Domain" */}
+            {/* Пример: сброс фильтра по Domain */}
             {column.dataKey === 'Domain' && (
-              <Tooltip title="Сбросить фильтр" arrow>
+              <Tooltip title="Сбросить фильтр по домену" arrow>
                 <IconButton
                   color="error"
-                  onClick={(event) => {
-                    event.stopPropagation(); // Предотвращаем сортировку при клике на кнопку
-                    setSearchQuery(''); // Сбрасываем фильтр домена
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSearchQuery('');
                   }}
                 >
                   <RestartAltIcon sx={{ width: '18px' }} />
@@ -608,25 +1044,25 @@ export default function ReactVirtualizedTable() {
               </Tooltip>
             )}
 
-            {/* Добавляем кнопку сброса для столбцов "Headers" и "JsData" */}
+            {/* Пример: сбросить раскрытые JSON для "Headers" или "JsData" */}
             {(column.dataKey === 'Headers' || column.dataKey === 'JsData') && (
-              <Tooltip title="Сбросить расширения" arrow>
+              <Tooltip title="Сбросить расширение JSON" arrow>
                 <IconButton
                   color="error"
-                  onClick={(event) => {
-                    event.stopPropagation(); // Предотвращаем сортировку при клике на кнопку
-                    setExpandedCell(null); // Сбрасываем текущее расширение
-                    // Очищаем formattedJSON для всех строк в этом столбце
-                    setFormattedJSON((prevState) => {
-                      const newState = { ...prevState };
-                      Object.keys(newState).forEach((rowId) => {
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setExpandedCell(null);
+                    // Очистить formattedJSON
+                    setFormattedJSON((prev) => {
+                      const newState = { ...prev };
+                      for (const rowId in newState) {
                         if (newState[rowId]) {
                           delete newState[rowId][column.dataKey];
                           if (Object.keys(newState[rowId]).length === 0) {
                             delete newState[rowId];
                           }
                         }
-                      });
+                      }
                       return newState;
                     });
                   }}
@@ -641,24 +1077,31 @@ export default function ReactVirtualizedTable() {
     );
   }
 
+  // -----------------------------------
+  // (I) Итоговый рендер
+  // -----------------------------------
   return (
     <>
       <Tabs
-        rows={sortedRows}
+        rows={filteredData} // передаём уже отфильтрованные и отсортированные
         VirtuosoTableComponents={VirtuosoTableComponents}
         fixedHeaderContent={fixedHeaderContent}
         rowContent={rowContent}
         loadMoreRows={loadMoreRows}
         loading={loading}
         hasMore={hasMore}
-        loadingRef={loadingRef} // Передаем loadingRef
-        columns={columns}
+        loadingRef={loadingRef}
+        // Пробрасываем в Tabs, если нужно
+        columns={allColumns} // полный список
         searchField={searchField}
         ColumnSelector={
           <ColumnSelector
-            columns={columns}
-            visibleColumns={userVisibleColumns}
-            setVisibleColumns={setUserVisibleColumns}
+            // Внутри ColumnSelector
+            // мы будем работать со всем списком allColumns
+            // но чекбоксы ставить по visibleDataKeys
+            columns={allColumns}
+            visibleColumns={visibleColumns}
+            setVisibleColumns={null /* больше не нужен, см. ниже */}
             startDate={startDate}
             setStartDate={setStartDate}
             endDate={endDate}
@@ -670,7 +1113,23 @@ export default function ReactVirtualizedTable() {
             headerFieldsDataKeys={headerFieldsDataKeys}
             jsDataFieldsDataKeys={jsDataFieldsDataKeys}
             setCheckedRows={setCheckedRows}
-            defaultVisibleColumns={defaultVisibleColumns}
+            defaultVisibleColumns={allColumns.filter((col) =>
+              [
+                'ID',
+                'Domain',
+                'Gclid',
+                'CreatedAt',
+                'ClickOnNumber',
+                'TimeSpent',
+                'IP',
+                'Headers',
+                'JsData',
+                'ScrollCoordinates',
+                'ClickCoordinates',
+              ].includes(col.dataKey),
+            )}
+            visibleDataKeys={visibleDataKeys}
+            setVisibleDataKeys={setVisibleDataKeys}
           />
         }
         searchQuery={searchQuery}

@@ -1,15 +1,15 @@
-// src/hooks/useLocalStorage.js
-
 import { useState } from 'react';
 
 /**
- * Хук для синхронизации состояния с localStorage
- * @param {string} key Ключ в localStorage
- * @param {*} initialValue Начальное значение
- * @returns [value, setValue]
+ * Хук для хранения массивов dataKey столбцов
+ * (или любых строк) в localStorage.
+ *
+ * @param {string} key - ключ в localStorage.
+ * @param {string[]} initialValue - начальный массив dataKey.
+ * @returns [dataKeys, setDataKeys]
  */
-function useLocalStorage(key, initialValue) {
-  const [storedValue, setStoredValue] = useState(() => {
+function useLocalStorageDataKeys(key, initialValue) {
+  const [dataKeys, setDataKeys] = useState(() => {
     try {
       const item = window.localStorage.getItem(key);
       // Парсим JSON, если возможно
@@ -20,20 +20,20 @@ function useLocalStorage(key, initialValue) {
     }
   });
 
-  const setValueLocal = (value) => {
+  const setValue = (value) => {
     try {
-      // Позволяет использовать функцию для обновления значения
-      const valueToStore =
-        value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      // Сохраняем в localStorage как строку JSON
+      // Если передали функцию, вызываем её, иначе берём как есть
+      const valueToStore = value instanceof Function ? value(dataKeys) : value;
+
+      setDataKeys(valueToStore);
+      // Сохраняем в localStorage строковый массив
       window.localStorage.setItem(key, JSON.stringify(valueToStore));
     } catch (error) {
       console.error(`Ошибка при записи ${key} в localStorage:`, error);
     }
   };
 
-  return [storedValue, setValueLocal];
+  return [dataKeys, setValue];
 }
 
-export default useLocalStorage;
+export default useLocalStorageDataKeys;
