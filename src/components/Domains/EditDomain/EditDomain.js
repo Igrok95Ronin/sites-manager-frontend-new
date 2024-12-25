@@ -23,12 +23,7 @@ import './EditDomain.scss';
 
 const APIURL = process.env.REACT_APP_APIURL; // Получем url из конфига
 
-export default function EditDomain({
-  editDomain,
-  showEditDomain,
-  setShowEditDomain,
-  onUpdateDomains,
-}) {
+export default function EditDomain({ editDomain, showEditDomain, setShowEditDomain, onUpdateDomains }) {
   // Запрос для получения GA и конфига
   const request = async () => {
     try {
@@ -72,8 +67,7 @@ export default function EditDomain({
   const useds = ['yes', 'no'];
   const [used, setUsed] = React.useState('no');
   // отправить Запрос Редактирования домена
-  const [sendRequestCreateConfig, setSendRequestCreateConfig] =
-    React.useState(false);
+  const [sendRequestCreateConfig, setSendRequestCreateConfig] = React.useState(false);
   // Создаем состояние для отслеживания процесса загрузки данных
   const [loading, setLoading] = React.useState(false);
   // Создаем состояние для хранения ошибок, которые могут возникнуть при запросе
@@ -142,38 +136,34 @@ export default function EditDomain({
     }
   };
 
+  // Подгружаем GA из конфига если он есть в поле формы
+  React.useEffect(() => {
+    if (dataConfig && googleAccount.length > 0) {
+      const foundAcc = googleAccount.find((acc) => acc.gtag_id === dataConfig.gtagID && acc.status !== 'blocked');
+      if (foundAcc) {
+        setSelectedGoogleAccount(foundAcc.account_id);
+      } else {
+        setSelectedGoogleAccount('');
+      }
+    }
+  }, [dataConfig, googleAccount]);
+
   return (
     <React.Fragment>
-      <Dialog
-        open={showEditDomain}
-        onClose={handleClose}
-        aria-labelledby="responsive-dialog-title"
-      >
+      <Dialog open={showEditDomain} onClose={handleClose} aria-labelledby="responsive-dialog-title">
         <DialogTitle className="editDomain__title" id="responsive-dialog-title">
-          Редактировать:{' '}
-          <span className="editDomain__domainName">{editDomain}</span>
+          Редактировать: <span className="editDomain__domainName">{editDomain}</span>
         </DialogTitle>
         <DialogContent>
-          <Box
-            className="editDomain__box"
-            component="form"
-            sx={{ width: 550 }}
-            noValidate
-            autoComplete="off"
-          >
+          <Box className="editDomain__box" component="form" sx={{ width: 550 }} noValidate autoComplete="off">
             {/* Поле Google Acc */}
             <Tooltip
-              title={
-                used === 'no' &&
-                'Что привязать Google Account, необходимо домен привязать к любому шаблону'
-              }
+              title={used === 'no' && 'Что привязать Google Account, необходимо домен привязать к любому шаблону'}
               placement="top-end"
               arrow
             >
               <FormControl variant="standard" fullWidth>
-                <InputLabel id="demo-simple-select-standard-label">
-                  Google Account
-                </InputLabel>
+                <InputLabel id="demo-simple-select-standard-label">Google Account</InputLabel>
                 <Select
                   labelId="demo-simple-select-standard-label"
                   id="demo-simple-select-standard"
@@ -197,9 +187,7 @@ export default function EditDomain({
 
             {/* Поле Язык сайт */}
             <FormControl variant="standard" fullWidth>
-              <InputLabel id="demo-simple-select-standard-label">
-                Язык сайт
-              </InputLabel>
+              <InputLabel id="demo-simple-select-standard-label">Язык сайт</InputLabel>
               <Select
                 labelId="demo-simple-select-standard-label"
                 id="demo-simple-select-standard"
@@ -218,9 +206,7 @@ export default function EditDomain({
 
             {/* Поле Used */}
             <FormControl variant="standard" fullWidth>
-              <InputLabel id="demo-simple-select-standard-label">
-                Used
-              </InputLabel>
+              <InputLabel id="demo-simple-select-standard-label">Used</InputLabel>
               <Select
                 labelId="demo-simple-select-standard-label"
                 id="demo-simple-select-standard"
@@ -247,10 +233,7 @@ export default function EditDomain({
               type="text"
               value={visiblePhoneNumber}
               onChange={(e) => setVisiblePhoneNumber(e.target.value)}
-              helperText={
-                visiblePhoneNumber.length < 5 &&
-                'Поле обязательно для заполнения'
-              }
+              helperText={visiblePhoneNumber.length < 5 && 'Поле обязательно для заполнения'}
               required
               error={visiblePhoneNumber.length < 5}
             />
@@ -264,10 +247,7 @@ export default function EditDomain({
               required
               value={phoneNumber.trim()}
               onChange={(e) => setPhoneNumber(e.target.value)}
-              helperText={
-                phoneNumber.trim().length < 5 &&
-                'Поле обязательно для заполнения'
-              }
+              helperText={phoneNumber.trim().length < 5 && 'Поле обязательно для заполнения'}
               error={phoneNumber.trim().length < 5}
             />
           </Box>
@@ -276,11 +256,7 @@ export default function EditDomain({
           <Button autoFocus onClick={handleClose}>
             Отмена
           </Button>
-          <Button
-            className="editDomain__btnEdit"
-            onClick={handleClickBtnSendRequestCreateConfig}
-            autoFocus
-          >
+          <Button className="editDomain__btnEdit" onClick={handleClickBtnSendRequestCreateConfig} autoFocus>
             Изменить
           </Button>
         </DialogActions>
