@@ -18,15 +18,14 @@
     padding: 0 !important;
   }
   &__gclid {
-    max-width: 200px !important;
-    overflow: auto;
+    display: inline-block;
+    width: 3em; /* Настройте ширину, чтобы поместилось нужное количество символов */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
-  &__gclid::-webkit-scrollbar {
-    width: 8px; /* ширина вертикального скроллбара */
-    height: 5px; /* высота горизонтального скроллбара */
-  }
-  &__gclid::-webkit-scrollbar-thumb {
-    background: #888; /* цвет ползунка */
-    border-radius: 4px;
+  &__gclidLen {
+    font-weight: 700;
+    color: #4caf50;
   }
 }

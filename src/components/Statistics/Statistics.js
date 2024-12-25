@@ -173,22 +173,11 @@ const expandedVisibleColumns = columns.filter((column) =>
 
 // Определение VirtuosoTableComponents
 const VirtuosoTableComponents = {
-  Scroller: React.forwardRef((props, ref) => (
-    <TableContainer component={Paper} {...props} ref={ref} />
-  )),
-  Table: (props) => (
-    <Table
-      {...props}
-      sx={{ borderCollapse: 'separate', tableLayout: 'auto' }}
-    />
-  ),
-  TableHead: React.forwardRef((props, ref) => (
-    <TableHead {...props} ref={ref} />
-  )),
+  Scroller: React.forwardRef((props, ref) => <TableContainer component={Paper} {...props} ref={ref} />),
+  Table: (props) => <Table {...props} sx={{ borderCollapse: 'separate', tableLayout: 'auto' }} />,
+  TableHead: React.forwardRef((props, ref) => <TableHead {...props} ref={ref} />),
   TableRow,
-  TableBody: React.forwardRef((props, ref) => (
-    <TableBody {...props} ref={ref} />
-  )),
+  TableBody: React.forwardRef((props, ref) => <TableBody {...props} ref={ref} />),
 };
 
 export default function ReactVirtualizedTable() {
@@ -204,10 +193,7 @@ export default function ReactVirtualizedTable() {
 
   // Используем defaultVisibleColumns в качестве начального состояния
   // const [visibleColumns, setVisibleColumns] = useState(defaultVisibleColumns);
-  const [userVisibleColumns, setUserVisibleColumns] = useLocalStorage(
-    'visibleColumns',
-    defaultVisibleColumns,
-  );
+  const [userVisibleColumns, setUserVisibleColumns] = useLocalStorage('visibleColumns', defaultVisibleColumns);
   const [visibleColumns, setVisibleColumns] = useState(userVisibleColumns);
 
   // Состояние для хранения выбранных дат
@@ -371,8 +357,7 @@ export default function ReactVirtualizedTable() {
   }, [rows, order, orderBy]);
 
   // Определение состояния для чекбоксов "Выбрать все" и "Некоторые выбраны"
-  const allChecked =
-    filteredData.length > 0 && filteredData.every((row) => checkedRows[row.ID]);
+  const allChecked = filteredData.length > 0 && filteredData.every((row) => checkedRows[row.ID]);
   const someChecked = filteredData.some((row) => checkedRows[row.ID]);
 
   // Функция для обработки клика на чекбокс заголовка
@@ -448,23 +433,12 @@ export default function ReactVirtualizedTable() {
     return (
       <>
         {/* Добавили ячейку с чекбоксом в начало каждой строки. */}
-        <TableCell
-          className="statistics__checked"
-          align="left"
-          style={{ backgroundColor: rowBackgroundColor }}
-        >
-          <Checkbox
-            checked={isChecked}
-            onChange={handleCheckboxChange(row.ID)}
-          />
+        <TableCell className="statistics__checked" align="left" style={{ backgroundColor: rowBackgroundColor }}>
+          <Checkbox checked={isChecked} onChange={handleCheckboxChange(row.ID)} />
         </TableCell>
 
         {visibleColumns.map((column) => (
-          <TableCell
-            key={column.dataKey}
-            align="left"
-            style={{ backgroundColor: rowBackgroundColor }}
-          >
+          <TableCell key={column.dataKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
             {column.dataKey === 'ClickOnNumber' ? (
               row[column.dataKey] ? (
                 <CheckIcon color="success" />
@@ -580,7 +554,12 @@ export default function ReactVirtualizedTable() {
             ) : column.dataKey === 'IP' ? (
               <IPInfo IP={row[column.dataKey]} />
             ) : column.dataKey === 'Gclid' ? (
-              <p className="statistics__gclid">{row[column.dataKey]}</p>
+              <>
+                <p className="statistics__gclid" title={row[column.dataKey]}>
+                  {row[column.dataKey]}
+                </p>
+                <p className='statistics__gclidLen'>{row[column.dataKey].length}</p>
+              </>
             ) : (
               row[column.dataKey]
             )}
@@ -594,17 +573,9 @@ export default function ReactVirtualizedTable() {
   function fixedHeaderContent() {
     return (
       <TableRow>
-        <TableCell
-          className="statistics__allChecked"
-          variant="head"
-          align="left"
-        >
+        <TableCell className="statistics__allChecked" variant="head" align="left">
           {/* Чекбокс "Выбрать все" */}
-          <Checkbox
-            indeterminate={someChecked && !allChecked}
-            checked={allChecked}
-            onChange={handleSelectAllClick}
-          />
+          <Checkbox indeterminate={someChecked && !allChecked} checked={allChecked} onChange={handleSelectAllClick} />
         </TableCell>
         {visibleColumns.map((column) => (
           <TableCell
@@ -614,10 +585,7 @@ export default function ReactVirtualizedTable() {
             sx={{ backgroundColor: 'background.paper', cursor: 'pointer' }}
             onClick={() => handleSort(column.dataKey)}
           >
-            <TableSortLabel
-              active={orderBy === column.dataKey}
-              direction={orderBy === column.dataKey ? order : 'asc'}
-            >
+            <TableSortLabel active={orderBy === column.dataKey} direction={orderBy === column.dataKey ? order : 'asc'}>
               {column.label}
             </TableSortLabel>
 
