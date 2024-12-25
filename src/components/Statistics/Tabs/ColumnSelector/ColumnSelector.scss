@@ -1,9 +1,14 @@
 .columnSelector {
-    &__btnPosition {
-        position: fixed !important;
-        bottom: 23px !important;
-        width: 574px !important;
-    }
+  &__btnPosition {
+    position: fixed !important;
+    bottom: 23px !important;
+    width: 574px !important;
+  }
+  &__fieldsSearch {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+  }
 }
 
 //               {/* primary (по умолчанию синий цвет)
