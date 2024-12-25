@@ -101,9 +101,7 @@ const ColumnSelector = ({
 
     // Сортируем dataKey в соответствии с исходным порядком в `columns`
     newDataKeys.sort(
-      (a, b) =>
-        columns.findIndex((col) => col.dataKey === a) -
-        columns.findIndex((col) => col.dataKey === b),
+      (a, b) => columns.findIndex((col) => col.dataKey === a) - columns.findIndex((col) => col.dataKey === b),
     );
 
     // Обновляем хранилище dataKey
@@ -190,14 +188,10 @@ const ColumnSelector = ({
           startIcon={<ViewWeekIcon />}
           onClick={() => {
             // Показываем стандартное окно подтверждения
-            const confirmed = window.confirm(
-              'Вы уверены, что хотите сбросить столбцы к значениям по умолчанию?',
-            );
+            const confirmed = window.confirm('Вы уверены, что хотите сбросить столбцы к значениям по умолчанию?');
             if (confirmed) {
               // Берём dataKey из массива defaultVisibleColumns:
-              const defaultKeys = defaultVisibleColumns.map(
-                (col) => col.dataKey,
-              );
+              const defaultKeys = defaultVisibleColumns.map((col) => col.dataKey);
               setVisibleDataKeys(defaultKeys);
             }
           }}
@@ -231,10 +225,7 @@ const ColumnSelector = ({
       >
         <Box sx={{ width: '100%' }}>
           {/* Верхняя часть: Выбор даты */}
-          <LocalizationProvider
-            dateAdapter={AdapterDateFns}
-            adapterLocale={ruLocale}
-          >
+          <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ruLocale}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <DatePicker
@@ -303,23 +294,21 @@ const ColumnSelector = ({
           </Typography>
           <Grid container spacing={1}>
             {columns.map((column) => {
-              // isChecked, если dataKey столбца присутствует в visibleDataKeys
               const isChecked = visibleDataKeys.includes(column.dataKey);
-
-              // Если сейчас только один столбец виден, делаем его unchecked impossible
               const isDisabled = visibleDataKeys.length === 1 && isChecked;
 
               return (
                 <Grid item xs={12} sm={6} key={column.dataKey}>
                   <FormControlLabel
                     control={
-                      <Checkbox
-                        checked={isChecked}
-                        onChange={() => handleToggleColumn(column)}
-                        disabled={isDisabled}
-                      />
+                      <Checkbox checked={isChecked} onChange={() => handleToggleColumn(column)} disabled={isDisabled} />
                     }
-                    label={column.label}
+                    label={
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {column.label}
+                        <span>{column.dataKey}</span>
+                      </div>
+                    }
                   />
                 </Grid>
               );
@@ -341,12 +330,7 @@ const ColumnSelector = ({
                 </Button>
               </Grid>
               <Grid item xs={6}>
-                <Button
-                  variant="contained"
-                  color="warning"
-                  onClick={handleSelectHeaderFields}
-                  fullWidth
-                >
+                <Button variant="contained" color="warning" onClick={handleSelectHeaderFields} fullWidth>
                   Поля Headers
                 </Button>
               </Grid>
@@ -362,12 +346,7 @@ const ColumnSelector = ({
                 </Button>
               </Grid>
               <Grid item xs={6}>
-                <Button
-                  variant="contained"
-                  color="error"
-                  onClick={handleSelectJSDataFields}
-                  fullWidth
-                >
+                <Button variant="contained" color="error" onClick={handleSelectJSDataFields} fullWidth>
                   Поля JSData
                 </Button>
               </Grid>
