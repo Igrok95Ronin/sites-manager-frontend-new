@@ -3,15 +3,12 @@
   padding: 0;
   list-style: none;
   outline: none;
-  font-family:
-    "Roboto",
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: 'Roboto', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   box-sizing: border-box;
   text-decoration: none;
+  font-size: 14px;
 }
 /* Селектор для стилизации самого скроллбара */
 ::-webkit-scrollbar {
@@ -32,9 +29,8 @@
 /* Селектор для стилизации бегунка скроллбара при наведении мыши */
 ::-webkit-scrollbar-thumb:hover {
   background-color: #555; /* Изменяет цвет бегунка, когда пользователь наводит на него мышь */
-  cursor:all-scroll;
+  cursor: all-scroll;
 }
 html {
   scroll-behavior: smooth;
 }
-

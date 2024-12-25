@@ -55,7 +55,15 @@ export default function IPInfo({ IP }) {
 
   return (
     <React.Fragment>
-      <Button variant="outlined" onClick={handleClickOpen}>
+      <Button
+        variant="text"
+        size="small"
+        sx={{
+          textTransform: 'none', // Убираем автоматическое преобразование текста
+          whiteSpace: 'nowrap', // Запрещаем перенос текста
+        }}
+        onClick={handleClickOpen}
+      >
         {IP}
       </Button>
       <Dialog
@@ -64,7 +72,9 @@ export default function IPInfo({ IP }) {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle sx={{paddingBottom: 0, color: "#0559b9"}} id="alert-dialog-title">{IP}</DialogTitle>
+        <DialogTitle sx={{ paddingBottom: 0, color: '#0559b9' }} id="alert-dialog-title">
+          {IP}
+        </DialogTitle>
         <DialogContent sx={{ padding: 0 }}>
           <DialogContent id="alert-dialog-description">
             {data ? (
@@ -73,40 +83,27 @@ export default function IPInfo({ IP }) {
                   if (typeof value === 'object' && value !== null) {
                     // Для вложенных объектов, например, "dns"
                     return (
-                      <div className='ipInfo__inner' key={key}>
-                        <span style={{ fontWeight: 500, color: '#0f374a' }}>
-                          {key}:
-                        </span>
-                        <ul className='ipInfo__inner'>
-                          {Object.entries(value).map(
-                            ([nestedKey, nestedValue]) => (
-                              <li key={nestedKey} className="ipInfo_wrapper">
-                                <span
-                                  style={{ fontWeight: 500, color: '#0f374a' }}
-                                >
-                                  {nestedKey}:
-                                </span>{' '}
-                                <span
-                                  style={{
-                                    color:
-                                      typeof nestedValue === 'number'
-                                        ? 'blue'
-                                        : typeof nestedValue === 'boolean'
-                                        ? 'green'
-                                        : '#800',
-                                    fontStyle:
-                                      typeof nestedValue === 'string'
-                                        ? ''
-                                        : 'normal',
-                                  }}
-                                >
-                                  {nestedValue !== null
-                                    ? nestedValue.toString()
-                                    : 'N/A'}
-                                </span>
-                              </li>
-                            ),
-                          )}
+                      <div className="ipInfo__inner" key={key}>
+                        <span style={{ fontWeight: 500, color: '#0f374a' }}>{key}:</span>
+                        <ul className="ipInfo__inner">
+                          {Object.entries(value).map(([nestedKey, nestedValue]) => (
+                            <li key={nestedKey} className="ipInfo_wrapper">
+                              <span style={{ fontWeight: 500, color: '#0f374a' }}>{nestedKey}:</span>{' '}
+                              <span
+                                style={{
+                                  color:
+                                    typeof nestedValue === 'number'
+                                      ? 'blue'
+                                      : typeof nestedValue === 'boolean'
+                                      ? 'green'
+                                      : '#800',
+                                  fontStyle: typeof nestedValue === 'string' ? '' : 'normal',
+                                }}
+                              >
+                                {nestedValue !== null ? nestedValue.toString() : 'N/A'}
+                              </span>
+                            </li>
+                          ))}
                         </ul>
                       </div>
                     );
@@ -114,17 +111,10 @@ export default function IPInfo({ IP }) {
                   // Для обычных ключей
                   return (
                     <p key={key} className="ipInfo_wrapper">
-                      <span style={{ fontWeight: 500, color: '#0f374a' }}>
-                        {key}:
-                      </span>{' '}
+                      <span style={{ fontWeight: 500, color: '#0f374a' }}>{key}:</span>{' '}
                       <span
                         style={{
-                          color:
-                            typeof value === 'number'
-                              ? '#cd5c12'
-                              : typeof value === 'boolean'
-                              ? 'green'
-                              : '#800',
+                          color: typeof value === 'number' ? '#cd5c12' : typeof value === 'boolean' ? 'green' : '#800',
                           fontStyle: typeof value === 'string' ? '' : 'normal',
                           paddingLeft: '5px',
                         }}

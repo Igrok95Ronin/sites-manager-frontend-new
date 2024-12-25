@@ -453,13 +453,17 @@ export default function ReactVirtualizedTable() {
               <>
                 {/* Кнопка для фильтрации по домену */}
                 <Button
-                  variant="outlined"
+                  variant="text"
+                  size="small"
                   color="secondary"
                   onClick={() => {
                     // setSearchDomain(row[column.dataKey]); // Устанавливаем домен для фильтрации
                     setSearchQuery(row[column.dataKey]);
                   }}
-                  sx={{ textTransform: 'none' }}
+                  sx={{
+                    textTransform: 'none', // Убираем автоматическое преобразование текста
+                    whiteSpace: 'nowrap', // Запрещаем перенос текста
+                  }}
                 >
                   {row[column.dataKey]}
                 </Button>
@@ -554,7 +558,12 @@ export default function ReactVirtualizedTable() {
             ) : column.dataKey === 'IP' ? (
               <IPInfo IP={row[column.dataKey]} />
             ) : column.dataKey === 'Gclid' ? (
-              <p className="statistics__gclid">{row[column.dataKey]}</p>
+              <>
+                <p className="statistics__gclid" title={row[column.dataKey]}>
+                  {row[column.dataKey]}
+                </p>
+                <p className="statistics__gclidLen">{row[column.dataKey].length}</p>
+              </>
             ) : (
               row[column.dataKey]
             )}
