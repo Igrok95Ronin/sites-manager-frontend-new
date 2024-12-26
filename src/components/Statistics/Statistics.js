@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import axiosInstance from '../../axiosInstance'; // Используем централизованный экземпляр Axios
 import axios from 'axios';
+import { startOfDay, endOfDay, isToday, isSameYear } from 'date-fns'; // Добавлено isSameYear
 
 import Table from '@mui/material/Table';
 import TableCell from '@mui/material/TableCell';
@@ -22,8 +23,6 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import Tooltip from '@mui/material/Tooltip';
 
 import { JSONTree } from 'react-json-tree';
-import { startOfDay, endOfDay } from 'date-fns';
-
 import Tabs from './Tabs/Tabs.js';
 import ColumnSelector from './Tabs/ColumnSelector/ColumnSelector.js';
 import IPInfo from './Tabs/IPInfo/IPInfo.js';
@@ -885,17 +884,32 @@ export default function ReactVirtualizedTable() {
             );
           }
 
+          // Поле даты и времени
           if (cellKey === 'CreatedAt') {
+            const date = new Date(cellValue);
+            const today = isToday(date);
+            const sameYear = isSameYear(date, new Date());
+
             return (
               <TableCell
                 className="statistics__padding"
                 key={cellKey}
                 align="left"
-                style={{ backgroundColor: rowBackgroundColor }}
+                style={{ backgroundColor: rowBackgroundColor, color: '#009688', fontWeight: 'bold' }}
               >
-                {new Date(cellValue).toLocaleString('ru-RU', {
-                  timeZone: 'Europe/Moscow',
-                })}
+                {today ? (
+                  // Если сегодня, показываем только время зелёным цветом
+                  <span>{date.toLocaleTimeString('ru-RU', { timeZone: 'Europe/Moscow' })}</span>
+                ) : sameYear ? (
+                  // Если текущий год, показываем дату без года
+                  `${date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })}, ${date.toLocaleTimeString(
+                    'ru-RU',
+                    { timeZone: 'Europe/Moscow' },
+                  )}`
+                ) : (
+                  // Иначе показываем полную дату с годом
+                  date.toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })
+                )}
               </TableCell>
             );
           }
