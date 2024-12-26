@@ -607,7 +607,7 @@ export default function ReactVirtualizedTable() {
   // (B) Прочие состояния
   // -----------------------------------
   const [rows, setRows] = useState([]);
-  const [limit, setLimit] = useState(100);
+  const [limit, setLimit] = useState(300);
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -1100,8 +1100,9 @@ export default function ReactVirtualizedTable() {
 
             {/* Пример: сброс фильтра по Domain */}
             {column.dataKey === 'Domain' && (
-              <Tooltip title="Сбросить фильтр по домену" arrow>
+              <Tooltip title="Сбросить фильтр по домену" arrow placement="top">
                 <IconButton
+                  sx={{ padding: '5px 0', marginLeft: '-25px' }}
                   color="error"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1115,8 +1116,9 @@ export default function ReactVirtualizedTable() {
 
             {/* Пример: сбросить раскрытые JSON для "Headers" или "JsData" */}
             {(column.dataKey === 'Headers' || column.dataKey === 'JsData') && (
-              <Tooltip title="Сбросить расширение JSON" arrow>
+              <Tooltip title="Сбросить расширение JSON" arrow placement="top">
                 <IconButton
+                  sx={{ padding: '5px 0', marginLeft: '-25px' }}
                   color="error"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1136,7 +1138,7 @@ export default function ReactVirtualizedTable() {
                     });
                   }}
                 >
-                  <RestartAltIcon sx={{ width: '18px' }} />
+                  <RestartAltIcon sx={{ width: '15px' }} />
                 </IconButton>
               </Tooltip>
             )}
