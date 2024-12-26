@@ -16,6 +16,9 @@
   }
   &__checked {
     padding: 0 !important;
+    span {
+      padding: 3px !important;
+    }
   }
   &__gclid {
     display: inline-block;
@@ -23,9 +26,28 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    margin-bottom: -5px;
   }
   &__gclidLen {
     font-weight: 700;
     color: #4caf50;
+  }
+  &__headers {
+    th {
+      padding: 0px !important;
+      white-space: nowrap;
+    }
+  }
+  &__checkall {
+    padding: 0 !important;
+    background-color: #fff !important;
+    span {
+      padding: 3px !important;
+    }
+  }
+  &__padding {
+    padding: 3px !important;
+    white-space: nowrap;
+    border-bottom: 1px solid #ced3c7 !important;
   }
 }

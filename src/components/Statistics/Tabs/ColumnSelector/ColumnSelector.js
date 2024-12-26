@@ -274,7 +274,10 @@ const ColumnSelector = ({
                   >
                     {columns.map((column) => (
                       <MenuItem key={column.dataKey} value={column.dataKey}>
-                               <span className='columnSelector__fieldsSearch'>{column.label}{column.dataKey}</span>
+                        <span className="columnSelector__fieldsSearch">
+                          {column.label}
+                          {column.dataKey}
+                        </span>
                       </MenuItem>
                     ))}
                   </Select>

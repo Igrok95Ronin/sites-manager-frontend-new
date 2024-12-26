@@ -816,7 +816,7 @@ export default function ReactVirtualizedTable() {
     const isChecked = checkedRows[row.ID] || false;
     const isClickOnNumberTrue = row['ClickOnNumber'];
 
-    const rowBackgroundColor = isClickOnNumberTrue ? '#c8e6c9' : isChecked ? '#e0f7fa' : 'inherit';
+    const rowBackgroundColor = isClickOnNumberTrue ? 'rgb(211 248 212)' : isChecked ? '#e0f7fa' : 'inherit';
 
     return (
       <>
@@ -832,7 +832,12 @@ export default function ReactVirtualizedTable() {
           // Логика для объединения значений innerWidth и innerHeight
           if (cellKey === 'windowSize') {
             return (
-              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+              <TableCell
+                className="statistics__padding"
+                key={cellKey}
+                align="left"
+                style={{ backgroundColor: rowBackgroundColor }}
+              >
                 {`${row.innerWidth || 'N/A'} x ${row.innerHeight || 'N/A'}`}
               </TableCell>
             );
@@ -841,7 +846,12 @@ export default function ReactVirtualizedTable() {
           // Логика для объединения значений outerWidth и outerHeight
           if (cellKey === 'outerWindowSize') {
             return (
-              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+              <TableCell
+                className="statistics__padding"
+                key={cellKey}
+                align="left"
+                style={{ backgroundColor: rowBackgroundColor }}
+              >
                 {`${row.outerWidth || 'N/A'} x ${row.outerHeight || 'N/A'}`}
               </TableCell>
             );
@@ -850,7 +860,12 @@ export default function ReactVirtualizedTable() {
           // Логика для объединения значений screenWidth и screenHeight
           if (cellKey === 'screenSize') {
             return (
-              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+              <TableCell
+                className="statistics__padding"
+                key={cellKey}
+                align="left"
+                style={{ backgroundColor: rowBackgroundColor }}
+              >
                 {`${row.screenWidth || 'N/A'} x ${row.screenHeight || 'N/A'}`}
               </TableCell>
             );
@@ -859,7 +874,12 @@ export default function ReactVirtualizedTable() {
           // Примеры разных вариантов отрисовки
           if (cellKey === 'ClickOnNumber') {
             return (
-              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+              <TableCell
+                className="statistics__padding"
+                key={cellKey}
+                align="left"
+                style={{ backgroundColor: rowBackgroundColor }}
+              >
                 {cellValue ? <CheckIcon color="success" /> : <CloseIcon color="error" />}
               </TableCell>
             );
@@ -867,7 +887,12 @@ export default function ReactVirtualizedTable() {
 
           if (cellKey === 'CreatedAt') {
             return (
-              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+              <TableCell
+                className="statistics__padding"
+                key={cellKey}
+                align="left"
+                style={{ backgroundColor: rowBackgroundColor }}
+              >
                 {new Date(cellValue).toLocaleString('ru-RU', {
                   timeZone: 'Europe/Moscow',
                 })}
@@ -877,7 +902,12 @@ export default function ReactVirtualizedTable() {
 
           if (cellKey === 'Domain') {
             return (
-              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+              <TableCell
+                className="statistics__padding"
+                key={cellKey}
+                align="left"
+                style={{ backgroundColor: rowBackgroundColor }}
+              >
                 <Button
                   variant="text"
                   size="small"
@@ -896,7 +926,12 @@ export default function ReactVirtualizedTable() {
 
           if (cellKey === 'Headers' || cellKey === 'JsData') {
             return (
-              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+              <TableCell
+                className="statistics__padding"
+                key={cellKey}
+                align="left"
+                style={{ backgroundColor: rowBackgroundColor, whiteSpace: 'wrap' }}
+              >
                 <Button
                   variant="outlined"
                   color="secondary"
@@ -916,9 +951,9 @@ export default function ReactVirtualizedTable() {
                       setExpandedCell({ rowId: row.ID, dataKey: cellKey });
                     }
                   }}
-                  sx={{ textTransform: 'none', padding: '5px', minWidth: '0' }}
+                  sx={{ textTransform: 'none', padding: '2px', minWidth: '0' }}
                 >
-                  <DataObjectIcon sx={{ width: '20px' }} />
+                  <DataObjectIcon sx={{ width: '18px' }} />
                 </Button>
 
                 {expandedCell &&
@@ -954,7 +989,12 @@ export default function ReactVirtualizedTable() {
 
           if (cellKey === 'Referer') {
             return (
-              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+              <TableCell
+                className="statistics__padding"
+                key={cellKey}
+                align="left"
+                style={{ backgroundColor: rowBackgroundColor }}
+              >
                 <Button
                   href={cellValue}
                   target="_blank"
@@ -975,7 +1015,12 @@ export default function ReactVirtualizedTable() {
 
           if (cellKey === 'IP') {
             return (
-              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+              <TableCell
+                className="statistics__padding"
+                key={cellKey}
+                align="left"
+                style={{ backgroundColor: rowBackgroundColor }}
+              >
                 <IPInfo IP={cellValue} />
               </TableCell>
             );
@@ -983,18 +1028,28 @@ export default function ReactVirtualizedTable() {
 
           if (cellKey === 'Gclid') {
             return (
-              <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
-                <p className="statistics__gclid" title={cellValue}>
+              <TableCell
+                className="statistics__padding"
+                key={cellKey}
+                align="left"
+                style={{ backgroundColor: rowBackgroundColor }}
+              >
+                <span className="statistics__gclid" title={cellValue}>
                   {cellValue}
-                </p>
-                <p className="statistics__gclidLen">{cellValue?.length}</p>
+                </span>
+                <span className="statistics__gclidLen">{cellValue?.length}</span>
               </TableCell>
             );
           }
 
           // По умолчанию просто отрисовать значение
           return (
-            <TableCell key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+            <TableCell
+              className="statistics__padding"
+              key={cellKey}
+              align="left"
+              style={{ backgroundColor: rowBackgroundColor }}
+            >
               {cellValue}
             </TableCell>
           );
@@ -1012,8 +1067,8 @@ export default function ReactVirtualizedTable() {
     const someChecked = filteredData.some((row) => checkedRows[row.ID]) && !allChecked;
 
     return (
-      <TableRow>
-        <TableCell variant="head" align="left">
+      <TableRow className="statistics__headers">
+        <TableCell className="statistics__checkall" variant="head" align="left">
           <Checkbox indeterminate={someChecked} checked={allChecked} onChange={handleSelectAllClick} />
         </TableCell>
 

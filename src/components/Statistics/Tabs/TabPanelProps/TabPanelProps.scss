@@ -1,13 +1,16 @@
 .tabPanelProps {
-    &__wrapper {
-        display: flex;
-        justify-content: space-between;
-    }
-    &__settings {
-        display: flex;
-        justify-content: end;
-    }
-    &__tabPanel > div {
-        padding-top: 0 !important;
-    }
+  &__wrapper {
+    display: flex;
+    justify-content: space-between;
+  }
+  &__settings {
+    display: flex;
+    justify-content: end;
+  }
+  &__tabPanel > div {
+    padding: 0 5px !important;
+  }
+//   &__columns > div > table > tbody > tr > td {
+//     background-color: red !important;
+//   }
 }
