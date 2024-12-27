@@ -30,6 +30,7 @@ import ResetCheckedForm from '../ResetCheckedForm/ResetCheckedForm';
 import DownloadFileLogsADS from '../DownloadFileLogsADS/DownloadFileLogsADS';
 import Spinner from '../../../Spinner/Spinner';
 import SnackbarCustom from '../../../SnackbarCustom/SnackbarCustom';
+import FontSizeChanger from '../../Tabs/FontSizeChanger/FontSizeChanger.js';
 
 import './ColumnSelector.scss';
 
@@ -159,6 +160,9 @@ const ColumnSelector = ({
 
   return (
     <>
+      {/* Компонент размера шрифта */}
+      <FontSizeChanger />
+
       {/* Кнопка скачать файл */}
       <Tooltip title="Скачать файл" arrow>
         <Button
@@ -199,7 +203,7 @@ const ColumnSelector = ({
       </Tooltip>
 
       {/* Кнопка настроек */}
-      <Tooltip title="Настроить столбцы" arrow>
+      <Tooltip title="Настройки" arrow>
         <Button
           sx={{
             padding: '6px 0 6px 0px',
