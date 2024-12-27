@@ -87,10 +87,7 @@ export default function FullWidthTabs({
             fieldValue = fieldValue.toString();
           }
 
-          return fieldValue
-            .toString()
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase());
+          return fieldValue.toString().toLowerCase().includes(searchQuery.toLowerCase());
         }
 
         return false;
@@ -124,21 +121,14 @@ export default function FullWidthTabs({
       </AppBar>
       <Box sx={{ flex: 1, overflow: 'auto' }}>
         {/* Первый таб Логи ADS*/}
-        <TabPanel
-          className="tabPanelProps__tabPanel"
-          value={value}
-          index={0}
-          dir={theme.direction}
-        >
+        <TabPanel className="tabPanelProps__tabPanel" value={value} index={0} dir={theme.direction}>
           <div className="tabPanelProps__wrapper">
-            <Search
-              onSearch={setSearchQuery}
-              numberOfDomains={numberOfDomains}
-            />
+            <Search onSearch={setSearchQuery} numberOfDomains={numberOfDomains} />
             <div className="tabPanelProps__settings">{ColumnSelector}</div>
           </div>
-          <Paper style={{ height: '70vh', width: '100%' }}>
+          <Paper style={{ height: '74vh', width: '100%' }}>
             <TableVirtuoso
+              classID="tabPanelProps__columns"
               data={filteredData} // данные для таблицы поиск
               components={VirtuosoTableComponents} // компоненты для виртуальной таблицы
               fixedHeaderContent={fixedHeaderContent} // отображение заголовков
@@ -149,11 +139,7 @@ export default function FullWidthTabs({
             />
             {/* {loading && <div style={{ textAlign: 'center' }}>Loading...</div>} */}
             {loading && <Spinner loading={loading} />}
-            {!hasMore && (
-              <div style={{ textAlign: 'center' }}>
-                Больше нет данных для загрузки.
-              </div>
-            )}
+            {!hasMore && <div style={{ textAlign: 'center' }}>Больше нет данных для загрузки.</div>}
           </Paper>
         </TabPanel>
 

@@ -35,9 +35,13 @@ import './ColumnSelector.scss';
 
 // Компонент для выбора столбцов, фильтрации по дате, количеству строк и выбору поля для поиска
 const ColumnSelector = ({
+  // Полный список столбцов (массив объектов {label, dataKey})
   columns,
-  visibleColumns,
-  setVisibleColumns,
+
+  // Массив "видимых" dataKey (строки), вместо объектов
+  visibleDataKeys,
+  setVisibleDataKeys,
+
   startDate,
   setStartDate,
   endDate,
@@ -49,18 +53,22 @@ const ColumnSelector = ({
   headerFieldsDataKeys,
   jsDataFieldsDataKeys,
   setCheckedRows,
-  defaultVisibleColumns,
+  defaultVisibleColumns, // Важный проп: массив объектов {label, dataKey} по умолчанию
 }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
+
   // Локальное состояние для поля limit
   const [localLimit, setLocalLimit] = useState(limit);
+
+  // Флаг для формы «снять все отмеченные чекбоксы»
   const [resetCheckedForm, setResetCheckedForm] = useState(false);
-  const [showDownloadFileLogsADS, setShowDownloadFileLogsADS] = useState(false); // Показать форму скачивания файла
-  // Создаем состояние для отслеживания процесса загрузки данных
+
+  // Флаг для формы «скачать файл»
+  const [showDownloadFileLogsADS, setShowDownloadFileLogsADS] = useState(false);
+
+  // Состояния для управления загрузкой / ошибками
   const [loading, setLoading] = React.useState(false);
-  // Создаем состояние для хранения ошибок, которые могут возникнуть при запросе
   const [error, setError] = React.useState(null);
-  // Создаем состояние для хранения данных, полученных в результате запроса
   const [data, setData] = React.useState(null);
 
   // Синхронизируем localLimit с limit при его изменении
@@ -78,60 +86,56 @@ const ColumnSelector = ({
     setAnchorEl(null);
   };
 
-  // Обработка выбора столбца
+  // Обработка выбора/снятия конкретного столбца
   const handleToggleColumn = (column) => {
-    let newVisibleColumns;
-    const isColumnVisible = visibleColumns.some(
-      (col) => col.dataKey === column.dataKey,
-    );
+    const alreadyVisible = visibleDataKeys.includes(column.dataKey);
+    let newDataKeys = [...visibleDataKeys];
 
-    if (isColumnVisible) {
-      // Удаляем столбец из видимых
-      newVisibleColumns = visibleColumns.filter(
-        (col) => col.dataKey !== column.dataKey,
-      );
+    if (alreadyVisible) {
+      // Убираем dataKey из массива
+      newDataKeys = newDataKeys.filter((key) => key !== column.dataKey);
     } else {
-      // Добавляем столбец к видимым
-      newVisibleColumns = [...visibleColumns, column];
+      // Добавляем dataKey
+      newDataKeys.push(column.dataKey);
     }
 
-    // Сортируем столбцы в соответствии с исходным порядком
-    newVisibleColumns.sort(
-      (a, b) =>
-        columns.findIndex((col) => col.dataKey === a.dataKey) -
-        columns.findIndex((col) => col.dataKey === b.dataKey),
+    // Сортируем dataKey в соответствии с исходным порядком в `columns`
+    newDataKeys.sort(
+      (a, b) => columns.findIndex((col) => col.dataKey === a) - columns.findIndex((col) => col.dataKey === b),
     );
 
-    // Обновляем состояние
-    setVisibleColumns(newVisibleColumns);
+    // Обновляем хранилище dataKey
+    setVisibleDataKeys(newDataKeys);
   };
 
-  // Функция для снятия всех полей кроме одного
+  // Функция для снятия всех полей, кроме одного
   const handleUncheckAllExceptOne = () => {
-    // Оставляем видимым первый столбец из списка columns
+    // Оставляем видимым только первый столбец
     const firstColumn = columns[0];
-    setVisibleColumns([firstColumn]);
+    setVisibleDataKeys([firstColumn.dataKey]);
   };
 
   // Функция для выбора всех столбцов
   const handleCheckAllColumns = () => {
-    setVisibleColumns(columns);
+    // Берём все dataKey из columns
+    const allKeys = columns.map((col) => col.dataKey);
+    setVisibleDataKeys(allKeys);
   };
 
-  // Добавляем функцию для отметки полей Headers
+  // Отметить только поля Headers (по списку dataKey)
   const handleSelectHeaderFields = () => {
-    const selectedColumns = columns.filter((column) =>
-      headerFieldsDataKeys.includes(column.dataKey),
-    );
-    setVisibleColumns(selectedColumns);
+    const selectedDataKeys = columns
+      .filter((column) => headerFieldsDataKeys.includes(column.dataKey))
+      .map((col) => col.dataKey);
+    setVisibleDataKeys(selectedDataKeys);
   };
 
-  // Добавляем функцию для отметки полей Headers
+  // Отметить только поля JSData (по списку dataKey)
   const handleSelectJSDataFields = () => {
-    const selectedColumns = columns.filter((column) =>
-      jsDataFieldsDataKeys.includes(column.dataKey),
-    );
-    setVisibleColumns(selectedColumns);
+    const selectedDataKeys = columns
+      .filter((column) => jsDataFieldsDataKeys.includes(column.dataKey))
+      .map((col) => col.dataKey);
+    setVisibleDataKeys(selectedDataKeys);
   };
 
   // Обработка изменения localLimit
@@ -163,8 +167,9 @@ const ColumnSelector = ({
           onClick={() => {
             setShowDownloadFileLogsADS(true);
           }}
-        ></Button>
+        />
       </Tooltip>
+
       {/* Кнопка снять все отмеченные чекбоксы */}
       <Tooltip title="Снять все отмеченные чекбоксы" arrow>
         <Button
@@ -173,23 +178,24 @@ const ColumnSelector = ({
           onClick={() => {
             setResetCheckedForm(true);
           }}
-        ></Button>
+        />
       </Tooltip>
-      {/* Кнопка Столбцы по умолчанию */}
+
+      {/* Кнопка «Столбцы по умолчанию» */}
       <Tooltip title="Столбцы по умолчанию" arrow>
         <Button
           sx={{ padding: '6px 0 6px 8px', minWidth: '25px' }}
           startIcon={<ViewWeekIcon />}
           onClick={() => {
             // Показываем стандартное окно подтверждения
-            const confirmed = window.confirm(
-              'Вы уверены, что хотите сбросить столбцы к значениям по умолчанию?',
-            );
+            const confirmed = window.confirm('Вы уверены, что хотите сбросить столбцы к значениям по умолчанию?');
             if (confirmed) {
-              setVisibleColumns(defaultVisibleColumns); // Сбрасываем видимые столбцы
+              // Берём dataKey из массива defaultVisibleColumns:
+              const defaultKeys = defaultVisibleColumns.map((col) => col.dataKey);
+              setVisibleDataKeys(defaultKeys);
             }
           }}
-        ></Button>
+        />
       </Tooltip>
 
       {/* Кнопка настроек */}
@@ -202,7 +208,7 @@ const ColumnSelector = ({
           }}
           startIcon={<MoreVertIcon />}
           onClick={handleClick}
-        ></Button>
+        />
       </Tooltip>
 
       <Menu
@@ -219,10 +225,7 @@ const ColumnSelector = ({
       >
         <Box sx={{ width: '100%' }}>
           {/* Верхняя часть: Выбор даты */}
-          <LocalizationProvider
-            dateAdapter={AdapterDateFns}
-            adapterLocale={ruLocale}
-          >
+          <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ruLocale}>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <DatePicker
@@ -271,7 +274,10 @@ const ColumnSelector = ({
                   >
                     {columns.map((column) => (
                       <MenuItem key={column.dataKey} value={column.dataKey}>
-                        {column.label}
+                        <span className="columnSelector__fieldsSearch">
+                          {column.label}
+                          {column.dataKey}
+                        </span>
                       </MenuItem>
                     ))}
                   </Select>
@@ -291,22 +297,21 @@ const ColumnSelector = ({
           </Typography>
           <Grid container spacing={1}>
             {columns.map((column) => {
-              const isChecked = visibleColumns.some(
-                (col) => col.dataKey === column.dataKey,
-              );
-              const isDisabled = visibleColumns.length === 1 && isChecked;
+              const isChecked = visibleDataKeys.includes(column.dataKey);
+              const isDisabled = visibleDataKeys.length === 1 && isChecked;
 
               return (
                 <Grid item xs={12} sm={6} key={column.dataKey}>
                   <FormControlLabel
                     control={
-                      <Checkbox
-                        checked={isChecked}
-                        onChange={() => handleToggleColumn(column)}
-                        disabled={isDisabled}
-                      />
+                      <Checkbox checked={isChecked} onChange={() => handleToggleColumn(column)} disabled={isDisabled} />
                     }
-                    label={column.label}
+                    label={
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {column.label}
+                        <span>{column.dataKey}</span>
+                      </div>
+                    }
                   />
                 </Grid>
               );
@@ -321,19 +326,14 @@ const ColumnSelector = ({
                   variant="contained"
                   color="secondary"
                   onClick={handleUncheckAllExceptOne}
-                  disabled={visibleColumns.length === 1}
+                  disabled={visibleDataKeys.length === 1}
                   fullWidth
                 >
                   Снять все кроме первого
                 </Button>
               </Grid>
               <Grid item xs={6}>
-                <Button
-                  variant="contained"
-                  color="warning"
-                  onClick={handleSelectHeaderFields}
-                  fullWidth
-                >
+                <Button variant="contained" color="warning" onClick={handleSelectHeaderFields} fullWidth>
                   Поля Headers
                 </Button>
               </Grid>
@@ -342,19 +342,14 @@ const ColumnSelector = ({
                   variant="contained"
                   color="primary"
                   onClick={handleCheckAllColumns}
-                  disabled={visibleColumns.length === columns.length}
+                  disabled={visibleDataKeys.length === columns.length}
                   fullWidth
                 >
                   Показать все столбцы
                 </Button>
               </Grid>
               <Grid item xs={6}>
-                <Button
-                  variant="contained"
-                  color="error"
-                  onClick={handleSelectJSDataFields}
-                  fullWidth
-                >
+                <Button variant="contained" color="error" onClick={handleSelectJSDataFields} fullWidth>
                   Поля JSData
                 </Button>
               </Grid>
@@ -362,9 +357,13 @@ const ColumnSelector = ({
           </Box>
         </Box>
       </Menu>
+
+      {/* Отображение спиннера/ошибок */}
       {error && <SnackbarCustom data={data} error={error} />}
       {loading && <Spinner loading={loading} />}
       {data && !error && <SnackbarCustom data={data} error={error} />}
+
+      {/* Модалка «Сбросить отмеченные чекбоксы» */}
       {resetCheckedForm && (
         <ResetCheckedForm
           resetCheckedForm={resetCheckedForm}
@@ -375,6 +374,8 @@ const ColumnSelector = ({
           setCheckedRows={setCheckedRows}
         />
       )}
+
+      {/* Модалка «Скачать файл» */}
       {showDownloadFileLogsADS && (
         <DownloadFileLogsADS
           showDownloadFileLogsADS={showDownloadFileLogsADS}
