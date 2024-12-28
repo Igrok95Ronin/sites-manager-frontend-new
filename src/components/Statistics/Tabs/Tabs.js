@@ -15,6 +15,10 @@ const Tabs = ({
   searchField,
   searchQuery,
   setSearchQuery,
+  limit,
+  setLimit,
+  setSearchField,
+  columns,
 }) => {
   return (
     <section className="tabs">
@@ -31,8 +35,12 @@ const Tabs = ({
             ColumnSelector={ColumnSelector}
             loadingRef={loadingRef} // Передаем loadingRef
             searchField={searchField}
+            setSearchField={setSearchField}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
+            limit={limit}
+            setLimit={setLimit}
+            columns={columns}
           />
         </div>
       </div>

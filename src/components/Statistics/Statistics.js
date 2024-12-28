@@ -1165,6 +1165,9 @@ export default function ReactVirtualizedTable() {
         // Пробрасываем в Tabs, если нужно
         columns={allColumns} // полный список
         searchField={searchField}
+        limit={limit}
+        setLimit={setLimit}
+        setSearchField={setSearchField}
         ColumnSelector={
           <ColumnSelector
             // Внутри ColumnSelector
@@ -1177,10 +1180,6 @@ export default function ReactVirtualizedTable() {
             setStartDate={setStartDate}
             endDate={endDate}
             setEndDate={setEndDate}
-            limit={limit}
-            setLimit={setLimit}
-            searchField={searchField}
-            setSearchField={setSearchField}
             headerFieldsDataKeys={headerFieldsDataKeys}
             jsDataFieldsDataKeys={jsDataFieldsDataKeys}
             setCheckedRows={setCheckedRows}

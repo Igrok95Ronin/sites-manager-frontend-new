@@ -1,19 +1,6 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
-import {
-  FormControlLabel,
-  Checkbox,
-  Button,
-  Menu,
-  Box,
-  Grid,
-  Typography,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-} from '@mui/material';
+import { useState } from 'react';
+import { FormControlLabel, Checkbox, Button, Menu, Box, Grid, Typography, TextField } from '@mui/material';
 // import SettingsIcon from '@mui/icons-material/Settings';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ViewWeekIcon from '@mui/icons-material/ViewWeek';
@@ -38,28 +25,19 @@ import './ColumnSelector.scss';
 const ColumnSelector = ({
   // Полный список столбцов (массив объектов {label, dataKey})
   columns,
-
   // Массив "видимых" dataKey (строки), вместо объектов
   visibleDataKeys,
   setVisibleDataKeys,
-
   startDate,
   setStartDate,
   endDate,
   setEndDate,
-  limit,
-  setLimit,
-  searchField,
-  setSearchField,
   headerFieldsDataKeys,
   jsDataFieldsDataKeys,
   setCheckedRows,
   defaultVisibleColumns, // Важный проп: массив объектов {label, dataKey} по умолчанию
 }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
-
-  // Локальное состояние для поля limit
-  const [localLimit, setLocalLimit] = useState(limit);
 
   // Флаг для формы «снять все отмеченные чекбоксы»
   const [resetCheckedForm, setResetCheckedForm] = useState(false);
@@ -71,11 +49,6 @@ const ColumnSelector = ({
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
   const [data, setData] = React.useState(null);
-
-  // Синхронизируем localLimit с limit при его изменении
-  useEffect(() => {
-    setLocalLimit(limit);
-  }, [limit]);
 
   // Открытие меню
   const handleClick = (event) => {
@@ -137,25 +110,6 @@ const ColumnSelector = ({
       .filter((column) => jsDataFieldsDataKeys.includes(column.dataKey))
       .map((col) => col.dataKey);
     setVisibleDataKeys(selectedDataKeys);
-  };
-
-  // Обработка изменения localLimit
-  const handleLimitChange = (event) => {
-    const value = event.target.value;
-    setLocalLimit(value);
-  };
-
-  // Обработка потери фокуса на поле limit
-  const handleLimitBlur = () => {
-    const number = parseInt(localLimit, 10);
-    if (!isNaN(number) && number > 0 && number <= 10000) {
-      setLimit(number);
-    }
-  };
-
-  // Обработка изменения поля поиска
-  const handleSearchFieldChange = (event) => {
-    setSearchField(event.target.value);
   };
 
   return (
@@ -249,46 +203,6 @@ const ColumnSelector = ({
               </Grid>
             </Grid>
           </LocalizationProvider>
-
-          {/* Поля для ввода количества строк и выбора поля поиска */}
-          <Box sx={{ mt: 2 }}>
-            <Grid container spacing={2}>
-              {/* Поле для ввода количества строк */}
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="Количество строк"
-                  type="number"
-                  value={localLimit}
-                  onChange={handleLimitChange}
-                  onBlur={handleLimitBlur}
-                  fullWidth
-                  inputProps={{ min: 1 }}
-                />
-              </Grid>
-
-              {/* Select для выбора поля поиска */}
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel id="search-field-label">Поле поиска</InputLabel>
-                  <Select
-                    labelId="search-field-label"
-                    value={searchField}
-                    label="Поле поиска"
-                    onChange={handleSearchFieldChange}
-                  >
-                    {columns.map((column) => (
-                      <MenuItem key={column.dataKey} value={column.dataKey}>
-                        <span className="columnSelector__fieldsSearch">
-                          {column.label}
-                          {column.dataKey}
-                        </span>
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
-          </Box>
 
           {/* Разделитель */}
           <Box sx={{ my: 2 }}>

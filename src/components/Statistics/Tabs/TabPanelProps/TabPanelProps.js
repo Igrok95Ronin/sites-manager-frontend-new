@@ -58,8 +58,12 @@ export default function FullWidthTabs({
   ColumnSelector,
   loadingRef,
   searchField,
+  setSearchField,
   searchQuery,
   setSearchQuery,
+  limit,
+  setLimit,
+  columns,
 }) {
   const theme = useTheme();
   const [value, setValue] = React.useState(0);
@@ -123,7 +127,15 @@ export default function FullWidthTabs({
         {/* Первый таб Логи ADS*/}
         <TabPanel className="tabPanelProps__tabPanel" value={value} index={0} dir={theme.direction}>
           <div className="tabPanelProps__wrapper">
-            <Search onSearch={setSearchQuery} numberOfDomains={numberOfDomains} />
+            <Search
+              onSearch={setSearchQuery}
+              numberOfDomains={numberOfDomains}
+              limit={limit}
+              setLimit={setLimit}
+              searchField={searchField}
+              setSearchField={setSearchField}
+              columns={columns}
+            />
             <div className="tabPanelProps__settings">{ColumnSelector}</div>
           </div>
           <Paper style={{ height: '74vh', width: '100%' }}>
