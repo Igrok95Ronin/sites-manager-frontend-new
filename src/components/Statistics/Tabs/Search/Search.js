@@ -1,25 +1,32 @@
-import React, { useState, useEffect } from 'react'; // Добавлен импорт useState
+import React from 'react';
 import { Box, Grid, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import Tooltip from '@mui/material/Tooltip';
 
 import './Search.scss';
+import useLocalStorage from '../UseLocalStorage/UseLocalStorage'; // Импортируем кастомный хук
 
-const Search = ({ onSearch, numberOfDomains, limit, setLimit, searchField, setSearchField, columns }) => {
+const Search = ({
+  onSearch,
+  numberOfDomains,
+  limit,
+  setLimit,
+  searchField,
+  setSearchField,
+  columns
+}) => {
+  // Используем кастомный хук для сохранения limit
+  const [localLimit, setLocalLimit] = useLocalStorage('search_limit', limit);
+
+  // Используем кастомный хук для сохранения searchField
+  const [localSearchField, setLocalSearchField] = useLocalStorage('search_searchField', searchField);
+
   // Функция для обработки изменений в поле ввода
   const handleInputChange = (e) => {
-    onSearch(e.target.value); // Вызываем функцию из родительского компонента для обновления поискового запроса
+    onSearch(e.target.value);
   };
 
   // Рассчитываем значение для sm динамически
-  const smValue = Math.min(Math.max(Math.ceil(columns.length / 8), 10), 6.5); // Динамическое значение от 4 до 12
-
-  // Локальное состояние для поля limit
-  const [localLimit, setLocalLimit] = useState(limit);
-
-  // Синхронизируем localLimit с limit при его изменении
-  useEffect(() => {
-    setLocalLimit(limit);
-  }, [limit]);
+  const smValue = Math.min(Math.max(Math.ceil(columns.length / 8), 10), 6.5);
 
   // Обработка изменения localLimit
   const handleLimitChange = (event) => {
@@ -37,7 +44,9 @@ const Search = ({ onSearch, numberOfDomains, limit, setLimit, searchField, setSe
 
   // Обработка изменения поля поиска
   const handleSearchFieldChange = (event) => {
-    setSearchField(event.target.value);
+    const value = event.target.value;
+    setLocalSearchField(value);
+    setSearchField(value);
   };
 
   return (
@@ -56,26 +65,25 @@ const Search = ({ onSearch, numberOfDomains, limit, setLimit, searchField, setSe
       {/* Вертикальный разделитель */}
       <div
         style={{
-          width: '2px', // Ширина линии
-          height: '50px', // Высота линии
-          backgroundColor: '#ccc', // Цвет линии
-          margin: '0 0px', // Отступы слева и справа
+          width: '2px',
+          height: '50px',
+          backgroundColor: '#ccc',
+          margin: '0 0px',
         }}
       ></div>
 
       {/* Поля для ввода количества строк и выбора поля поиска */}
       <Box
         sx={{
-          display: 'flex', // Flexbox для размещения дочерних элементов
-          gap: '16px', // Отступы между элементами
-          flexWrap: 'wrap', // Позволяет перенос строк
+          display: 'flex',
+          gap: '16px',
+          flexWrap: 'wrap',
         }}
       >
         {/* Поле для ввода количества строк */}
-        <Tooltip title="Количества строк" arrow>
+        <Tooltip title="Количество строк" arrow>
           <Grid item xs={2.8}>
             <TextField
-              // label="Количество строк"
               type="number"
               variant="standard"
               value={localLimit}
@@ -84,11 +92,11 @@ const Search = ({ onSearch, numberOfDomains, limit, setLimit, searchField, setSe
               fullWidth
               inputProps={{ min: 1 }}
               sx={{
-                width: '60px', // Фиксированная ширина
+                width: '60px',
                 paddingBottom: '10px',
                 '& .MuiInputBase-input': {
-                  color: '#1976d2', // Цвет текста
-                  fontWeight: 'bold', // Жирность текста
+                  color: '#1976d2',
+                  fontWeight: 'bold',
                 },
               }}
             />
@@ -101,12 +109,12 @@ const Search = ({ onSearch, numberOfDomains, limit, setLimit, searchField, setSe
             <InputLabel id="search-field-label">Поле поиска</InputLabel>
             <Select
               labelId="search-field-label"
-              value={searchField}
+              value={localSearchField}
               label="Поле поиска"
               onChange={handleSearchFieldChange}
               sx={{
                 '& .MuiSelect-select': {
-                  padding: '4px 8px', // Уменьшение внутреннего паддинга
+                  padding: '4px 8px',
                 },
               }}
             >
@@ -122,13 +130,14 @@ const Search = ({ onSearch, numberOfDomains, limit, setLimit, searchField, setSe
           </FormControl>
         </Grid>
       </Box>
+      
       {/* Вертикальный разделитель */}
       <div
         style={{
-          width: '2px', // Ширина линии
-          height: '50px', // Высота линии
-          backgroundColor: '#ccc', // Цвет линии
-          margin: '0 0px', // Отступы слева и справа
+          width: '2px',
+          height: '50px',
+          backgroundColor: '#ccc',
+          margin: '0 0px',
         }}
       ></div>
     </div>

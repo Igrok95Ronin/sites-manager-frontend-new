@@ -26,6 +26,7 @@ import { JSONTree } from 'react-json-tree';
 import Tabs from './Tabs/Tabs.js';
 import ColumnSelector from './Tabs/ColumnSelector/ColumnSelector.js';
 import IPInfo from './Tabs/IPInfo/IPInfo.js';
+import useLocalStorage from './Tabs/UseLocalStorage/UseLocalStorage.js'; // Импортируем кастомный хук
 
 import './Statistics.scss';
 
@@ -607,7 +608,7 @@ export default function ReactVirtualizedTable() {
   // (B) Прочие состояния
   // -----------------------------------
   const [rows, setRows] = useState([]);
-  const [limit, setLimit] = useState(300);
+  const [limit, setLimit] = useLocalStorage('search_limit', 300); // Берем значение из Local storage если его нету ставим 300
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -621,7 +622,7 @@ export default function ReactVirtualizedTable() {
 
   const loadingRef = useRef(false);
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [searchField, setSearchField] = useState('Domain'); // пример: ищем по "Domain"
+  const [searchField, setSearchField] = useLocalStorage('search_searchField', 'Domain') ; // пример: ищем по "Domain"
 
   // Для показа JSON-структур
   const [formattedJSON, setFormattedJSON] = useState({});
