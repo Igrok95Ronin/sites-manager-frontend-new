@@ -21,7 +21,6 @@ export default function FullScreenDialog({
   rows,
   headerFieldsDataKeys,
   loadMoreRows,
-  loading,
   hasMore,
 }) {
   const [open, setOpen] = React.useState(false);
@@ -76,7 +75,13 @@ export default function FullScreenDialog({
           </Toolbar>
         </AppBar>
         {/* Контент */}
-        <DataTable columns={columns} rows={rows} headerFieldsDataKeys={headerFieldsDataKeys} />
+        <DataTable
+          columns={columns}
+          rows={rows}
+          headerFieldsDataKeys={headerFieldsDataKeys}
+          loadMoreRows={loadMoreRows}
+          hasMore={hasMore}
+        />
       </Dialog>
     </React.Fragment>
   );

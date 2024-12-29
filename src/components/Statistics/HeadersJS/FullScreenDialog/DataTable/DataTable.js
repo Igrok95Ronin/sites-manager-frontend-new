@@ -14,7 +14,9 @@ import './DataTable.scss';
 
 // Компоненты для использования в таблице виртуализации
 const VirtuosoTableComponents = {
-  Scroller: React.forwardRef((props, ref) => <TableContainer className="dataTable__scroll" component={Paper} {...props} ref={ref} />),
+  Scroller: React.forwardRef((props, ref) => (
+    <TableContainer className="dataTable__scroll" component={Paper} {...props} ref={ref} />
+  )),
   Table: (props) => <Table {...props} sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }} />,
   TableHead: React.forwardRef((props, ref) => <TableHead {...props} ref={ref} />),
   TableRow,
@@ -38,16 +40,20 @@ function fixedHeaderContent(columns, sortKey, sortDirection, handleSort) {
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             padding: '7px 10px 0px',
-            cursor: 'pointer', // Указатель мыши для заголовков
+            cursor: 'pointer',
           }}
           onClick={() => handleSort(column.dataKey)} // Обработчик клика
         >
           <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             {column.label}
             {sortKey === column.dataKey ? (
-              sortDirection === 'asc' ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />
+              sortDirection === 'asc' ? (
+                <ArrowDropUpIcon />
+              ) : (
+                <ArrowDropDownIcon />
+              )
             ) : (
-              <span style={{ visibility: 'hidden' }}> {/* Для выравнивания */}
+              <span style={{ visibility: 'hidden' }}>
                 <ArrowDropDownIcon />
               </span>
             )}
@@ -81,23 +87,21 @@ function rowContent(columns, _index, row) {
   );
 }
 
-export default function DataTable({ columns, rows, headerFieldsDataKeys }) {
+export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMoreRows, hasMore }) {
   const [sortKey, setSortKey] = React.useState(null); // Ключ сортировки
   const [sortDirection, setSortDirection] = React.useState('asc'); // Направление сортировки
 
   const handleSort = (dataKey) => {
     if (sortKey === dataKey) {
-      // Если уже сортируем по этому ключу, меняем направление
       setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
     } else {
-      // Устанавливаем новый ключ сортировки
       setSortKey(dataKey);
       setSortDirection('asc');
     }
   };
 
   const sortedRows = React.useMemo(() => {
-    if (!sortKey) return rows; // Если сортировка не выбрана, возвращаем исходные данные
+    if (!sortKey) return rows;
     const sorted = [...rows].sort((a, b) => {
       if (a[sortKey] < b[sortKey]) return sortDirection === 'asc' ? -1 : 1;
       if (a[sortKey] > b[sortKey]) return sortDirection === 'asc' ? 1 : -1;
@@ -113,6 +117,14 @@ export default function DataTable({ columns, rows, headerFieldsDataKeys }) {
 
   const filteredColumns = processedColumns.filter((col) => headerFieldsDataKeys.includes(col.dataKey));
 
+  // Срабатывает подгрузка данных при 80%
+  const handleRangeChanged = (range) => {
+    const visiblePercentage = (range.endIndex / rows.length) * 100;
+    if (visiblePercentage >= 80 && hasMore) {
+      loadMoreRows();
+    }
+  };
+
   return (
     <Paper style={{ height: '88vh', width: '100%' }}>
       <TableVirtuoso
@@ -120,6 +132,7 @@ export default function DataTable({ columns, rows, headerFieldsDataKeys }) {
         components={VirtuosoTableComponents}
         fixedHeaderContent={() => fixedHeaderContent(filteredColumns, sortKey, sortDirection, handleSort)}
         itemContent={(index, row) => rowContent(filteredColumns, index, row)}
+        rangeChanged={handleRangeChanged} // Отслеживаем текущий диапазон видимых строк
       />
     </Paper>
   );

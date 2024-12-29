@@ -1067,6 +1067,8 @@ export default function ReactVirtualizedTable() {
                   columns={allColumns}
                   rows={filteredData}
                   headerFieldsDataKeys={headerFieldsDataKeys}
+                  loadMoreRows={loadMoreRows}
+                  hasMore={hasMore}
                 />
               </TableCell>
             );
