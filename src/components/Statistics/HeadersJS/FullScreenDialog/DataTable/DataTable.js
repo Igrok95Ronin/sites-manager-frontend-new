@@ -9,10 +9,14 @@ import Paper from '@mui/material/Paper';
 import { TableVirtuoso } from 'react-virtuoso';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import Checkbox from '@mui/material/Checkbox';
 
 import './DataTable.scss';
 
-// Компоненты для использования в таблице виртуализации
+// Компоненты для виртуализации таблицы
 const VirtuosoTableComponents = {
   Scroller: React.forwardRef((props, ref) => (
     <TableContainer className="dataTable__scroll" component={Paper} {...props} ref={ref} />
@@ -23,7 +27,25 @@ const VirtuosoTableComponents = {
   TableBody: React.forwardRef((props, ref) => <TableBody {...props} ref={ref} />),
 };
 
-function fixedHeaderContent(columns, sortKey, sortDirection, handleSort) {
+function FixedHeaderContent({
+  columns,
+  allColumns,
+  sortKey,
+  sortDirection,
+  handleSort,
+  anchorEl,
+  setAnchorEl,
+  visibleColumns,
+  toggleColumnVisibility,
+}) {
+  const handleMenuOpen = (event, column) => {
+    setAnchorEl({ anchor: event.currentTarget, column });
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
   return (
     <TableRow>
       {columns.map((column) => (
@@ -42,22 +64,50 @@ function fixedHeaderContent(columns, sortKey, sortDirection, handleSort) {
             padding: '7px 10px 0px',
             cursor: 'pointer',
           }}
-          onClick={() => handleSort(column.dataKey)} // Обработчик клика
         >
           <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            {column.label}
-            {sortKey === column.dataKey ? (
-              sortDirection === 'asc' ? (
-                <ArrowDropUpIcon />
+            <span onClick={() => handleSort(column.dataKey)}>
+              {column.label}
+              {sortKey === column.dataKey ? (
+                sortDirection === 'asc' ? (
+                  <ArrowDropUpIcon />
+                ) : (
+                  <ArrowDropDownIcon />
+                )
               ) : (
-                <ArrowDropDownIcon />
-              )
-            ) : (
-              <span style={{ visibility: 'hidden' }}>
-                <ArrowDropDownIcon />
-              </span>
-            )}
+                <span style={{ visibility: 'hidden' }}>
+                  <ArrowDropDownIcon />
+                </span>
+              )}
+            </span>
+            <MoreVertIcon
+              onClick={(e) => handleMenuOpen(e, column)}
+              sx={{ cursor: 'pointer', marginLeft: '10px' }}
+            />
           </span>
+
+          {/* Меню для управления видимостью колонок */}
+          <Menu
+            anchorEl={anchorEl?.anchor}
+            open={Boolean(anchorEl?.anchor) && anchorEl?.column?.dataKey === column.dataKey}
+            onClose={handleMenuClose}
+            MenuListProps={{
+              style: { maxHeight: 300, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '5px' },
+            }}
+          >
+            {allColumns.map((col) => (
+              <MenuItem
+                key={col.dataKey}
+                onClick={() => {
+                  toggleColumnVisibility(col.dataKey);
+                }}
+                sx={{ display: 'flex', alignItems: 'center' }}
+              >
+                <Checkbox checked={visibleColumns.includes(col.dataKey)} />
+                {col.label}
+              </MenuItem>
+            ))}
+          </Menu>
         </TableCell>
       ))}
     </TableRow>
@@ -88,8 +138,10 @@ function rowContent(columns, _index, row) {
 }
 
 export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMoreRows, hasMore }) {
-  const [sortKey, setSortKey] = React.useState(null); // Ключ сортировки
-  const [sortDirection, setSortDirection] = React.useState('asc'); // Направление сортировки
+  const [sortKey, setSortKey] = React.useState(null);
+  const [sortDirection, setSortDirection] = React.useState('asc');
+  const [visibleColumns, setVisibleColumns] = React.useState(headerFieldsDataKeys);
+  const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleSort = (dataKey) => {
     if (sortKey === dataKey) {
@@ -102,12 +154,11 @@ export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMor
 
   const sortedRows = React.useMemo(() => {
     if (!sortKey) return rows;
-    const sorted = [...rows].sort((a, b) => {
+    return [...rows].sort((a, b) => {
       if (a[sortKey] < b[sortKey]) return sortDirection === 'asc' ? -1 : 1;
       if (a[sortKey] > b[sortKey]) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
-    return sorted;
   }, [rows, sortKey, sortDirection]);
 
   const processedColumns = columns.map((col) => ({
@@ -115,9 +166,14 @@ export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMor
     width: col.width || 100,
   }));
 
-  const filteredColumns = processedColumns.filter((col) => headerFieldsDataKeys.includes(col.dataKey));
+  const filteredColumns = processedColumns.filter((col) => visibleColumns.includes(col.dataKey));
 
-  // Срабатывает подгрузка данных при 80%
+  const toggleColumnVisibility = (dataKey) => {
+    setVisibleColumns((prev) =>
+      prev.includes(dataKey) ? prev.filter((key) => key !== dataKey) : [...prev, dataKey]
+    );
+  };
+
   const handleRangeChanged = (range) => {
     const visiblePercentage = (range.endIndex / rows.length) * 100;
     if (visiblePercentage >= 80 && hasMore) {
@@ -130,9 +186,21 @@ export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMor
       <TableVirtuoso
         data={sortedRows}
         components={VirtuosoTableComponents}
-        fixedHeaderContent={() => fixedHeaderContent(filteredColumns, sortKey, sortDirection, handleSort)}
+        fixedHeaderContent={() => (
+          <FixedHeaderContent
+            columns={filteredColumns}
+            allColumns={processedColumns}
+            sortKey={sortKey}
+            sortDirection={sortDirection}
+            handleSort={handleSort}
+            anchorEl={anchorEl}
+            setAnchorEl={setAnchorEl}
+            visibleColumns={visibleColumns}
+            toggleColumnVisibility={toggleColumnVisibility}
+          />
+        )}
         itemContent={(index, row) => rowContent(filteredColumns, index, row)}
-        rangeChanged={handleRangeChanged} // Отслеживаем текущий диапазон видимых строк
+        rangeChanged={handleRangeChanged}
       />
     </Paper>
   );
