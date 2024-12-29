@@ -15,7 +15,15 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export default function FullScreenDialog({ AcceptLanguage, allColumns, rows, headerFieldsDataKeys }) {
+export default function FullScreenDialog({
+  AcceptLanguage,
+  columns,
+  rows,
+  headerFieldsDataKeys,
+  loadMoreRows,
+  loading,
+  hasMore,
+}) {
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
@@ -68,7 +76,7 @@ export default function FullScreenDialog({ AcceptLanguage, allColumns, rows, hea
           </Toolbar>
         </AppBar>
         {/* Контент */}
-        <DataTable allColumns={allColumns} rows={rows} headerFieldsDataKeys={headerFieldsDataKeys}/>
+        <DataTable columns={columns} rows={rows} headerFieldsDataKeys={headerFieldsDataKeys} />
       </Dialog>
     </React.Fragment>
   );

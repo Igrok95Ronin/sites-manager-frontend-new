@@ -119,6 +119,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'ID',
+    width: 70,
   },
   {
     label: (
@@ -127,6 +128,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'Domain',
+    width: 150,
   },
   {
     label: (
@@ -247,7 +249,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'Accept',
-    maxWidth: 600,
+    width: 550,
   },
   {
     label: (
@@ -256,6 +258,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'Accept-Encoding',
+    width: 150,
   },
   {
     label: (
@@ -264,6 +267,25 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'Accept-Language',
+    width: 300,
+  },
+  {
+    label: (
+      <Tooltip title="User-Agent" arrow placement="top">
+        <DevicesIcon />
+      </Tooltip>
+    ),
+    dataKey: 'User-Agent',
+    width: 1000,
+  },
+  {
+    label: (
+      <Tooltip title="sec-ch-ua" arrow placement="top">
+        <BrowserUpdatedIcon />
+      </Tooltip>
+    ),
+    dataKey: 'sec-ch-ua',
+    width: 450
   },
   {
     label: (
@@ -288,7 +310,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'Referer',
-    maxWidth: 250,
+    width: 300,
   },
   {
     label: (
@@ -313,23 +335,6 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'Sec-Fetch-Site',
-  },
-  {
-    label: (
-      <Tooltip title="User-Agent" arrow placement="top">
-        <DevicesIcon />
-      </Tooltip>
-    ),
-    dataKey: 'User-Agent',
-    maxWidth: 1000,
-  },
-  {
-    label: (
-      <Tooltip title="sec-ch-ua" arrow placement="top">
-        <BrowserUpdatedIcon />
-      </Tooltip>
-    ),
-    dataKey: 'sec-ch-ua',
   },
   {
     label: (
@@ -1059,8 +1064,8 @@ export default function ReactVirtualizedTable() {
               >
                 <FullScreenDialog
                   AcceptLanguage={cellValue}
-                  allColumns={allColumns}
-                  rows={rows}
+                  columns={allColumns}
+                  rows={filteredData}
                   headerFieldsDataKeys={headerFieldsDataKeys}
                 />
               </TableCell>
