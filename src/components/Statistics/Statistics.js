@@ -247,6 +247,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'Accept',
+    maxWidth: 600,
   },
   {
     label: (
@@ -287,6 +288,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'Referer',
+    maxWidth: 250,
   },
   {
     label: (
@@ -319,6 +321,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'User-Agent',
+    maxWidth: 1000,
   },
   {
     label: (
@@ -502,6 +505,7 @@ export const allColumns = [
 // 3) Другие вспомогательные переменные
 // =========================================
 const headerFieldsDataKeys = [
+  'ID',
   'Accept',
   'Accept-Encoding',
   'Accept-Language',
@@ -555,6 +559,8 @@ const defaultVisibleDataKeys = [
   'JsData',
   'ScrollCoordinates',
   'ClickCoordinates',
+  'Accept-Language',
+  'language',
 ];
 
 // Если ячейка «расширена», хотим показывать какие-то доп. поля
@@ -1051,7 +1057,12 @@ export default function ReactVirtualizedTable() {
                 align="left"
                 style={{ backgroundColor: rowBackgroundColor }}
               >
-                <FullScreenDialog AcceptLanguage={cellValue} />
+                <FullScreenDialog
+                  AcceptLanguage={cellValue}
+                  allColumns={allColumns}
+                  rows={rows}
+                  headerFieldsDataKeys={headerFieldsDataKeys}
+                />
               </TableCell>
             );
           }
