@@ -27,6 +27,7 @@ import Tabs from './Tabs/Tabs.js';
 import ColumnSelector from './Tabs/ColumnSelector/ColumnSelector.js';
 import IPInfo from './Tabs/IPInfo/IPInfo.js';
 import useLocalStorage from './Tabs/UseLocalStorage/UseLocalStorage.js'; // Импортируем кастомный хук
+import FullScreenDialog from './HeadersJS/FullScreenDialog/FullScreenDialog.js'; // Окно для показа заголовков
 
 import './Statistics.scss';
 
@@ -622,7 +623,7 @@ export default function ReactVirtualizedTable() {
 
   const loadingRef = useRef(false);
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [searchField, setSearchField] = useLocalStorage('search_searchField', 'Domain') ; // пример: ищем по "Domain"
+  const [searchField, setSearchField] = useLocalStorage('search_searchField', 'Domain'); // пример: ищем по "Domain"
 
   // Для показа JSON-структур
   const [formattedJSON, setFormattedJSON] = useState({});
@@ -1037,6 +1038,20 @@ export default function ReactVirtualizedTable() {
                 style={{ backgroundColor: rowBackgroundColor }}
               >
                 <IPInfo IP={cellValue} />
+              </TableCell>
+            );
+          }
+
+          // Вызываем модальное окно
+          if (cellKey === 'Accept-Language') {
+            return (
+              <TableCell
+                className="statistics__padding"
+                key={cellKey}
+                align="left"
+                style={{ backgroundColor: rowBackgroundColor }}
+              >
+                <FullScreenDialog AcceptLanguage={cellValue} />
               </TableCell>
             );
           }
