@@ -17,6 +17,7 @@ import useLocalStorageDataKeys from '../../../Tabs/UseLocalStorage/UseLocalStora
 import ColumnMenu from '../ColumnMenu/ColumnMenu';
 import './DataTable.scss';
 
+// Определение компонентов для виртуализированной таблицы
 const VirtuosoTableComponents = {
   Scroller: React.forwardRef((props, ref) => (
     <TableContainer className="dataTable__scroll" component={Paper} {...props} ref={ref} />
@@ -27,6 +28,7 @@ const VirtuosoTableComponents = {
   TableBody: React.forwardRef((props, ref) => <TableBody {...props} ref={ref} />),
 };
 
+// Заголовок таблицы с возможностью сортировки и управления колонками
 function FixedHeaderContent({
   columns,
   allColumns,
@@ -40,10 +42,12 @@ function FixedHeaderContent({
   resetVisibleColumns,
   label,
 }) {
+  // Открытие меню для управления колонками
   const handleMenuOpen = (event, column) => {
     setAnchorEl({ anchor: event.currentTarget, column });
   };
 
+  // Закрытие меню
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
@@ -70,6 +74,7 @@ function FixedHeaderContent({
           <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span onClick={() => handleSort(column.dataKey)}>
               {column.label}
+              {/* Иконка сортировки */}
               {sortKey === column.dataKey ? (
                 sortDirection === 'asc' ? (
                   <ArrowDropUpIcon />
@@ -86,6 +91,7 @@ function FixedHeaderContent({
           </span>
         </TableCell>
       ))}
+      {/* Меню для управления видимостью колонок */}
       <ColumnMenu
         anchorEl={anchorEl}
         handleMenuClose={handleMenuClose}
@@ -99,7 +105,9 @@ function FixedHeaderContent({
   );
 }
 
+// Отображение строки таблицы с условным стилем и иконками
 function rowContent(columns, _index, row) {
+  // Определение цвета фона строки на основе значения ClickOnNumber
   const rowBackgroundColor = row.ClickOnNumber ? 'rgb(211, 248, 212)' : _index % 2 === 0 ? '#f9f9f9' : 'white';
 
   return (
@@ -129,7 +137,7 @@ function rowContent(columns, _index, row) {
   );
 }
 
-
+// Главный компонент таблицы
 export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMoreRows, hasMore, label }) {
   const storageKey = label === 'Headers' ? 'visibleColumnsHeaders' : 'visibleColumnsJS';
   const [sortKey, setSortKey] = React.useState(null);
@@ -137,6 +145,7 @@ export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMor
   const [visibleColumns, setVisibleColumns] = useLocalStorageDataKeys(storageKey, headerFieldsDataKeys);
   const [anchorEl, setAnchorEl] = React.useState(null);
 
+  // Функция сортировки колонок
   const handleSort = (dataKey) => {
     if (sortKey === dataKey) {
       setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
@@ -146,11 +155,13 @@ export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMor
     }
   };
 
+  // Сброс видимости колонок к настройкам по умолчанию
   const resetVisibleColumns = () => {
     window.localStorage.removeItem(storageKey);
     setVisibleColumns(headerFieldsDataKeys);
   };
 
+  // Сортировка строк на основе выбранной колонки
   const sortedRows = React.useMemo(() => {
     if (!sortKey) return rows;
     return [...rows].sort((a, b) => {
@@ -160,6 +171,7 @@ export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMor
     });
   }, [rows, sortKey, sortDirection]);
 
+  // Обработка колонок: добавление ширины и фильтрация видимых
   const processedColumns = columns.map((col) => ({
     ...col,
     width: col.width || 100,
@@ -167,10 +179,12 @@ export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMor
 
   const filteredColumns = processedColumns.filter((col) => visibleColumns.includes(col.dataKey));
 
+  // Управление видимостью колонок
   const toggleColumnVisibility = (dataKey) => {
     setVisibleColumns((prev) => (prev.includes(dataKey) ? prev.filter((key) => key !== dataKey) : [...prev, dataKey]));
   };
 
+  // Обработка загрузки дополнительных данных при прокрутке
   const handleRangeChanged = (range) => {
     const visiblePercentage = (range.endIndex / rows.length) * 100;
     if (visiblePercentage >= 80 && hasMore) {

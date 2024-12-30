@@ -169,6 +169,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'Keyword',
+    width: 200
   },
   {
     label: (
@@ -177,6 +178,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'IP',
+    width: 150
   },
   {
     label: (
@@ -185,6 +187,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'CreatedAt',
+    width: 200
   },
   {
     label: (
@@ -310,7 +313,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'Referer',
-    width: 300,
+    width: 250,
   },
   {
     label: (
@@ -343,6 +346,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'sec-ch-ua-platform',
+  
   },
   {
     label: (
@@ -391,6 +395,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'appVersion',
+    width: 850
   },
   {
     label: (
@@ -407,6 +412,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'platform',
+    width: 120
   },
   {
     label: (
@@ -431,6 +437,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'userAgent',
+    width: 950
   },
   {
     label: (
@@ -439,6 +446,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'vendor',
+    width: 150
   },
   {
     label: (
@@ -558,12 +566,11 @@ const defaultVisibleDataKeys = [
   'ClickOnNumber',
   'TimeSpent',
   'IP',
-  'Headers',
-  'JsData',
   'ScrollCoordinates',
   'ClickCoordinates',
   'Accept-Language',
   'language',
+  'Accept',
 ];
 
 // Если ячейка «расширена», хотим показывать какие-то доп. поля
@@ -1248,19 +1255,7 @@ export default function ReactVirtualizedTable() {
             jsDataFieldsDataKeys={jsDataFieldsDataKeys}
             setCheckedRows={setCheckedRows}
             defaultVisibleColumns={allColumns.filter((col) =>
-              [
-                'ID',
-                'Domain',
-                'Gclid',
-                'CreatedAt',
-                'ClickOnNumber',
-                'TimeSpent',
-                'IP',
-                'Headers',
-                'JsData',
-                'ScrollCoordinates',
-                'ClickCoordinates',
-              ].includes(col.dataKey),
+              defaultVisibleDataKeys.includes(col.dataKey),
             )}
             visibleDataKeys={visibleDataKeys}
             setVisibleDataKeys={setVisibleDataKeys}

@@ -43,6 +43,7 @@ export default function FullScreenDialog({
         sx={{
           textTransform: 'none', // Убираем автоматическое преобразование текста
           whiteSpace: 'nowrap', // Запрещаем перенос текста
+          justifyContent: 'start'
         }}
         onClick={handleClickOpen}
       >
