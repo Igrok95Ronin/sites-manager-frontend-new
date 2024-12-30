@@ -193,7 +193,7 @@ export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMor
   };
 
   return (
-    <Paper style={{ height: '88vh', width: '100%' }}>
+    <Paper style={{ height: '87.8vh', width: '100%' }}>
       <TableVirtuoso
         data={sortedRows}
         components={VirtuosoTableComponents}

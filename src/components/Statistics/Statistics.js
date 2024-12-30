@@ -169,7 +169,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'Keyword',
-    width: 200
+    width: 200,
   },
   {
     label: (
@@ -178,7 +178,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'IP',
-    width: 150
+    width: 150,
   },
   {
     label: (
@@ -187,7 +187,16 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'CreatedAt',
-    width: 200
+    width: 200,
+  },
+  {
+    label: (
+      <Tooltip title="Дата создания (formattedCreatedAt Europe/Moscow UTC+3)" arrow placement="top">
+        <AccessTimeIcon />
+      </Tooltip>
+    ),
+    dataKey: 'formattedCreatedAt',
+    width: 150,
   },
   {
     label: (
@@ -346,7 +355,6 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'sec-ch-ua-platform',
-  
   },
   {
     label: (
@@ -395,7 +403,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'appVersion',
-    width: 850
+    width: 850,
   },
   {
     label: (
@@ -412,7 +420,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'platform',
-    width: 120
+    width: 120,
   },
   {
     label: (
@@ -437,7 +445,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'userAgent',
-    width: 950
+    width: 950,
   },
   {
     label: (
@@ -446,7 +454,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'vendor',
-    width: 150
+    width: 150,
   },
   {
     label: (
@@ -572,20 +580,6 @@ const defaultVisibleDataKeys = [
   'language',
   'Accept',
 ];
-
-// Если ячейка «расширена», хотим показывать какие-то доп. поля
-// (здесь для примера, как у вас было)
-// const expandedDataKeys = [
-//   'ID',
-//   'Domain',
-//   'CompanyID',
-//   'AccountID',
-//   'CreatedAt',
-//   'Keyword',
-//   'TimeSpent',
-//   'Headers',
-//   'JsData',
-// ];
 
 // =========================================
 // 4) Определяем VirtuosoTableComponents (как у вас)
@@ -748,13 +742,33 @@ export default function ReactVirtualizedTable() {
   }, [sortedRows, searchField, searchQuery]);
 
   const processedData = React.useMemo(() => {
-    return filteredData.map((row) => ({
-      ...row,
-      windowSize: `${row.innerWidth || 'N/A'} x ${row.innerHeight || 'N/A'}`,
-      outerWindowSize: `${row.outerWidth || 'N/A'} x ${row.outerHeight || 'N/A'}`,
-      screenSize: `${row.screenWidth || 'N/A'} x ${row.screenHeight || 'N/A'}`,
-      ClickOnNumber: row.ClickOnNumber ?? false, // Добавляем поле с значением true/false
-    }));
+    return filteredData.map((row) => {
+      // Обрабатываем дату 'CreatedAt'
+      const createdAt = new Date(row.CreatedAt);
+      const today = isToday(createdAt);
+      const sameYear = isSameYear(createdAt, new Date());
+      let formattedDate;
+  
+      if (today) {
+        // Если дата - сегодня, показываем только время
+        formattedDate = createdAt.toLocaleTimeString('ru-RU', { timeZone: 'Europe/Moscow' });
+      } else if (sameYear) {
+        // Если текущий год, показываем дату без года
+        formattedDate = `${createdAt.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })}, ${createdAt.toLocaleTimeString('ru-RU', { timeZone: 'Europe/Moscow' })}`;
+      } else {
+        // Иначе показываем полную дату с годом
+        formattedDate = createdAt.toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' });
+      }
+  
+      return {
+        ...row,
+        windowSize: `${row.innerWidth || 'N/A'} x ${row.innerHeight || 'N/A'}`,
+        outerWindowSize: `${row.outerWidth || 'N/A'} x ${row.outerHeight || 'N/A'}`,
+        screenSize: `${row.screenWidth || 'N/A'} x ${row.screenHeight || 'N/A'}`,
+        ClickOnNumber: row.ClickOnNumber ?? false, // Добавляем поле с значением true/false
+        formattedCreatedAt: formattedDate, // Добавляем отформатированную дату
+      };
+    });
   }, [filteredData]);
 
   // -----------------------------------
@@ -1254,9 +1268,7 @@ export default function ReactVirtualizedTable() {
             headerFieldsDataKeys={headerFieldsDataKeys}
             jsDataFieldsDataKeys={jsDataFieldsDataKeys}
             setCheckedRows={setCheckedRows}
-            defaultVisibleColumns={allColumns.filter((col) =>
-              defaultVisibleDataKeys.includes(col.dataKey),
-            )}
+            defaultVisibleColumns={allColumns.filter((col) => defaultVisibleDataKeys.includes(col.dataKey))}
             visibleDataKeys={visibleDataKeys}
             setVisibleDataKeys={setVisibleDataKeys}
           />
