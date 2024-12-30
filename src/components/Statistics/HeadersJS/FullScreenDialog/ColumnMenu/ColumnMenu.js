@@ -53,7 +53,7 @@ export default function ColumnMenu({
       open={Boolean(anchorEl?.anchor)}
       onClose={handleMenuClose}
       MenuListProps={{
-        style: { maxHeight: 300, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '5px' },
+        style: { maxHeight: 500, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '5px' },
       }}
     >
       {allColumns.map((col) => (
@@ -73,14 +73,14 @@ export default function ColumnMenu({
       <MenuItem
         onClick={handleResetVisibleColumns}
         sx={{
-          gridColumn: 'span 3',
+          gridColumn: 'span 4',
           justifyContent: 'center',
           fontWeight: 'bold',
           textAlign: 'center',
-          color: 'red',
+          color: 'green',
         }}
       >
-        Сбросить {label}
+        Только {label}
       </MenuItem>
     </Menu>
   );
