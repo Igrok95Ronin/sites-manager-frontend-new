@@ -10,11 +10,41 @@ export default function ColumnMenu({
   visibleColumns,
   toggleColumnVisibility,
   resetVisibleColumns,
+  label, // Метка для определения типа (Headers или JS)
 }) {
+  const storageKey = label === 'Headers' ? 'visibleColumnsHeaders' : 'visibleColumnsJS';
+
+  console.log('Label:', label);
+  console.log('Storage Key:', storageKey);
+
   const handleToggleColumn = (dataKey) => {
-    if (visibleColumns.length > 1 || !visibleColumns.includes(dataKey)) {
-      toggleColumnVisibility(dataKey);
+    if (visibleColumns.length === 1 && visibleColumns.includes(dataKey)) {
+      // Блокируем снятие последнего поля
+      return;
     }
+
+    let updatedColumns;
+
+    if (visibleColumns.includes(dataKey)) {
+      updatedColumns = visibleColumns.filter((key) => key !== dataKey);
+    } else {
+      updatedColumns = [...visibleColumns, dataKey];
+    }
+
+    // Обновляем localStorage только для текущего storageKey
+    localStorage.setItem(storageKey, JSON.stringify(updatedColumns));
+    toggleColumnVisibility(dataKey); // Обновляем состояние
+  };
+
+  const handleResetVisibleColumns = () => {
+    // Удаляем данные только для текущего storageKey
+    localStorage.removeItem(storageKey);
+
+    // Сбрасываем видимые колонки
+    resetVisibleColumns();
+
+    // Закрываем меню
+    handleMenuClose();
   };
 
   return (
@@ -34,16 +64,14 @@ export default function ColumnMenu({
         >
           <Checkbox
             checked={visibleColumns.includes(col.dataKey)}
-            disabled={visibleColumns.length === 1 && visibleColumns.includes(col.dataKey)}
+            disabled={visibleColumns.length === 1 && visibleColumns.includes(col.dataKey)} // Блокировка снятия последнего
           />
-          {col.label}{col.dataKey}
+          {col.label}
+          {col.dataKey}
         </MenuItem>
       ))}
       <MenuItem
-        onClick={() => {
-          resetVisibleColumns();
-          handleMenuClose();
-        }}
+        onClick={handleResetVisibleColumns}
         sx={{
           gridColumn: 'span 3',
           justifyContent: 'center',
@@ -52,7 +80,7 @@ export default function ColumnMenu({
           color: 'red',
         }}
       >
-        Показывать только Headers
+        Сбросить {label}
       </MenuItem>
     </Menu>
   );

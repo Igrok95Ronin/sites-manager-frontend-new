@@ -285,7 +285,7 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'sec-ch-ua',
-    width: 450
+    width: 450,
   },
   {
     label: (
@@ -527,12 +527,7 @@ const headerFieldsDataKeys = [
 ];
 
 const jsDataFieldsDataKeys = [
-  'innerWidth',
-  'innerHeight',
-  'outerWidth',
-  'outerHeight',
-  'screenWidth',
-  'screenHeight',
+  'ID',
   'appCodeName',
   'appName',
   'appVersion',
@@ -550,6 +545,9 @@ const jsDataFieldsDataKeys = [
   'totalJSHeapSize',
   'usedJSHeapSize',
   'jsHeapSizeLimit',
+  'windowSize',
+  'outerWindowSize',
+  'screenSize',
 ];
 
 // Какие столбцы показываем по умолчанию (только dataKey!)
@@ -741,6 +739,17 @@ export default function ReactVirtualizedTable() {
       return fieldValue.toLowerCase().includes(searchQuery.toLowerCase());
     });
   }, [sortedRows, searchField, searchQuery]);
+
+  
+  const processedData = React.useMemo(() => {
+    return filteredData.map((row) => ({
+      ...row,
+      windowSize: `${row.innerWidth || 'N/A'} x ${row.innerHeight || 'N/A'}`,
+      outerWindowSize: `${row.outerWidth || 'N/A'} x ${row.outerHeight || 'N/A'}`,
+      screenSize: `${row.screenWidth || 'N/A'} x ${row.screenHeight || 'N/A'}`,
+    }));
+  }, [filteredData]);
+  
 
   // -----------------------------------
   // (E) Логика «расширенной» таблицы (если expandedCell)
@@ -1053,7 +1062,7 @@ export default function ReactVirtualizedTable() {
             );
           }
 
-          // Вызываем модальное окно
+          // Вызываем модальное окно Headers
           if (cellKey === 'Accept-Language') {
             return (
               <TableCell
@@ -1065,10 +1074,32 @@ export default function ReactVirtualizedTable() {
                 <FullScreenDialog
                   AcceptLanguage={cellValue}
                   columns={allColumns}
-                  rows={filteredData}
+                  rows={processedData}
                   headerFieldsDataKeys={headerFieldsDataKeys}
                   loadMoreRows={loadMoreRows}
                   hasMore={hasMore}
+                  label={'Headers'}
+                />
+              </TableCell>
+            );
+          }
+          // Вызываем модальное окно JS
+          if (cellKey === 'language') {
+            return (
+              <TableCell
+                className="statistics__padding"
+                key={cellKey}
+                align="left"
+                style={{ backgroundColor: rowBackgroundColor }}
+              >
+                <FullScreenDialog
+                  AcceptLanguage={cellValue}
+                  columns={allColumns}
+                  rows={processedData}
+                  headerFieldsDataKeys={jsDataFieldsDataKeys}
+                  loadMoreRows={loadMoreRows}
+                  hasMore={hasMore}
+                  label={'JS'}
                 />
               </TableCell>
             );

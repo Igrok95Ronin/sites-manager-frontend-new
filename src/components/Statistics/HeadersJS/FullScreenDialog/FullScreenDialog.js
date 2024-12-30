@@ -22,8 +22,10 @@ export default function FullScreenDialog({
   headerFieldsDataKeys,
   loadMoreRows,
   hasMore,
+  label
 }) {
   const [open, setOpen] = React.useState(false);
+
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -81,6 +83,7 @@ export default function FullScreenDialog({
           headerFieldsDataKeys={headerFieldsDataKeys}
           loadMoreRows={loadMoreRows}
           hasMore={hasMore}
+          label={label}
         />
       </Dialog>
     </React.Fragment>

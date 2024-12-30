@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -36,6 +36,7 @@ function FixedHeaderContent({
   visibleColumns,
   toggleColumnVisibility,
   resetVisibleColumns,
+  label,
 }) {
   const handleMenuOpen = (event, column) => {
     setAnchorEl({ anchor: event.currentTarget, column });
@@ -90,6 +91,7 @@ function FixedHeaderContent({
         visibleColumns={visibleColumns}
         toggleColumnVisibility={toggleColumnVisibility}
         resetVisibleColumns={resetVisibleColumns}
+        label={label}
       />
     </TableRow>
   );
@@ -118,13 +120,12 @@ function rowContent(columns, _index, row) {
   );
 }
 
-export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMoreRows, hasMore }) {
+export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMoreRows, hasMore, label }) {
+  const storageKey = label === 'Headers' ? 'visibleColumnsHeaders' : 'visibleColumnsJS';
+
   const [sortKey, setSortKey] = React.useState(null);
   const [sortDirection, setSortDirection] = React.useState('asc');
-  const [visibleColumns, setVisibleColumns] = useLocalStorageDataKeys(
-    'visibleColumns',
-    headerFieldsDataKeys,
-  );
+  const [visibleColumns, setVisibleColumns] = useLocalStorageDataKeys(storageKey, headerFieldsDataKeys);
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleSort = (dataKey) => {
@@ -137,7 +138,7 @@ export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMor
   };
 
   const resetVisibleColumns = () => {
-    window.localStorage.removeItem('visibleColumns');
+    window.localStorage.removeItem(storageKey);
     setVisibleColumns(headerFieldsDataKeys);
   };
 
@@ -185,6 +186,7 @@ export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMor
             visibleColumns={visibleColumns}
             toggleColumnVisibility={toggleColumnVisibility}
             resetVisibleColumns={resetVisibleColumns}
+            label={label}
           />
         )}
         itemContent={(index, row) => rowContent(filteredColumns, index, row)}
