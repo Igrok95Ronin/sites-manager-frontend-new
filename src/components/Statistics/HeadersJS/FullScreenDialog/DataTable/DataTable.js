@@ -6,7 +6,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { TableVirtuoso } from 'react-virtuoso'; // Библиотека для виртуализации больших таблиц
+import { TableVirtuoso } from 'react-virtuoso';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -14,10 +14,9 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Checkbox from '@mui/material/Checkbox';
 
-import useLocalStorageDataKeys from '../../../Tabs/UseLocalStorage/UseLocalStorage'; // Хук для работы с localStorage
+import useLocalStorageDataKeys from '../../../Tabs/UseLocalStorage/UseLocalStorage';
 import './DataTable.scss';
 
-// Компоненты для виртуализации таблицы
 const VirtuosoTableComponents = {
   Scroller: React.forwardRef((props, ref) => (
     <TableContainer className="dataTable__scroll" component={Paper} {...props} ref={ref} />
@@ -28,26 +27,22 @@ const VirtuosoTableComponents = {
   TableBody: React.forwardRef((props, ref) => <TableBody {...props} ref={ref} />),
 };
 
-/**
- * Компонент для отображения заголовка таблицы с возможностью сортировки и настройки видимости столбцов.
- */
 function FixedHeaderContent({
-  columns, // Отображаемые столбцы
-  allColumns, // Все доступные столбцы
-  sortKey, // Ключ текущей сортировки
-  sortDirection, // Направление текущей сортировки
-  handleSort, // Функция для изменения сортировки
-  anchorEl, // Элемент для управления открытием меню
-  setAnchorEl, // Функция для управления меню
-  visibleColumns, // Массив видимых столбцов
-  toggleColumnVisibility, // Функция для переключения видимости столбцов
+  columns,
+  allColumns,
+  sortKey,
+  sortDirection,
+  handleSort,
+  anchorEl,
+  setAnchorEl,
+  visibleColumns,
+  toggleColumnVisibility,
+  resetVisibleColumns, // Функция для сброса видимости колонок
 }) {
-  // Открытие меню для управления видимостью колонок
   const handleMenuOpen = (event, column) => {
     setAnchorEl({ anchor: event.currentTarget, column });
   };
 
-  // Закрытие меню
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
@@ -71,7 +66,6 @@ function FixedHeaderContent({
             cursor: 'pointer',
           }}
         >
-          {/* Заголовок столбца с сортировкой */}
           <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <span onClick={() => handleSort(column.dataKey)}>
               {column.label}
@@ -87,11 +81,9 @@ function FixedHeaderContent({
                 </span>
               )}
             </span>
-            {/* Иконка для открытия меню */}
             <MoreVertIcon onClick={(e) => handleMenuOpen(e, column)} sx={{ cursor: 'pointer', marginLeft: '10px' }} />
           </span>
 
-          {/* Меню для настройки видимости столбцов */}
           <Menu
             anchorEl={anchorEl?.anchor}
             open={Boolean(anchorEl?.anchor) && anchorEl?.column?.dataKey === column.dataKey}
@@ -109,9 +101,24 @@ function FixedHeaderContent({
                 sx={{ display: 'flex', alignItems: 'center', gap: '5px' }}
               >
                 <Checkbox checked={visibleColumns.includes(col.dataKey)} />
-                {col.label}{<span> {col.dataKey}</span>}
-              </MenuItem> 
+                {col.label}{col.dataKey}
+              </MenuItem>
             ))}
+            <MenuItem
+              onClick={() => {
+                resetVisibleColumns();
+                handleMenuClose();
+              }}
+              sx={{
+                gridColumn: 'span 3',
+                justifyContent: 'center',
+                fontWeight: 'bold',
+                textAlign: 'center',
+                color: 'red',
+              }}
+            >
+              Показывать только Headers
+            </MenuItem>
           </Menu>
         </TableCell>
       ))}
@@ -119,9 +126,6 @@ function FixedHeaderContent({
   );
 }
 
-/**
- * Компонент для отображения строки таблицы
- */
 function rowContent(columns, _index, row) {
   return (
     <>
@@ -145,19 +149,15 @@ function rowContent(columns, _index, row) {
   );
 }
 
-/**
- * Основной компонент таблицы с виртуализацией и настройкой видимости столбцов
- */
 export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMoreRows, hasMore }) {
-  const [sortKey, setSortKey] = React.useState(null); // Текущий ключ сортировки
-  const [sortDirection, setSortDirection] = React.useState('asc'); // Текущее направление сортировки
+  const [sortKey, setSortKey] = React.useState(null);
+  const [sortDirection, setSortDirection] = React.useState('asc');
   const [visibleColumns, setVisibleColumns] = useLocalStorageDataKeys(
-    'visibleColumns', // Ключ для сохранения состояния в localStorage
-    headerFieldsDataKeys, // Начальные видимые столбцы
+    'visibleColumns',
+    headerFieldsDataKeys,
   );
-  const [anchorEl, setAnchorEl] = React.useState(null); // Элемент для управления открытием меню
+  const [anchorEl, setAnchorEl] = React.useState(null);
 
-  // Функция для изменения сортировки
   const handleSort = (dataKey) => {
     if (sortKey === dataKey) {
       setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'));
@@ -167,7 +167,11 @@ export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMor
     }
   };
 
-  // Сортировка строк
+  const resetVisibleColumns = () => {
+    window.localStorage.removeItem('visibleColumns');
+    setVisibleColumns(headerFieldsDataKeys);
+  };
+
   const sortedRows = React.useMemo(() => {
     if (!sortKey) return rows;
     return [...rows].sort((a, b) => {
@@ -179,17 +183,15 @@ export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMor
 
   const processedColumns = columns.map((col) => ({
     ...col,
-    width: col.width || 100, // Установка ширины по умолчанию
+    width: col.width || 100,
   }));
 
   const filteredColumns = processedColumns.filter((col) => visibleColumns.includes(col.dataKey));
 
-  // Функция для переключения видимости столбцов
   const toggleColumnVisibility = (dataKey) => {
     setVisibleColumns((prev) => (prev.includes(dataKey) ? prev.filter((key) => key !== dataKey) : [...prev, dataKey]));
   };
 
-  // Обработчик для подгрузки данных при скролле
   const handleRangeChanged = (range) => {
     const visiblePercentage = (range.endIndex / rows.length) * 100;
     if (visiblePercentage >= 80 && hasMore) {
@@ -213,6 +215,7 @@ export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMor
             setAnchorEl={setAnchorEl}
             visibleColumns={visibleColumns}
             toggleColumnVisibility={toggleColumnVisibility}
+            resetVisibleColumns={resetVisibleColumns}
           />
         )}
         itemContent={(index, row) => rowContent(filteredColumns, index, row)}
