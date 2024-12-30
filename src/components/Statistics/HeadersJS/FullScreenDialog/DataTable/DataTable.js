@@ -10,11 +10,9 @@ import { TableVirtuoso } from 'react-virtuoso';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import Checkbox from '@mui/material/Checkbox';
 
 import useLocalStorageDataKeys from '../../../Tabs/UseLocalStorage/UseLocalStorage';
+import ColumnMenu from '../ColumnMenu/ColumnMenu';
 import './DataTable.scss';
 
 const VirtuosoTableComponents = {
@@ -37,7 +35,7 @@ function FixedHeaderContent({
   setAnchorEl,
   visibleColumns,
   toggleColumnVisibility,
-  resetVisibleColumns, // Функция для сброса видимости колонок
+  resetVisibleColumns,
 }) {
   const handleMenuOpen = (event, column) => {
     setAnchorEl({ anchor: event.currentTarget, column });
@@ -83,45 +81,16 @@ function FixedHeaderContent({
             </span>
             <MoreVertIcon onClick={(e) => handleMenuOpen(e, column)} sx={{ cursor: 'pointer', marginLeft: '10px' }} />
           </span>
-
-          <Menu
-            anchorEl={anchorEl?.anchor}
-            open={Boolean(anchorEl?.anchor) && anchorEl?.column?.dataKey === column.dataKey}
-            onClose={handleMenuClose}
-            MenuListProps={{
-              style: { maxHeight: 300, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '5px' },
-            }}
-          >
-            {allColumns.map((col) => (
-              <MenuItem
-                key={col.dataKey}
-                onClick={() => {
-                  toggleColumnVisibility(col.dataKey);
-                }}
-                sx={{ display: 'flex', alignItems: 'center', gap: '5px' }}
-              >
-                <Checkbox checked={visibleColumns.includes(col.dataKey)} />
-                {col.label}{col.dataKey}
-              </MenuItem>
-            ))}
-            <MenuItem
-              onClick={() => {
-                resetVisibleColumns();
-                handleMenuClose();
-              }}
-              sx={{
-                gridColumn: 'span 3',
-                justifyContent: 'center',
-                fontWeight: 'bold',
-                textAlign: 'center',
-                color: 'red',
-              }}
-            >
-              Показывать только Headers
-            </MenuItem>
-          </Menu>
         </TableCell>
       ))}
+      <ColumnMenu
+        anchorEl={anchorEl}
+        handleMenuClose={handleMenuClose}
+        allColumns={allColumns}
+        visibleColumns={visibleColumns}
+        toggleColumnVisibility={toggleColumnVisibility}
+        resetVisibleColumns={resetVisibleColumns}
+      />
     </TableRow>
   );
 }
