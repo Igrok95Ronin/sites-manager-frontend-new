@@ -10,6 +10,8 @@ import { TableVirtuoso } from 'react-virtuoso';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 
 import useLocalStorageDataKeys from '../../../Tabs/UseLocalStorage/UseLocalStorage';
 import ColumnMenu from '../ColumnMenu/ColumnMenu';
@@ -98,6 +100,8 @@ function FixedHeaderContent({
 }
 
 function rowContent(columns, _index, row) {
+  const rowBackgroundColor = row.ClickOnNumber ? 'rgb(211, 248, 212)' : _index % 2 === 0 ? '#f9f9f9' : 'white';
+
   return (
     <>
       {columns.map((column) => (
@@ -106,23 +110,28 @@ function rowContent(columns, _index, row) {
           align={column.numeric ? 'right' : 'left'}
           sx={{
             border: '1px solid #ccc',
-            backgroundColor: _index % 2 === 0 ? '#f9f9f9' : 'white',
+            backgroundColor: rowBackgroundColor, // Условный стиль для всей строки
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             padding: '6px',
           }}
         >
-          {row[column.dataKey]}
+          {/* Условное отображение иконки для ClickOnNumber */}
+          {column.dataKey === 'ClickOnNumber' ? (
+            row.ClickOnNumber ? <CheckIcon color="success" /> : <CloseIcon color="error" />
+          ) : (
+            row[column.dataKey]
+          )}
         </TableCell>
       ))}
     </>
   );
 }
 
+
 export default function DataTable({ columns, rows, headerFieldsDataKeys, loadMoreRows, hasMore, label }) {
   const storageKey = label === 'Headers' ? 'visibleColumnsHeaders' : 'visibleColumnsJS';
-
   const [sortKey, setSortKey] = React.useState(null);
   const [sortDirection, setSortDirection] = React.useState('asc');
   const [visibleColumns, setVisibleColumns] = useLocalStorageDataKeys(storageKey, headerFieldsDataKeys);

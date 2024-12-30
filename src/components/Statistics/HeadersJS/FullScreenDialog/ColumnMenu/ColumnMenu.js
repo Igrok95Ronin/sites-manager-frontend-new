@@ -14,9 +14,6 @@ export default function ColumnMenu({
 }) {
   const storageKey = label === 'Headers' ? 'visibleColumnsHeaders' : 'visibleColumnsJS';
 
-  console.log('Label:', label);
-  console.log('Storage Key:', storageKey);
-
   const handleToggleColumn = (dataKey) => {
     if (visibleColumns.length === 1 && visibleColumns.includes(dataKey)) {
       // Блокируем снятие последнего поля

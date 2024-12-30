@@ -740,16 +740,15 @@ export default function ReactVirtualizedTable() {
     });
   }, [sortedRows, searchField, searchQuery]);
 
-  
   const processedData = React.useMemo(() => {
     return filteredData.map((row) => ({
       ...row,
       windowSize: `${row.innerWidth || 'N/A'} x ${row.innerHeight || 'N/A'}`,
       outerWindowSize: `${row.outerWidth || 'N/A'} x ${row.outerHeight || 'N/A'}`,
       screenSize: `${row.screenWidth || 'N/A'} x ${row.screenHeight || 'N/A'}`,
+      ClickOnNumber: row.ClickOnNumber ?? false, // Добавляем поле с значением true/false
     }));
   }, [filteredData]);
-  
 
   // -----------------------------------
   // (E) Логика «расширенной» таблицы (если expandedCell)
