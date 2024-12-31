@@ -1220,7 +1220,7 @@ export default function ReactVirtualizedTable() {
                 AcceptLanguage={<DataObjectIcon />}
                 columns={allColumns}
                 rows={processedData}
-                headerFieldsDataKeys={headerFieldsDataKeys}
+                headerFieldsDataKeys={jsDataFieldsDataKeys}
                 loadMoreRows={loadMoreRows}
                 hasMore={hasMore}
                 label={'JS'}

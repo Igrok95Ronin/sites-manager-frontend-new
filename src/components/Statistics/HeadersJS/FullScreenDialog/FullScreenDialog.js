@@ -73,7 +73,7 @@ export default function FullScreenDialog({
             }}
           >
             <Typography sx={{ ml: 0, flex: 1 }} variant="h6" component="div">
-              Headers
+              {label}
             </Typography>
             <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
               <CloseIcon />
