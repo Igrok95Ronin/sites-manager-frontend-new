@@ -276,7 +276,7 @@ export const allColumns = [
   {
     label: (
       <Tooltip title="Accept-Language" arrow placement="top">
-        <GTranslateIcon/>
+        <GTranslateIcon />
       </Tooltip>
     ),
     dataKey: 'Accept-Language',
@@ -749,18 +749,21 @@ export default function ReactVirtualizedTable() {
       const today = isToday(createdAt);
       const sameYear = isSameYear(createdAt, new Date());
       let formattedDate;
-  
+
       if (today) {
         // Если дата - сегодня, показываем только время
         formattedDate = createdAt.toLocaleTimeString('ru-RU', { timeZone: 'Europe/Moscow' });
       } else if (sameYear) {
         // Если текущий год, показываем дату без года
-        formattedDate = `${createdAt.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })}, ${createdAt.toLocaleTimeString('ru-RU', { timeZone: 'Europe/Moscow' })}`;
+        formattedDate = `${createdAt.toLocaleDateString('ru-RU', {
+          day: '2-digit',
+          month: '2-digit',
+        })}, ${createdAt.toLocaleTimeString('ru-RU', { timeZone: 'Europe/Moscow' })}`;
       } else {
         // Иначе показываем полную дату с годом
         formattedDate = createdAt.toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' });
       }
-  
+
       return {
         ...row,
         windowSize: `${row.innerWidth || 'N/A'} x ${row.innerHeight || 'N/A'}`,
@@ -1083,48 +1086,48 @@ export default function ReactVirtualizedTable() {
             );
           }
 
-          // Вызываем модальное окно Headers
-          if (cellKey === 'Accept-Language') {
-            return (
-              <TableCell
-                className="statistics__padding"
-                key={cellKey}
-                align="left"
-                style={{ backgroundColor: rowBackgroundColor }}
-              >
-                <FullScreenDialog
-                  AcceptLanguage={cellValue}
-                  columns={allColumns}
-                  rows={processedData}
-                  headerFieldsDataKeys={headerFieldsDataKeys}
-                  loadMoreRows={loadMoreRows}
-                  hasMore={hasMore}
-                  label={'Headers'}
-                />
-              </TableCell>
-            );
-          }
-          // Вызываем модальное окно JS
-          if (cellKey === 'language') {
-            return (
-              <TableCell
-                className="statistics__padding"
-                key={cellKey}
-                align="left"
-                style={{ backgroundColor: rowBackgroundColor }}
-              >
-                <FullScreenDialog
-                  AcceptLanguage={cellValue}
-                  columns={allColumns}
-                  rows={processedData}
-                  headerFieldsDataKeys={jsDataFieldsDataKeys}
-                  loadMoreRows={loadMoreRows}
-                  hasMore={hasMore}
-                  label={'JS'}
-                />
-              </TableCell>
-            );
-          }
+          // // Вызываем модальное окно Headers
+          // if (cellKey === 'Accept-Language') {
+          //   return (
+          //     <TableCell
+          //       className="statistics__padding"
+          //       key={cellKey}
+          //       align="left"
+          //       style={{ backgroundColor: rowBackgroundColor }}
+          //     >
+          //       <FullScreenDialog
+          //         AcceptLanguage={cellValue}
+          //         columns={allColumns}
+          //         rows={processedData}
+          //         headerFieldsDataKeys={headerFieldsDataKeys}
+          //         loadMoreRows={loadMoreRows}
+          //         hasMore={hasMore}
+          //         label={'Headers'}
+          //       />
+          //     </TableCell>
+          //   );
+          // }
+          // // Вызываем модальное окно JS
+          // if (cellKey === 'language') {
+          //   return (
+          //     <TableCell
+          //       className="statistics__padding"
+          //       key={cellKey}
+          //       align="left"
+          //       style={{ backgroundColor: rowBackgroundColor }}
+          //     >
+          //       <FullScreenDialog
+          //         AcceptLanguage={cellValue}
+          //         columns={allColumns}
+          //         rows={processedData}
+          //         headerFieldsDataKeys={jsDataFieldsDataKeys}
+          //         loadMoreRows={loadMoreRows}
+          //         hasMore={hasMore}
+          //         label={'JS'}
+          //       />
+          //     </TableCell>
+          //   );
+          // }
 
           if (cellKey === 'Gclid') {
             return (
@@ -1198,6 +1201,34 @@ export default function ReactVirtualizedTable() {
                   <RestartAltIcon sx={{ width: '18px' }} />
                 </IconButton>
               </Tooltip>
+            )}
+
+            {/* Открыть модальное окно для Headers */}
+            {column.dataKey === 'Accept-Language' && (
+              <FullScreenDialog
+                AcceptLanguage={<DataObjectIcon />}
+                columns={allColumns}
+                rows={processedData}
+                headerFieldsDataKeys={headerFieldsDataKeys}
+                loadMoreRows={loadMoreRows}
+                hasMore={hasMore}
+                label={'Headers'}
+                Description={'Заголовки Headers'}
+              />
+            )}
+
+            {/* Открыть модальное окно для JS */}
+            {column.dataKey === 'language' && (
+              <FullScreenDialog
+                AcceptLanguage={<DataObjectIcon />}
+                columns={allColumns}
+                rows={processedData}
+                headerFieldsDataKeys={headerFieldsDataKeys}
+                loadMoreRows={loadMoreRows}
+                hasMore={hasMore}
+                label={'JS'}
+                Description={'Данные JS'}
+              />
             )}
 
             {/* Пример: сбросить раскрытые JSON для "Headers" или "JsData" */}

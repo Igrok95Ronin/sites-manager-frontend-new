@@ -8,6 +8,7 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import CloseIcon from '@mui/icons-material/Close';
 import Slide from '@mui/material/Slide';
+import Tooltip from '@mui/material/Tooltip';
 
 import DataTable from './DataTable/DataTable';
 
@@ -22,10 +23,10 @@ export default function FullScreenDialog({
   headerFieldsDataKeys,
   loadMoreRows,
   hasMore,
-  label
+  label,
+  Description
 }) {
   const [open, setOpen] = React.useState(false);
-
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -37,18 +38,20 @@ export default function FullScreenDialog({
 
   return (
     <React.Fragment>
-      <Button
-        variant="text"
-        size="small"
-        sx={{
-          textTransform: 'none', // Убираем автоматическое преобразование текста
-          whiteSpace: 'nowrap', // Запрещаем перенос текста
-          justifyContent: 'start'
-        }}
-        onClick={handleClickOpen}
-      >
-        {AcceptLanguage}
-      </Button>
+      <Tooltip title={Description} arrow placement="top">
+        <Button
+          variant="text"
+          size="small"
+          sx={{
+            textTransform: 'none', // Убираем автоматическое преобразование текста
+            whiteSpace: 'nowrap', // Запрещаем перенос текста
+            minWidth: '30px',
+          }}
+          onClick={handleClickOpen}
+        >
+          {AcceptLanguage}
+        </Button>
+      </Tooltip>
       <Dialog
         fullScreen
         open={open}
