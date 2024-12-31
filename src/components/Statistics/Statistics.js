@@ -1096,7 +1096,12 @@ export default function ReactVirtualizedTable() {
                 align="left"
                 style={{ backgroundColor: rowBackgroundColor }}
               >
-                <AlertDialog AcceptLanguage={cellValue} Headers={row.Headers} Label={"Headers"} Title={"Заголовки (Headers)"} />
+                <AlertDialog
+                  AcceptLanguage={cellValue}
+                  Headers={row.Headers}
+                  Label={'Headers'}
+                  Title={'Заголовки (Headers)'}
+                />
               </TableCell>
             );
           }
@@ -1109,7 +1114,7 @@ export default function ReactVirtualizedTable() {
                 align="left"
                 style={{ backgroundColor: rowBackgroundColor }}
               >
-                <AlertDialog AcceptLanguage={cellValue} Headers={row.JsData} Label={"JS"} Title={"Данные (JS)"}/>
+                <AlertDialog AcceptLanguage={cellValue} Headers={row.JsData} Label={'JS'} Title={'Данные (JS)'} />
               </TableCell>
             );
           }
@@ -1165,10 +1170,17 @@ export default function ReactVirtualizedTable() {
             key={column.dataKey}
             variant="head"
             align="left"
-            sx={{ backgroundColor: 'background.paper', cursor: 'pointer' }}
-            onClick={() => handleSort(column.dataKey)}
+            sx={{ backgroundColor: 'background.paper', cursor: 'default' }} // Убираем "pointer" для всей ячейки
           >
-            <TableSortLabel active={orderBy === column.dataKey} direction={orderBy === column.dataKey ? order : 'asc'}>
+            <TableSortLabel
+              active={orderBy === column.dataKey}
+              direction={orderBy === column.dataKey ? order : 'asc'}
+              onClick={(e) => {
+                e.stopPropagation(); // Останавливаем всплытие события
+                handleSort(column.dataKey); // Сортировка только при клике на иконку
+              }}
+              sx={{ cursor: 'pointer' }} // Устанавливаем "pointer" для самой иконки
+            >
               {column.label}
             </TableSortLabel>
 
@@ -1179,7 +1191,7 @@ export default function ReactVirtualizedTable() {
                   sx={{ padding: '5px 0', marginLeft: '-25px' }}
                   color="error"
                   onClick={(e) => {
-                    e.stopPropagation();
+                    e.stopPropagation(); // Останавливаем всплытие события
                     setSearchQuery('');
                   }}
                 >
@@ -1223,7 +1235,7 @@ export default function ReactVirtualizedTable() {
                   sx={{ padding: '5px 0', marginLeft: '-25px' }}
                   color="error"
                   onClick={(e) => {
-                    e.stopPropagation();
+                    e.stopPropagation(); // Останавливаем всплытие события
                     setExpandedCell(null);
                     // Очистить formattedJSON
                     setFormattedJSON((prev) => {
