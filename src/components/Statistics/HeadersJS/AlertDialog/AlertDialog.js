@@ -5,7 +5,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import { JSONTree } from 'react-json-tree';
 
-export default function AlertDialog({ AcceptLanguage, Headers, Title }) {
+export default function AlertDialog({ AcceptLanguage, Headers, Label, Title }) {
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
@@ -21,7 +21,7 @@ export default function AlertDialog({ AcceptLanguage, Headers, Title }) {
     try {
       return typeof Headers === 'string' ? JSON.parse(Headers) : Headers;
     } catch (error) {
-      console.error('Ошибка при парсинге Headers:', error);
+    //   console.error('Ошибка при парсинге Headers:', error);
       return null;
     }
   }, [Headers]);
@@ -39,7 +39,7 @@ export default function AlertDialog({ AcceptLanguage, Headers, Title }) {
         }}
         onClick={handleClickOpen}
       >
-        {AcceptLanguage || 'View Headers'}
+        {AcceptLanguage || `View ${Label}`}
       </Button>
       <Dialog
         open={open}
@@ -99,7 +99,7 @@ export default function AlertDialog({ AcceptLanguage, Headers, Title }) {
             />
           ) : (
             <p style={{ color: '#d32f2f', fontWeight: 'bold' }}>
-              Не удалось отобразить Headers. Проверьте данные.
+              Не удалось отобразить {Title}. Проверьте данные возможно они пустые.
             </p>
           )}
         </DialogContent>

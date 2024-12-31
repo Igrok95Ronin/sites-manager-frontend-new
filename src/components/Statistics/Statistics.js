@@ -1096,7 +1096,7 @@ export default function ReactVirtualizedTable() {
                 align="left"
                 style={{ backgroundColor: rowBackgroundColor }}
               >
-                <AlertDialog AcceptLanguage={cellValue} Headers={row.Headers} Title={"Заголовки (Headers)"} />
+                <AlertDialog AcceptLanguage={cellValue} Headers={row.Headers} Label={"Headers"} Title={"Заголовки (Headers)"} />
               </TableCell>
             );
           }
@@ -1109,7 +1109,7 @@ export default function ReactVirtualizedTable() {
                 align="left"
                 style={{ backgroundColor: rowBackgroundColor }}
               >
-                <AlertDialog AcceptLanguage={cellValue} Headers={row.JsData} Title={"Данные (JS)"}/>
+                <AlertDialog AcceptLanguage={cellValue} Headers={row.JsData} Label={"JS"} Title={"Данные (JS)"}/>
               </TableCell>
             );
           }
