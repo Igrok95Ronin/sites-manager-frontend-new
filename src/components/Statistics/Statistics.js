@@ -28,6 +28,7 @@ import ColumnSelector from './Tabs/ColumnSelector/ColumnSelector.js';
 import IPInfo from './Tabs/IPInfo/IPInfo.js';
 import useLocalStorage from './Tabs/UseLocalStorage/UseLocalStorage.js'; // Импортируем кастомный хук
 import FullScreenDialog from './HeadersJS/FullScreenDialog/FullScreenDialog.js'; // Окно для показа заголовков
+import AlertDialog from './HeadersJS/AlertDialog/AlertDialog.js';
 
 import './Statistics.scss';
 
@@ -1086,48 +1087,32 @@ export default function ReactVirtualizedTable() {
             );
           }
 
-          // // Вызываем модальное окно Headers
-          // if (cellKey === 'Accept-Language') {
-          //   return (
-          //     <TableCell
-          //       className="statistics__padding"
-          //       key={cellKey}
-          //       align="left"
-          //       style={{ backgroundColor: rowBackgroundColor }}
-          //     >
-          //       <FullScreenDialog
-          //         AcceptLanguage={cellValue}
-          //         columns={allColumns}
-          //         rows={processedData}
-          //         headerFieldsDataKeys={headerFieldsDataKeys}
-          //         loadMoreRows={loadMoreRows}
-          //         hasMore={hasMore}
-          //         label={'Headers'}
-          //       />
-          //     </TableCell>
-          //   );
-          // }
-          // // Вызываем модальное окно JS
-          // if (cellKey === 'language') {
-          //   return (
-          //     <TableCell
-          //       className="statistics__padding"
-          //       key={cellKey}
-          //       align="left"
-          //       style={{ backgroundColor: rowBackgroundColor }}
-          //     >
-          //       <FullScreenDialog
-          //         AcceptLanguage={cellValue}
-          //         columns={allColumns}
-          //         rows={processedData}
-          //         headerFieldsDataKeys={jsDataFieldsDataKeys}
-          //         loadMoreRows={loadMoreRows}
-          //         hasMore={hasMore}
-          //         label={'JS'}
-          //       />
-          //     </TableCell>
-          //   );
-          // }
+          // Вызываем модальное окно Headers
+          if (cellKey === 'Accept-Language') {
+            return (
+              <TableCell
+                className="statistics__padding"
+                key={cellKey}
+                align="left"
+                style={{ backgroundColor: rowBackgroundColor }}
+              >
+                <AlertDialog AcceptLanguage={cellValue} Headers={row.Headers} Title={"Заголовки (Headers)"} />
+              </TableCell>
+            );
+          }
+          // Вызываем модальное окно JS
+          if (cellKey === 'language') {
+            return (
+              <TableCell
+                className="statistics__padding"
+                key={cellKey}
+                align="left"
+                style={{ backgroundColor: rowBackgroundColor }}
+              >
+                <AlertDialog AcceptLanguage={cellValue} Headers={row.JsData} Title={"Данные (JS)"}/>
+              </TableCell>
+            );
+          }
 
           if (cellKey === 'Gclid') {
             return (
