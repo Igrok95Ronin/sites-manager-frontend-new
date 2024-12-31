@@ -79,6 +79,7 @@ import PanToolIcon from '@mui/icons-material/PanTool';
 import NetworkCheckIcon from '@mui/icons-material/NetworkCheck';
 import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
 import DataThresholdingIcon from '@mui/icons-material/DataThresholding';
+import GTranslateIcon from '@mui/icons-material/GTranslate';
 
 // =========================================
 // 1) ХУК: храним в localStorage только массив строк (dataKey).
@@ -275,7 +276,7 @@ export const allColumns = [
   {
     label: (
       <Tooltip title="Accept-Language" arrow placement="top">
-        <LanguageIcon />
+        <GTranslateIcon/>
       </Tooltip>
     ),
     dataKey: 'Accept-Language',
