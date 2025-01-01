@@ -16,15 +16,32 @@ export default function AlertDialog({ AcceptLanguage, Headers, Label, Title }) {
     setOpen(false);
   };
 
-  // Проверяем, если Headers это строка, парсим её в объект
-  const parsedHeaders = React.useMemo(() => {
+  // Преобразуем Headers, чтобы массивы отображались как строки
+  const formattedHeaders = React.useMemo(() => {
     try {
-      return typeof Headers === 'string' ? JSON.parse(Headers) : Headers;
+      const headers = typeof Headers === 'string' ? JSON.parse(Headers) : Headers;
+
+      // Преобразуем массивы в строки
+      const transformedHeaders = Object.fromEntries(
+        Object.entries(headers).map(([key, value]) => [
+          key,
+          Array.isArray(value) ? value.join(', ') : value, // Если массив, преобразуем в строку
+        ])
+      );
+
+      return transformedHeaders;
     } catch (error) {
-    //   console.error('Ошибка при парсинге Headers:', error);
       return null;
     }
   }, [Headers]);
+
+  // Получаем количество заголовков
+  const headersCount = React.useMemo(() => {
+    if (formattedHeaders && typeof formattedHeaders === 'object') {
+      return Object.keys(formattedHeaders).length;
+    }
+    return 0;
+  }, [formattedHeaders]);
 
   return (
     <>
@@ -62,7 +79,7 @@ export default function AlertDialog({ AcceptLanguage, Headers, Label, Title }) {
             borderBottom: '1px solid #ddd',
           }}
         >
-          {Title}
+          {Title} {headersCount > 0 && `(${headersCount} заголовков)`}
         </DialogTitle>
         <DialogContent
           sx={{
@@ -73,9 +90,9 @@ export default function AlertDialog({ AcceptLanguage, Headers, Label, Title }) {
             padding: '20px',
           }}
         >
-          {parsedHeaders ? (
+          {formattedHeaders ? (
             <JSONTree
-              data={parsedHeaders}
+              data={formattedHeaders}
               theme={{
                 base00: '#ffffff', // Фон
                 base01: '#f5f5f5',
@@ -95,11 +112,11 @@ export default function AlertDialog({ AcceptLanguage, Headers, Label, Title }) {
                 base0F: '#5d4037', // Коричневый
               }}
               invertTheme={false} // Светлая тема
-              shouldExpandNode={(keyPath, data, level) => level < 2} // Раскрывать только первые 2 уровня
+              hideRoot // Убираем root
             />
           ) : (
             <p style={{ color: '#d32f2f', fontWeight: 'bold' }}>
-              Не удалось отобразить {Title}. Проверьте данные возможно они пустые.
+              Не удалось отобразить {Title}. Проверьте данные, возможно, они пустые.
             </p>
           )}
         </DialogContent>
