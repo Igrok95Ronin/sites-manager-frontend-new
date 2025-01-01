@@ -3,6 +3,8 @@ import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 import { JSONTree } from 'react-json-tree';
 
 export default function AlertDialog({ AcceptLanguage, Headers, Label, Title }) {
@@ -60,7 +62,11 @@ export default function AlertDialog({ AcceptLanguage, Headers, Label, Title }) {
       </Button>
       <Dialog
         open={open}
-        onClose={handleClose}
+        disableEnforceFocus // Отключение блокировки фокуса на модальном окне
+        disableScrollLock // Отключение блокировки скролла
+        BackdropProps={{
+          style: { backgroundColor: 'transparent' }, // Отключение затемнения фона
+        }}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
         maxWidth="md"
@@ -77,9 +83,21 @@ export default function AlertDialog({ AcceptLanguage, Headers, Label, Title }) {
             fontWeight: 'bold',
             fontSize: '1.2rem',
             borderBottom: '1px solid #ddd',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
           }}
         >
-          {Title} {headersCount > 0 && `(${headersCount} заголовков)`}
+          {Title} {headersCount > 0 && `(${headersCount})`}
+          <IconButton
+            aria-label="close"
+            onClick={handleClose}
+            sx={{
+              color: '#333',
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
         <DialogContent
           sx={{
