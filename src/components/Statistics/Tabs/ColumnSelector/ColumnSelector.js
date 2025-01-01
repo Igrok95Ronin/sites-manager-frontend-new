@@ -8,6 +8,7 @@ import ViewWeekIcon from '@mui/icons-material/ViewWeek';
 import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import SimCardDownloadIcon from '@mui/icons-material/SimCardDownload';
 import Tooltip from '@mui/material/Tooltip';
+import Switch from '@mui/material/Switch';
 
 // Импортируем компоненты для выбора даты
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
@@ -36,6 +37,8 @@ const ColumnSelector = ({
   jsDataFieldsDataKeys,
   setCheckedRows,
   defaultVisibleColumns, // Важный проп: массив объектов {label, dataKey} по умолчанию
+  doubleOutput,
+  setDoubleOutput,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -203,6 +206,21 @@ const ColumnSelector = ({
               </Grid>
             </Grid>
           </LocalizationProvider>
+
+          {/* Разделитель */}
+          <Box sx={{ my: 2 }}>
+            <hr />
+          </Box>
+
+          {/* Чеки */}
+          <Tooltip title="Двойной вывод Headers и JS" arrow placement="top">
+            <Switch
+              checked={doubleOutput} // Привязываем текущее состояние
+              onChange={() => setDoubleOutput((prev) => !prev)} // Инвертируем предыдущее значение
+              inputProps={{ 'aria-label': 'controlled' }}
+              size={'small'}
+            />
+          </Tooltip>
 
           {/* Разделитель */}
           <Box sx={{ my: 2 }}>

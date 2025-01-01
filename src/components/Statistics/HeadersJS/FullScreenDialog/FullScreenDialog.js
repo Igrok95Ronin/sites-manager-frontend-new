@@ -24,7 +24,7 @@ export default function FullScreenDialog({
   loadMoreRows,
   hasMore,
   label,
-  Description
+  Description,
 }) {
   const [open, setOpen] = React.useState(false);
 

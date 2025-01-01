@@ -643,6 +643,9 @@ export default function ReactVirtualizedTable() {
   // Чекбоксы внутри таблицы
   const [checkedRows, setCheckedRows] = useState({});
 
+  // Двойной вывод Headers, JS
+  const [doubleOutput, setDoubleOutput] = useLocalStorage('doubleOutput', 'true');
+
   // -----------------------------------
   // (C) Загрузка данных
   // -----------------------------------
@@ -1101,6 +1104,8 @@ export default function ReactVirtualizedTable() {
                   Headers={row.Headers}
                   Label={'Headers'}
                   Title={'Заголовки (Headers)'}
+                  doubleOutput={doubleOutput}
+                  doubleData={row.JsData}
                 />
               </TableCell>
             );
@@ -1114,7 +1119,14 @@ export default function ReactVirtualizedTable() {
                 align="left"
                 style={{ backgroundColor: rowBackgroundColor }}
               >
-                <AlertDialog AcceptLanguage={cellValue} Headers={row.JsData} Label={'JS'} Title={'Данные (JS)'} />
+                <AlertDialog
+                  AcceptLanguage={cellValue}
+                  Headers={row.JsData}
+                  Label={'JS'}
+                  Title={'Данные (JS)'}
+                  doubleOutput={doubleOutput}
+                  doubleData={row.Headers}
+                />
               </TableCell>
             );
           }
@@ -1300,6 +1312,8 @@ export default function ReactVirtualizedTable() {
             defaultVisibleColumns={allColumns.filter((col) => defaultVisibleDataKeys.includes(col.dataKey))}
             visibleDataKeys={visibleDataKeys}
             setVisibleDataKeys={setVisibleDataKeys}
+            doubleOutput={doubleOutput}
+            setDoubleOutput={setDoubleOutput} // Чек для показа двойных данные в модальном окне
           />
         }
         searchQuery={searchQuery}
