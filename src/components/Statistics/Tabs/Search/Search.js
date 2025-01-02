@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Grid, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import Tooltip from '@mui/material/Tooltip';
+import Button from '@mui/material/Button';
 
 import './Search.scss';
 import useLocalStorage from '../UseLocalStorage/UseLocalStorage'; // Импортируем кастомный хук
@@ -12,7 +13,10 @@ const Search = ({
   setLimit,
   searchField,
   setSearchField,
-  columns
+  columns,
+  loadMoreRows,
+  loading,
+  hasMore,
 }) => {
   // Используем кастомный хук для сохранения limit
   const [localLimit, setLocalLimit] = useLocalStorage('search_limit', limit);
@@ -130,7 +134,7 @@ const Search = ({
           </FormControl>
         </Grid>
       </Box>
-      
+
       {/* Вертикальный разделитель */}
       <div
         style={{
@@ -140,6 +144,13 @@ const Search = ({
           margin: '0 0px',
         }}
       ></div>
+      {hasMore && (
+        <div style={{ textAlign: 'center', padding: '10px' }}>
+          <Button variant="outlined" size="small" onClick={loadMoreRows} disabled={loading}>
+            Загрузить ещё
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

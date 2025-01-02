@@ -56,7 +56,6 @@ export default function FullWidthTabs({
   loading,
   hasMore,
   ColumnSelector,
-  loadingRef,
   searchField,
   setSearchField,
   searchQuery,
@@ -71,11 +70,11 @@ export default function FullWidthTabs({
     setValue(newValue);
   };
 
-  const endReachedHandler = React.useCallback(() => {
-    if (!loadingRef.current && hasMore) {
-      loadMoreRows();
-    }
-  }, [hasMore, loadMoreRows, loadingRef]);
+  // const endReachedHandler = React.useCallback(() => {
+  //   if (!loadingRef.current && hasMore) {
+  //     loadMoreRows();
+  //   }
+  // }, [hasMore, loadMoreRows, loadingRef]);
 
   // Фильтруем данные по Headers
   const filteredData = rows
@@ -135,23 +134,27 @@ export default function FullWidthTabs({
               searchField={searchField}
               setSearchField={setSearchField}
               columns={columns}
+              loadMoreRows={loadMoreRows}
+              loading={loading}
+              hasMore={hasMore}
             />
             <div className="tabPanelProps__settings">{ColumnSelector}</div>
           </div>
+
           <Paper style={{ height: '74vh', width: '100%' }}>
             <TableVirtuoso
               classID="tabPanelProps__columns"
-              data={filteredData} // данные для таблицы поиск
-              components={VirtuosoTableComponents} // компоненты для виртуальной таблицы
-              fixedHeaderContent={fixedHeaderContent} // отображение заголовков
-              itemContent={rowContent} // отображение строк
-              // endReached={loadMoreRows} // функция для ленивой загрузки
-              endReached={endReachedHandler}
-              increaseViewportBy={{ bottom: 1000 }} // Настройте значение по необходимости
+              data={filteredData}
+              components={VirtuosoTableComponents}
+              fixedHeaderContent={fixedHeaderContent}
+              itemContent={rowContent}
+              // endReached={endReachedHandler}   // <-- Удаляем или комментируем
+              // increaseViewportBy={{ bottom: 1000 }} // <-- Тоже не нужно
             />
-            {/* {loading && <div style={{ textAlign: 'center' }}>Loading...</div>} */}
+
             {loading && <Spinner loading={loading} />}
-            {!hasMore && <div style={{ textAlign: 'center' }}>Больше нет данных для загрузки.</div>}
+
+            {/* {!hasMore && <div style={{ textAlign: 'center' }}>Больше нет данных для загрузки.</div>} */}
           </Paper>
         </TabPanel>
 
