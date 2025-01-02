@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import axiosInstance from '../../axiosInstance'; // Используем централизованный экземпляр Axios
 import axios from 'axios';
 import { startOfDay, endOfDay, isToday, isSameYear } from 'date-fns'; // Добавлено isSameYear
@@ -625,8 +625,8 @@ export default function ReactVirtualizedTable() {
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-
   const [order, setOrder] = useState('desc');
+
   // Сортируем первоначально по первому столбцу из defaultVisibleDataKeys
   const [orderBy, setOrderBy] = useState(defaultVisibleDataKeys[0] || 'ID');
 
@@ -646,13 +646,17 @@ export default function ReactVirtualizedTable() {
   // Двойной вывод Headers, JS
   const [doubleOutput, setDoubleOutput] = useLocalStorage('doubleOutput', 'true');
 
+  // Состояние для фильтрации по домену
+  const [filterByDomain, setFilterByDomain] = useLocalStorageDataKeys('filterByDomain', null);
+
   // -----------------------------------
   // (C) Загрузка данных
   // -----------------------------------
-  const loadMoreRows = async () => {
+  const loadMoreRows = useCallback(async () => {
     if (loadingRef.current || !hasMore) return;
     loadingRef.current = true;
     setLoading(true);
+
     try {
       const params = { limit, offset };
 
@@ -691,17 +695,23 @@ export default function ReactVirtualizedTable() {
       setLoading(false);
       loadingRef.current = false;
     }
-  };
+  }, [limit, offset, hasMore, startDate, endDate]);
 
-  // Сбрасываем и загружаем заново при изменении дат или limit
+  // Сбрасываем при изменении startDate, endDate, limit
   useEffect(() => {
     setRows([]);
     setOffset(0);
     setHasMore(true);
     loadingRef.current = false;
-    loadMoreRows();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startDate, endDate, limit]);
+
+  // Второй useEffect – следит, когда действительно надо грузить, и вызывает loadMoreRows():
+  useEffect(() => {
+    // Например, если offset == 0 и есть hasMore, то запускаем запрос
+    if (!loadingRef.current && hasMore && offset === 0) {
+      loadMoreRows();
+    }
+  }, [offset, hasMore, loadMoreRows]);
 
   // -----------------------------------
   // (D) Сортировка и поиск
@@ -730,21 +740,34 @@ export default function ReactVirtualizedTable() {
   }, [rows, order, orderBy]);
 
   // Фильтрация по полю searchField и поисковой строке searchQuery
+  // Фильтрация по полю searchField, поисковой строке searchQuery и домену
   const filteredData = React.useMemo(() => {
-    return sortedRows.filter((item) => {
-      let fieldValue = item[searchField];
-      if (fieldValue === undefined || fieldValue === null) return false;
+    let data = sortedRows;
 
-      if (searchField === 'CreatedAt') {
-        // пример: преобразовать дату к строке
-        const date = new Date(fieldValue);
-        fieldValue = date.toLocaleDateString('ru-RU');
-      } else {
-        fieldValue = fieldValue.toString();
-      }
-      return fieldValue.toLowerCase().includes(searchQuery.toLowerCase());
-    });
-  }, [sortedRows, searchField, searchQuery]);
+    // Применение фильтрации по полю поиска
+    if (searchQuery) {
+      data = data.filter((item) => {
+        let fieldValue = item[searchField];
+        if (fieldValue === undefined || fieldValue === null) return false;
+
+        if (searchField === 'CreatedAt') {
+          const date = new Date(fieldValue);
+          fieldValue = date.toLocaleDateString('ru-RU');
+        } else {
+          fieldValue = fieldValue.toString();
+        }
+
+        return fieldValue.toLowerCase().includes(searchQuery.toLowerCase());
+      });
+    }
+
+    // Применение фильтрации по домену
+    if (filterByDomain) {
+      data = data.filter((item) => item.Domain === filterByDomain);
+    }
+
+    return data;
+  }, [sortedRows, searchField, searchQuery, filterByDomain]);
 
   const processedData = React.useMemo(() => {
     return filteredData.map((row) => {
@@ -976,7 +999,7 @@ export default function ReactVirtualizedTable() {
                   variant="text"
                   size="small"
                   color="secondary"
-                  onClick={() => setSearchQuery(cellValue)}
+                  onClick={() => setFilterByDomain(cellValue)}
                   sx={{
                     textTransform: 'none',
                     whiteSpace: 'nowrap',
@@ -1197,14 +1220,14 @@ export default function ReactVirtualizedTable() {
             </TableSortLabel>
 
             {/* Пример: сброс фильтра по Domain */}
-            {column.dataKey === 'Domain' && (
+            {column.dataKey === 'Domain' && filterByDomain && (
               <Tooltip title="Сбросить фильтр по домену" arrow placement="top">
                 <IconButton
-                  sx={{ padding: '5px 0', marginLeft: '-25px' }}
-                  color="error"
+                  sx={{ padding: '5px 0', marginLeft: '0' }}
+                  color="success" // Зеленый цвет, чтобы показать, что фильтр активен
                   onClick={(e) => {
                     e.stopPropagation(); // Останавливаем всплытие события
-                    setSearchQuery('');
+                    setFilterByDomain(null); // Сбросить значение в локальном хранилище
                   }}
                 >
                   <RestartAltIcon sx={{ width: '18px' }} />
