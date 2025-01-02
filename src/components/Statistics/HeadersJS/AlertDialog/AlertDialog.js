@@ -7,9 +7,9 @@ import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 import { JSONTree } from 'react-json-tree';
 
-import './AlertDialog.scss'
+import './AlertDialog.scss';
 
-export default function AlertDialog({ AcceptLanguage, Headers, Label, Title, doubleOutput,doubleData}) {
+export default function AlertDialog({ AcceptLanguage, Headers, Label, Title, doubleOutput, doubleData }) {
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
@@ -40,24 +40,23 @@ export default function AlertDialog({ AcceptLanguage, Headers, Label, Title, dou
   }, [Headers]);
 
   // Преобразуем doubleData, чтобы массивы отображались как строки
-const formattedDoubleData = React.useMemo(() => {
-  try {
-    const data = typeof doubleData === 'string' ? JSON.parse(doubleData) : doubleData;
+  const formattedDoubleData = React.useMemo(() => {
+    try {
+      const data = typeof doubleData === 'string' ? JSON.parse(doubleData) : doubleData;
 
-    // Преобразуем массивы в строки
-    const transformedData = Object.fromEntries(
-      Object.entries(data).map(([key, value]) => [
-        key,
-        Array.isArray(value) ? value.join(', ') : value, // Если массив, преобразуем в строку
-      ])
-    );
+      // Преобразуем массивы в строки
+      const transformedData = Object.fromEntries(
+        Object.entries(data).map(([key, value]) => [
+          key,
+          Array.isArray(value) ? value.join(', ') : value, // Если массив, преобразуем в строку
+        ]),
+      );
 
-    return transformedData;
-  } catch (error) {
-    return null;
-  }
-}, [doubleData]);
-
+      return transformedData;
+    } catch (error) {
+      return null;
+    }
+  }, [doubleData]);
 
   // Получаем количество заголовков
   const headersCount = React.useMemo(() => {
@@ -84,16 +83,12 @@ const formattedDoubleData = React.useMemo(() => {
       </Button>
       <Dialog
         open={open}
-        disableEnforceFocus // Отключение блокировки фокуса на модальном окне
-        disableScrollLock // Отключение блокировки скролла
-        BackdropProps={{
-          style: { backgroundColor: 'transparent' }, // Отключение затемнения фона
-        }}
+        onClose={handleClose} // Добавляем обработку закрытия при клике на фон
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
         maxWidth="false"
         PaperProps={{
-          sx: { borderRadius: 2, overflow: 'hidden', bgcolor: '#ffffff' ,maxWidth: '1500px'}, // Светлая тема
+          sx: { borderRadius: 2, overflow: 'hidden', bgcolor: '#ffffff', maxWidth: '1500px' }, // Светлая тема
         }}
       >
         {doubleOutput ? (
@@ -112,17 +107,8 @@ const formattedDoubleData = React.useMemo(() => {
               }}
             >
               {Title} {headersCount > 0 && `(${headersCount})`}
-              <IconButton
-                aria-label="close"
-                onClick={handleClose}
-                sx={{
-                  color: '#333',
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
             </DialogTitle>
-            
+
             <div className="alertDialog__innerModal">
               <DialogContent
                 sx={{
