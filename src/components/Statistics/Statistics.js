@@ -1296,9 +1296,6 @@ export default function ReactVirtualizedTable() {
         setSearchField={setSearchField}
         ColumnSelector={
           <ColumnSelector
-            // Внутри ColumnSelector
-            // мы будем работать со всем списком allColumns
-            // но чекбоксы ставить по visibleDataKeys
             columns={allColumns}
             visibleColumns={visibleColumns}
             setVisibleColumns={null /* больше не нужен, см. ниже */}
