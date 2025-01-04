@@ -582,9 +582,7 @@ export default function ReactVirtualizedTable() {
 
   // На основе visibleDataKeys восстанавливаем объекты столбцов (с иконками) с сохранением порядка
   const visibleColumns = React.useMemo(() => {
-    return visibleDataKeys
-      .map((key) => allColumns.find((col) => col.dataKey === key))
-      .filter(Boolean);
+    return visibleDataKeys.map((key) => allColumns.find((col) => col.dataKey === key)).filter(Boolean);
   }, [visibleDataKeys]);
 
   // «Расширенный» набор dataKeys (если нужно)
@@ -1223,76 +1221,76 @@ export default function ReactVirtualizedTable() {
                         >
                           {column.label}
                         </TableSortLabel>
-                      </div>
 
-                      {/* Дополнительные элементы (например, Tooltips, Buttons) */}
-                      {column.dataKey === 'Domain' && filterByDomain && (
-                        <Tooltip title="Сбросить фильтр по домену" arrow placement="top">
-                          <IconButton
-                            sx={{ padding: '5px 0', marginLeft: '0' }}
-                            color="success"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setFilterByDomain(null);
-                            }}
-                          >
-                            <RestartAltIcon sx={{ width: '18px' }} />
-                          </IconButton>
-                        </Tooltip>
-                      )}
+                        {/* Дополнительные элементы (например, Tooltips, Buttons) */}
+                        {column.dataKey === 'Domain' && filterByDomain && (
+                          <Tooltip title="Сбросить фильтр по домену" arrow placement="top">
+                            <IconButton
+                              sx={{ padding: '5px 0', marginLeft: '0' }}
+                              color="success"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setFilterByDomain(null);
+                              }}
+                            >
+                              <RestartAltIcon sx={{ width: '18px' }} />
+                            </IconButton>
+                          </Tooltip>
+                        )}
 
-                      {column.dataKey === 'Accept-Language' && (
-                        <FullScreenDialog
-                          AcceptLanguage={<DataObjectIcon />}
-                          columns={allColumns}
-                          rows={processedData}
-                          headerFieldsDataKeys={headerFieldsDataKeys}
-                          loadMoreRows={loadMoreRows}
-                          hasMore={hasMore}
-                          label={'Headers'}
-                          Description={'Заголовки Headers'}
-                        />
-                      )}
+                        {column.dataKey === 'Accept-Language' && (
+                          <FullScreenDialog
+                            AcceptLanguage={<DataObjectIcon />}
+                            columns={allColumns}
+                            rows={processedData}
+                            headerFieldsDataKeys={headerFieldsDataKeys}
+                            loadMoreRows={loadMoreRows}
+                            hasMore={hasMore}
+                            label={'Headers'}
+                            Description={'Заголовки Headers'}
+                          />
+                        )}
 
-                      {column.dataKey === 'language' && (
-                        <FullScreenDialog
-                          AcceptLanguage={<DataObjectIcon />}
-                          columns={allColumns}
-                          rows={processedData}
-                          headerFieldsDataKeys={jsDataFieldsDataKeys}
-                          loadMoreRows={loadMoreRows}
-                          hasMore={hasMore}
-                          label={'JS'}
-                          Description={'Данные JS'}
-                        />
-                      )}
+                        {column.dataKey === 'language' && (
+                          <FullScreenDialog
+                            AcceptLanguage={<DataObjectIcon />}
+                            columns={allColumns}
+                            rows={processedData}
+                            headerFieldsDataKeys={jsDataFieldsDataKeys}
+                            loadMoreRows={loadMoreRows}
+                            hasMore={hasMore}
+                            label={'JS'}
+                            Description={'Данные JS'}
+                          />
+                        )}
 
-                      {(column.dataKey === 'Headers' || column.dataKey === 'JsData') && (
-                        <Tooltip title="Сбросить расширение JSON" arrow placement="top">
-                          <IconButton
-                            sx={{ padding: '5px 0', marginLeft: '-25px' }}
-                            color="error"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setExpandedCell(null);
-                              setFormattedJSON((prev) => {
-                                const newState = { ...prev };
-                                for (const rowId in newState) {
-                                  if (newState[rowId]) {
-                                    delete newState[rowId][column.dataKey];
-                                    if (Object.keys(newState[rowId]).length === 0) {
-                                      delete newState[rowId];
+                        {(column.dataKey === 'Headers' || column.dataKey === 'JsData') && (
+                          <Tooltip title="Сбросить расширение JSON" arrow placement="top">
+                            <IconButton
+                              sx={{ padding: '5px 0', marginLeft: '-25px' }}
+                              color="error"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setExpandedCell(null);
+                                setFormattedJSON((prev) => {
+                                  const newState = { ...prev };
+                                  for (const rowId in newState) {
+                                    if (newState[rowId]) {
+                                      delete newState[rowId][column.dataKey];
+                                      if (Object.keys(newState[rowId]).length === 0) {
+                                        delete newState[rowId];
+                                      }
                                     }
                                   }
-                                }
-                                return newState;
-                              });
-                            }}
-                          >
-                            <RestartAltIcon sx={{ width: '15px' }} />
-                          </IconButton>
-                        </Tooltip>
-                      )}
+                                  return newState;
+                                });
+                              }}
+                            >
+                              <RestartAltIcon sx={{ width: '15px' }} />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </div>
                     </TableCell>
                   )}
                 </Draggable>
