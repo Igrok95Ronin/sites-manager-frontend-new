@@ -3,13 +3,15 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import axiosInstance from '../../axiosInstance'; // Используем централизованный экземпляр Axios
 import axios from 'axios';
 import { startOfDay, endOfDay, isToday, isSameYear } from 'date-fns'; // Добавлено isSameYear
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'; // Обновлено на @hello-pangea/dnd
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 
 import Table from '@mui/material/Table';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
+// import Paper from '@mui/material/Paper';
 import TableSortLabel from '@mui/material/TableSortLabel';
-import TableContainer from '@mui/material/TableContainer';
+// import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableBody from '@mui/material/TableBody';
 import Checkbox from '@mui/material/Checkbox';
@@ -26,7 +28,7 @@ import { JSONTree } from 'react-json-tree';
 import Tabs from './Tabs/Tabs.js';
 import ColumnSelector from './Tabs/ColumnSelector/ColumnSelector.js';
 import IPInfo from './Tabs/IPInfo/IPInfo.js';
-import useLocalStorage from './Tabs/UseLocalStorage/UseLocalStorage.js'; // Импортируем кастомный хук
+import useLocalStorageDataKeys from './Tabs/UseLocalStorage/UseLocalStorage.js'; // Импортируем кастомный хук
 import FullScreenDialog from './HeadersJS/FullScreenDialog/FullScreenDialog.js'; // Окно для показа заголовков
 import AlertDialog from './HeadersJS/AlertDialog/AlertDialog.js';
 
@@ -81,34 +83,6 @@ import NetworkCheckIcon from '@mui/icons-material/NetworkCheck';
 import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
 import DataThresholdingIcon from '@mui/icons-material/DataThresholding';
 import GTranslateIcon from '@mui/icons-material/GTranslate';
-
-// =========================================
-// 1) ХУК: храним в localStorage только массив строк (dataKey).
-// =========================================
-function useLocalStorageDataKeys(key, initialValue) {
-  const [dataKeys, setDataKeys] = useState(() => {
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
-    } catch (error) {
-      console.error(`Ошибка при чтении ${key} из localStorage:`, error);
-      return initialValue;
-    }
-  });
-
-  const setValue = (value) => {
-    try {
-      const valueToStore = value instanceof Function ? value(dataKeys) : value;
-
-      setDataKeys(valueToStore);
-      window.localStorage.setItem(key, JSON.stringify(valueToStore));
-    } catch (error) {
-      console.error(`Ошибка при записи ${key} в localStorage:`, error);
-    }
-  };
-
-  return [dataKeys, setValue];
-}
 
 // =========================================
 // 2) "Эталонный" список столбцов (allColumns) с иконками и т.п.
@@ -587,7 +561,7 @@ const defaultVisibleDataKeys = [
 // 4) Определяем VirtuosoTableComponents (как у вас)
 // =========================================
 const VirtuosoTableComponents = {
-  Scroller: React.forwardRef((props, ref) => <TableContainer component={Paper} {...props} ref={ref} />),
+  Scroller: React.forwardRef((props, ref) => <div {...props} ref={ref} />), // Изменено для устранения скролл-конфликта
   Table: (props) => <Table {...props} sx={{ borderCollapse: 'separate', tableLayout: 'auto' }} />,
   TableHead: React.forwardRef((props, ref) => <TableHead {...props} ref={ref} />),
   TableRow,
@@ -606,22 +580,29 @@ export default function ReactVirtualizedTable() {
     defaultVisibleDataKeys,
   );
 
-  // На основе visibleDataKeys восстанавливаем объекты столбцов (с иконками)
+  // На основе visibleDataKeys восстанавливаем объекты столбцов (с иконками) с сохранением порядка
   const visibleColumns = React.useMemo(() => {
-    return allColumns.filter((col) => visibleDataKeys.includes(col.dataKey));
+    return visibleDataKeys
+      .map((key) => allColumns.find((col) => col.dataKey === key))
+      .filter(Boolean);
   }, [visibleDataKeys]);
 
   // «Расширенный» набор dataKeys (если нужно)
   const [expandedCell, setExpandedCell] = useState(null);
-  // const expandedColumns = React.useMemo(() => {
-  //   return allColumns.filter((col) => expandedDataKeys.includes(col.dataKey));
-  // }, []);
 
   // -----------------------------------
   // (B) Прочие состояния
   // -----------------------------------
   const [rows, setRows] = useState([]);
-  const [limit, setLimit] = useLocalStorage('search_limit', 300); // Берем значение из Local storage если его нету ставим 300
+  const [limit, setLimit] = useState(() => {
+    try {
+      const item = window.localStorage.getItem('search_limit');
+      return item ? JSON.parse(item) : 300;
+    } catch (error) {
+      console.error('Ошибка при чтении search_limit из localStorage:', error);
+      return 300;
+    }
+  });
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -635,7 +616,15 @@ export default function ReactVirtualizedTable() {
 
   const loadingRef = useRef(false);
   const [searchQuery, setSearchQuery] = React.useState('');
-  const [searchField, setSearchField] = useLocalStorage('search_searchField', 'Domain'); // пример: ищем по "Domain"
+  const [searchField, setSearchField] = useState(() => {
+    try {
+      const item = window.localStorage.getItem('search_searchField');
+      return item ? JSON.parse(item) : 'Domain';
+    } catch (error) {
+      console.error('Ошибка при чтении search_searchField из localStorage:', error);
+      return 'Domain';
+    }
+  });
 
   // Для показа JSON-структур
   const [formattedJSON, setFormattedJSON] = useState({});
@@ -644,7 +633,15 @@ export default function ReactVirtualizedTable() {
   const [checkedRows, setCheckedRows] = useState({});
 
   // Двойной вывод Headers, JS
-  const [doubleOutput, setDoubleOutput] = useLocalStorage('doubleOutput', 'true');
+  const [doubleOutput, setDoubleOutput] = useState(() => {
+    try {
+      const item = window.localStorage.getItem('doubleOutput');
+      return item ? JSON.parse(item) : true;
+    } catch (error) {
+      console.error('Ошибка при чтении doubleOutput из localStorage:', error);
+      return true;
+    }
+  });
 
   // Состояние для фильтрации по домену
   const [filterByDomain, setFilterByDomain] = useLocalStorageDataKeys('filterByDomain', null);
@@ -801,17 +798,6 @@ export default function ReactVirtualizedTable() {
       };
     });
   }, [filteredData]);
-
-  // -----------------------------------
-  // (E) Логика «расширенной» таблицы (если expandedCell)
-  // -----------------------------------
-  useEffect(() => {
-    if (expandedCell) {
-      // Если есть «расширенный» режим, показываем expandedColumns
-      // вместо обычных visibleColumns (ваша логика).
-      // Можно и другие варианты: объединять и т.д.
-    }
-  }, [expandedCell]);
 
   // -----------------------------------
   // (F) Функции чекбоксов внутри таблицы
@@ -1034,7 +1020,7 @@ export default function ReactVirtualizedTable() {
                       }));
                       setExpandedCell({ rowId: row.ID, dataKey: cellKey });
                     } catch (error) {
-                      console.error('Error parsing data:', error);
+                      console.error('Ошибка при парсинге данных:', error);
                       setExpandedCell({ rowId: row.ID, dataKey: cellKey });
                     }
                   }}
@@ -1187,7 +1173,7 @@ export default function ReactVirtualizedTable() {
   }
 
   // -----------------------------------
-  // (H) Заголовок таблицы
+  // (H) Заголовок таблицы с Drag-and-Drop
   // -----------------------------------
   function fixedHeaderContent() {
     // Чекбокс «Выбрать все»
@@ -1195,110 +1181,152 @@ export default function ReactVirtualizedTable() {
     const someChecked = filteredData.some((row) => checkedRows[row.ID]) && !allChecked;
 
     return (
-      <TableRow className="statistics__headers">
-        <TableCell className="statistics__checkall" variant="head" align="left">
-          <Checkbox indeterminate={someChecked} checked={allChecked} onChange={handleSelectAllClick} />
-        </TableCell>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="droppable" direction="horizontal">
+          {(provided) => (
+            <TableRow className="statistics__headers" ref={provided.innerRef} {...provided.droppableProps}>
+              {/* Select All Checkbox */}
+              <TableCell className="statistics__checkall" variant="head" align="left">
+                <Checkbox indeterminate={someChecked} checked={allChecked} onChange={handleSelectAllClick} />
+              </TableCell>
 
-        {visibleColumns.map((column) => (
-          <TableCell
-            key={column.dataKey}
-            variant="head"
-            align="left"
-            sx={{ backgroundColor: 'background.paper', cursor: 'default' }} // Убираем "pointer" для всей ячейки
-          >
-            <TableSortLabel
-              active={orderBy === column.dataKey}
-              direction={orderBy === column.dataKey ? order : 'asc'}
-              onClick={(e) => {
-                e.stopPropagation(); // Останавливаем всплытие события
-                handleSort(column.dataKey); // Сортировка только при клике на иконку
-              }}
-              sx={{ cursor: 'pointer' }} // Устанавливаем "pointer" для самой иконки
-            >
-              {column.label}
-            </TableSortLabel>
+              {/* Draggable Column Headers */}
+              {visibleColumns.map((column, index) => (
+                <Draggable key={column.dataKey} draggableId={column.dataKey} index={index}>
+                  {(provided, snapshot) => (
+                    <TableCell
+                      key={column.dataKey}
+                      variant="head"
+                      align="left"
+                      sx={{ backgroundColor: 'background.paper', cursor: 'default' }}
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      style={{
+                        ...provided.draggableProps.style,
+                        boxShadow: snapshot.isDragging ? '0 4px 8px rgba(0,0,0,0.2)' : 'none',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        {/* Drag Handle Icon */}
+                        <DragIndicatorIcon style={{ cursor: 'grab', marginRight: '8px' }} />
 
-            {/* Пример: сброс фильтра по Domain */}
-            {column.dataKey === 'Domain' && filterByDomain && (
-              <Tooltip title="Сбросить фильтр по домену" arrow placement="top">
-                <IconButton
-                  sx={{ padding: '5px 0', marginLeft: '0' }}
-                  color="success" // Зеленый цвет, чтобы показать, что фильтр активен
-                  onClick={(e) => {
-                    e.stopPropagation(); // Останавливаем всплытие события
-                    setFilterByDomain(null); // Сбросить значение в локальном хранилище
-                  }}
-                >
-                  <RestartAltIcon sx={{ width: '18px' }} />
-                </IconButton>
-              </Tooltip>
-            )}
+                        {/* Sortable Column Label */}
+                        <TableSortLabel
+                          active={orderBy === column.dataKey}
+                          direction={orderBy === column.dataKey ? order : 'asc'}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSort(column.dataKey);
+                          }}
+                          sx={{ cursor: 'pointer' }}
+                        >
+                          {column.label}
+                        </TableSortLabel>
+                      </div>
 
-            {/* Открыть модальное окно для Headers */}
-            {column.dataKey === 'Accept-Language' && (
-              <FullScreenDialog
-                AcceptLanguage={<DataObjectIcon />}
-                columns={allColumns}
-                rows={processedData}
-                headerFieldsDataKeys={headerFieldsDataKeys}
-                loadMoreRows={loadMoreRows}
-                hasMore={hasMore}
-                label={'Headers'}
-                Description={'Заголовки Headers'}
-              />
-            )}
+                      {/* Дополнительные элементы (например, Tooltips, Buttons) */}
+                      {column.dataKey === 'Domain' && filterByDomain && (
+                        <Tooltip title="Сбросить фильтр по домену" arrow placement="top">
+                          <IconButton
+                            sx={{ padding: '5px 0', marginLeft: '0' }}
+                            color="success"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFilterByDomain(null);
+                            }}
+                          >
+                            <RestartAltIcon sx={{ width: '18px' }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
 
-            {/* Открыть модальное окно для JS */}
-            {column.dataKey === 'language' && (
-              <FullScreenDialog
-                AcceptLanguage={<DataObjectIcon />}
-                columns={allColumns}
-                rows={processedData}
-                headerFieldsDataKeys={jsDataFieldsDataKeys}
-                loadMoreRows={loadMoreRows}
-                hasMore={hasMore}
-                label={'JS'}
-                Description={'Данные JS'}
-              />
-            )}
+                      {column.dataKey === 'Accept-Language' && (
+                        <FullScreenDialog
+                          AcceptLanguage={<DataObjectIcon />}
+                          columns={allColumns}
+                          rows={processedData}
+                          headerFieldsDataKeys={headerFieldsDataKeys}
+                          loadMoreRows={loadMoreRows}
+                          hasMore={hasMore}
+                          label={'Headers'}
+                          Description={'Заголовки Headers'}
+                        />
+                      )}
 
-            {/* Пример: сбросить раскрытые JSON для "Headers" или "JsData" */}
-            {(column.dataKey === 'Headers' || column.dataKey === 'JsData') && (
-              <Tooltip title="Сбросить расширение JSON" arrow placement="top">
-                <IconButton
-                  sx={{ padding: '5px 0', marginLeft: '-25px' }}
-                  color="error"
-                  onClick={(e) => {
-                    e.stopPropagation(); // Останавливаем всплытие события
-                    setExpandedCell(null);
-                    // Очистить formattedJSON
-                    setFormattedJSON((prev) => {
-                      const newState = { ...prev };
-                      for (const rowId in newState) {
-                        if (newState[rowId]) {
-                          delete newState[rowId][column.dataKey];
-                          if (Object.keys(newState[rowId]).length === 0) {
-                            delete newState[rowId];
-                          }
-                        }
-                      }
-                      return newState;
-                    });
-                  }}
-                >
-                  <RestartAltIcon sx={{ width: '15px' }} />
-                </IconButton>
-              </Tooltip>
-            )}
-          </TableCell>
-        ))}
-      </TableRow>
+                      {column.dataKey === 'language' && (
+                        <FullScreenDialog
+                          AcceptLanguage={<DataObjectIcon />}
+                          columns={allColumns}
+                          rows={processedData}
+                          headerFieldsDataKeys={jsDataFieldsDataKeys}
+                          loadMoreRows={loadMoreRows}
+                          hasMore={hasMore}
+                          label={'JS'}
+                          Description={'Данные JS'}
+                        />
+                      )}
+
+                      {(column.dataKey === 'Headers' || column.dataKey === 'JsData') && (
+                        <Tooltip title="Сбросить расширение JSON" arrow placement="top">
+                          <IconButton
+                            sx={{ padding: '5px 0', marginLeft: '-25px' }}
+                            color="error"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setExpandedCell(null);
+                              setFormattedJSON((prev) => {
+                                const newState = { ...prev };
+                                for (const rowId in newState) {
+                                  if (newState[rowId]) {
+                                    delete newState[rowId][column.dataKey];
+                                    if (Object.keys(newState[rowId]).length === 0) {
+                                      delete newState[rowId];
+                                    }
+                                  }
+                                }
+                                return newState;
+                              });
+                            }}
+                          >
+                            <RestartAltIcon sx={{ width: '15px' }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                    </TableCell>
+                  )}
+                </Draggable>
+              ))}
+
+              {provided.placeholder}
+            </TableRow>
+          )}
+        </Droppable>
+      </DragDropContext>
     );
   }
 
   // -----------------------------------
-  // (I) Итоговый рендер
+  // (I) Функция обработки завершения перетаскивания
+  // -----------------------------------
+  const onDragEnd = (result) => {
+    const { destination, source } = result;
+
+    // Если нет назначения или позиция не изменилась, ничего не делаем
+    if (!destination || destination.index === source.index) return;
+
+    // Переставляем элементы
+    const newVisibleDataKeys = Array.from(visibleDataKeys);
+    const [movedItem] = newVisibleDataKeys.splice(source.index, 1);
+    newVisibleDataKeys.splice(destination.index, 0, movedItem);
+
+    console.log('Новый порядок столбцов:', newVisibleDataKeys); // Для отладки
+
+    setVisibleDataKeys(newVisibleDataKeys);
+  };
+
+  // -----------------------------------
+  // (J) Итоговый рендер
   // -----------------------------------
   return (
     <>
