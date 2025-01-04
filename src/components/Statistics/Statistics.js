@@ -1181,7 +1181,7 @@ export default function ReactVirtualizedTable() {
     return (
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="droppable" direction="horizontal">
-          {(provided,snapshot) => (
+          {(provided, snapshot) => (
             <TableRow
               className="statistics__headers"
               ref={provided.innerRef}
