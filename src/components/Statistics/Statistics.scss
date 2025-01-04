@@ -34,8 +34,10 @@
   }
   &__headers {
     th {
-      padding:3px 5px !important;
+      padding: 3px 5px !important;
       white-space: nowrap;
+      border: 1px dashed rgb(148 148 148);
+      border-right: 0;
     }
   }
   &__checkall {
@@ -50,4 +52,19 @@
     white-space: nowrap;
     border-bottom: 1px solid #ced3c7 !important;
   }
+}
+
+.dragging {
+  background-color: #ffecb3;
+  border: 2px dashed #ff9800;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  transform: scale(1.1);
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.placeholder {
+  background-color: #e3f2fd;
+  border: 2px dashed #64b5f6;
+  height: 48px;
+  transition: background-color 0.3s ease, border 0.3s ease;
 }

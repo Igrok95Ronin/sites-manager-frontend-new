@@ -1181,8 +1181,17 @@ export default function ReactVirtualizedTable() {
     return (
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="droppable" direction="horizontal">
-          {(provided) => (
-            <TableRow className="statistics__headers" ref={provided.innerRef} {...provided.droppableProps}>
+          {(provided,snapshot) => (
+            <TableRow
+              className="statistics__headers"
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              sx={{
+                transition: 'border 0.3s ease',
+                border: snapshot.isDraggingOver ? '2px dashed #42a5f5' : 'none',
+                backgroundColor: snapshot.isDraggingOver ? '#f0f8ff' : 'inherit',
+              }}
+            >
               {/* Select All Checkbox */}
               <TableCell className="statistics__checkall" variant="head" align="left">
                 <Checkbox indeterminate={someChecked} checked={allChecked} onChange={handleSelectAllClick} />
@@ -1193,10 +1202,17 @@ export default function ReactVirtualizedTable() {
                 <Draggable key={column.dataKey} draggableId={column.dataKey} index={index}>
                   {(provided, snapshot) => (
                     <TableCell
+                      className={snapshot.isDragging ? 'dragging' : ''}
                       key={column.dataKey}
                       variant="head"
                       align="left"
-                      sx={{ backgroundColor: 'background.paper', cursor: 'default' }}
+                      sx={{
+                        backgroundColor: snapshot.isDragging ? '#f0f8ff' : 'background.paper',
+                        boxShadow: snapshot.isDragging ? '0 8px 16px rgba(0,0,0,0.3)' : 'none',
+                        transform: snapshot.isDragging ? 'scale(1.05)' : 'scale(1)',
+                        transition: 'background-color 0.3s ease, transform 0.2s ease',
+                        cursor: 'grab',
+                      }}
                       ref={provided.innerRef}
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
@@ -1207,7 +1223,15 @@ export default function ReactVirtualizedTable() {
                     >
                       <div style={{ display: 'flex', alignItems: 'center' }}>
                         {/* Drag Handle Icon */}
-                        <DragIndicatorIcon style={{ cursor: 'grab', marginRight: '8px' }} />
+                        <DragIndicatorIcon
+                          style={{
+                            cursor: 'grab',
+                            marginRight: '8px',
+                            color: snapshot.isDragging ? '#42a5f5' : '#90a4ae',
+                            transition: 'color 0.3s ease, transform 0.2s ease',
+                            transform: snapshot.isDragging ? 'rotate(15deg)' : 'none',
+                          }}
+                        />
 
                         {/* Sortable Column Label */}
                         <TableSortLabel
@@ -1217,7 +1241,11 @@ export default function ReactVirtualizedTable() {
                             e.stopPropagation();
                             handleSort(column.dataKey);
                           }}
-                          sx={{ cursor: 'pointer' }}
+                          sx={{
+                            backgroundColor: snapshot.isDragging ? '#bbdefb' : 'inherit',
+                            boxShadow: snapshot.isDragging ? 'inset 0 0 8px rgba(0, 0, 0, 0.1)' : 'none',
+                            transition: 'background-color 0.3s ease',
+                          }}
                         >
                           {column.label}
                         </TableSortLabel>
