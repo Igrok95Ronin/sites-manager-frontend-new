@@ -1346,8 +1346,6 @@ export default function ReactVirtualizedTable() {
     const [movedItem] = newVisibleDataKeys.splice(source.index, 1);
     newVisibleDataKeys.splice(destination.index, 0, movedItem);
 
-    console.log('Новый порядок столбцов:', newVisibleDataKeys); // Для отладки
-
     setVisibleDataKeys(newVisibleDataKeys);
   };
 
