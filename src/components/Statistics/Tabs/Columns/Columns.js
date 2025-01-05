@@ -515,6 +515,7 @@ export const jsDataFieldsDataKeys = [
 export const defaultVisibleDataKeys = [
   'ID',
   'Domain',
+  'Keyword',
   'CreatedAt',
   'ClickOnNumber',
   'TimeSpent',
