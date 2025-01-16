@@ -66,7 +66,8 @@ export default function ReactVirtualizedTable() {
   const [order, setOrder] = useState('desc');
 
   // Сортируем первоначально по первому столбцу из defaultVisibleDataKeys
-  const [orderBy, setOrderBy] = useState(defaultVisibleDataKeys[0] || 'ID');
+  // const [orderBy, setOrderBy] = useState(defaultVisibleDataKeys[0] || 'ID');
+  const [orderBy, setOrderBy] = useState('CreatedAt');
 
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
