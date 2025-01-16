@@ -1,7 +1,9 @@
 import React from 'react';
-import { Box, Grid, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import Tooltip from '@mui/material/Tooltip';
-import Button from '@mui/material/Button';
+import { Box, Grid, TextField, FormControl, InputLabel, Select, MenuItem, Tooltip, Button } from '@mui/material';
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import ruLocale from 'date-fns/locale/ru';
+import { subDays, startOfMonth, endOfMonth } from 'date-fns';
 
 import './Search.scss';
 import useLocalStorage from '../UseLocalStorage/UseLocalStorage'; // Импортируем кастомный хук
@@ -17,6 +19,10 @@ const Search = ({
   loadMoreRows,
   loading,
   hasMore,
+  startDate,
+  setStartDate,
+  endDate,
+  setEndDate,
 }) => {
   // Используем кастомный хук для сохранения limit
   const [localLimit, setLocalLimit] = useLocalStorage('search_limit', limit);
@@ -53,6 +59,17 @@ const Search = ({
     setSearchField(value);
   };
 
+  // Обработчик для кнопок быстрого фильтра по датам
+  const handleQuickFilter = (days) => {
+    if (days === 'm') {
+      setStartDate(startOfMonth(new Date())); // Устанавливаем начало месяца
+      setEndDate(endOfMonth(new Date())); // Устанавливаем конец месяца
+    } else {
+      setStartDate(subDays(new Date(), days)); // Устанавливаем начальную дату
+      setEndDate(new Date()); // Устанавливаем сегодняшнюю дату
+    }
+  };
+
   return (
     <div className="search__box">
       <Box sx={{ maxWidth: '100%' }} className="search__box">
@@ -82,6 +99,7 @@ const Search = ({
           display: 'flex',
           gap: '16px',
           flexWrap: 'wrap',
+          minWidth: '205px',
         }}
       >
         {/* Поле для ввода количества строк */}
@@ -145,12 +163,126 @@ const Search = ({
         }}
       ></div>
       {hasMore && (
-        <div style={{ textAlign: 'center', padding: '10px' }}>
-          <Button variant="outlined" size="small" onClick={loadMoreRows} disabled={loading}>
+        <div style={{ textAlign: 'center', padding: '10px 0' }}>
+          <Button
+            sx={{ whiteSpace: 'nowrap' }}
+            variant="outlined"
+            size="small"
+            onClick={loadMoreRows}
+            disabled={loading}
+          >
             Загрузить ещё
           </Button>
         </div>
       )}
+
+      {/* Вертикальный разделитель */}
+      <div
+        style={{
+          width: '2px',
+          height: '50px',
+          backgroundColor: '#ccc',
+          margin: '0 0px',
+        }}
+      ></div>
+
+      {/* Верхняя часть: Выбор даты */}
+      <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ruLocale}>
+        <Grid
+          sx={{
+            '& .MuiGrid-item': {
+              paddingBottom: '4px', // Изменяем верхний отступ
+            },
+          }}
+          container
+          spacing={1}
+        >
+          <Grid item xs={12} sm={3.0}>
+            <DatePicker
+              label="Начальная дата"
+              value={startDate}
+              onChange={(newValue) => setStartDate(newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      padding: '10px',
+                    },
+                    '& .MuiInputLabel-root': {
+                      lineHeight: '0.8375em',
+                      fontSize: '0.8em',
+                    },
+                  }}
+                />
+              )}
+            />
+          </Grid>
+          <Grid item xs={12} sm={3.0}>
+            <DatePicker
+              label="Конечная дата"
+              value={endDate}
+              onChange={(newValue) => setEndDate(newValue)}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  fullWidth
+                  sx={{
+                    '& .MuiInputBase-input': {
+                      padding: '10px',
+                    },
+                    '& .MuiInputLabel-root': {
+                      lineHeight: '0.8375em',
+                      fontSize: '0.8em',
+                    },
+                  }}
+                />
+              )}
+            />
+          </Grid>
+
+          {/* Кнопки для быстрого выбора дат */}
+          <Grid className="search__buttonsDate" item xs={12} sm={1}>
+            <Tooltip title="Показать данные по дням" arrow>
+              <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2px' }}>
+                <Button
+                  sx={{ minWidth: '25px', padding: '0px', backgroundColor: '#009688' }}
+                  variant="contained"
+                  size="small"
+                  onClick={() => handleQuickFilter(1)}
+                >
+                  1
+                </Button>
+                <Button
+                  sx={{ minWidth: '25px', padding: '0px', backgroundColor: '#009688' }}
+                  variant="contained"
+                  size="small"
+                  onClick={() => handleQuickFilter(7)}
+                >
+                  7
+                </Button>
+                <Button
+                  sx={{ minWidth: '25px', padding: '0px', backgroundColor: '#009688' }}
+                  variant="contained"
+                  size="small"
+                  onClick={() => handleQuickFilter(10)}
+                >
+                  10
+                </Button>
+                <Button
+                  sx={{ minWidth: '25px', padding: '0px', backgroundColor: '#009688' }}
+                  variant="contained"
+                  size="small"
+                  onClick={() => handleQuickFilter('m')}
+                >
+                  M
+                </Button>
+              </Box>
+            </Tooltip>
+          </Grid>
+        </Grid>
+      </LocalizationProvider>
     </div>
   );
 };

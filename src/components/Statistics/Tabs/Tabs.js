@@ -19,6 +19,10 @@ const Tabs = ({
   setLimit,
   setSearchField,
   columns,
+  startDate,
+  setStartDate,
+  endDate,
+  setEndDate,
 }) => {
   return (
     <section className="tabs">
@@ -41,6 +45,10 @@ const Tabs = ({
             limit={limit}
             setLimit={setLimit}
             columns={columns}
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
           />
         </div>
       </div>

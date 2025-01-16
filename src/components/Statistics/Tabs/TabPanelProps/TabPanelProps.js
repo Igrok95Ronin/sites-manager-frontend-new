@@ -63,6 +63,10 @@ export default function FullWidthTabs({
   limit,
   setLimit,
   columns,
+  startDate,
+  setStartDate,
+  endDate,
+  setEndDate,
 }) {
   const theme = useTheme();
   const [value, setValue] = React.useState(0);
@@ -137,6 +141,10 @@ export default function FullWidthTabs({
               loadMoreRows={loadMoreRows}
               loading={loading}
               hasMore={hasMore}
+              startDate={startDate}
+              setStartDate={setStartDate}
+              endDate={endDate}
+              setEndDate={setEndDate}
             />
             <div className="tabPanelProps__settings">{ColumnSelector}</div>
           </div>

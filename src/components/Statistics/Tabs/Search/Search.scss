@@ -9,6 +9,8 @@
   &__container {
     max-width: 1300px;
     margin: 20px auto 0px;
+    // display: grid;
+    // grid-template-columns: repeat(2 1fr);
   }
   &__number {
     color: #4caf50;
@@ -19,7 +21,7 @@
   &__textField > label {
     left: 10px !important;
   }
-  &__innerCountLine{
+  &__innerCountLine {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
@@ -38,5 +40,8 @@
     -webkit-transition: -webkit-transform 200ms cubic-bezier(0, 0, 0.2, 1) 0ms;
     transition: transform 200ms cubic-bezier(0, 0, 0.2, 1) 0ms;
     pointer-events: none;
+  }
+  &__buttonsDate {
+    padding-top: 6px !important;
   }
 }

@@ -397,6 +397,10 @@ export default function ReactVirtualizedTable() {
         }
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
+        startDate={startDate}
+        setStartDate={setStartDate}
+        endDate={endDate}
+        setEndDate={setEndDate}
       />
     </>
   );
