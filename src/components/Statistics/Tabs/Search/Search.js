@@ -281,6 +281,20 @@ const Search = ({
               </Box>
             </Tooltip>
           </Grid>
+          {/* Кнопка сброса */}
+          {startDate && (
+            <Button
+              sx={{ minWidth: '25px', padding: '3px', backgroundColor: '#F44336', margin: '6px 0 4px 10px' }}
+              variant="contained"
+              size="small"
+              onClick={() => {
+                setStartDate(null);
+                setEndDate(null);
+              }}
+            >
+              Reset
+            </Button>
+          )}
         </Grid>
       </LocalizationProvider>
     </div>
