@@ -134,7 +134,7 @@ export default function TableRowRender({
                 <span>{date.toLocaleTimeString('ru-RU', { timeZone: 'Europe/Moscow' })}</span>
               ) : sameYear ? (
                 // Если текущий год, показываем дату без года
-                `${date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })}, ${date.toLocaleTimeString(
+                `${date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })} | ${date.toLocaleTimeString(
                   'ru-RU',
                   { timeZone: 'Europe/Moscow' },
                 )}`
