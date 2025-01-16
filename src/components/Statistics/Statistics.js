@@ -381,10 +381,6 @@ export default function ReactVirtualizedTable() {
             columns={allColumns}
             visibleColumns={visibleColumns}
             setVisibleColumns={null /* больше не нужен, см. ниже */}
-            startDate={startDate}
-            setStartDate={setStartDate}
-            endDate={endDate}
-            setEndDate={setEndDate}
             headerFieldsDataKeys={headerFieldsDataKeys}
             jsDataFieldsDataKeys={jsDataFieldsDataKeys}
             setCheckedRows={setCheckedRows}

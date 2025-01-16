@@ -98,7 +98,7 @@ const Search = ({
         sx={{
           display: 'flex',
           gap: '16px',
-          flexWrap: 'wrap',
+          flexWrap: 'nowrap',
           minWidth: '205px',
         }}
       >
@@ -193,11 +193,12 @@ const Search = ({
             '& .MuiGrid-item': {
               paddingBottom: '4px', // Изменяем верхний отступ
             },
+            width: 'fit-content',
           }}
           container
           spacing={1}
         >
-          <Grid item xs={12} sm={3.0}>
+          <Grid item xs={12} sm={3.5}>
             <DatePicker
               label="Начальная дата"
               value={startDate}
@@ -219,7 +220,7 @@ const Search = ({
               )}
             />
           </Grid>
-          <Grid item xs={12} sm={3.0}>
+          <Grid item xs={12} sm={3.5}>
             <DatePicker
               label="Конечная дата"
               value={endDate}
@@ -284,7 +285,7 @@ const Search = ({
           {/* Кнопка сброса */}
           {startDate && (
             <Button
-              sx={{ minWidth: '25px', padding: '3px', backgroundColor: '#F44336', margin: '6px 0 4px 10px' }}
+              sx={{ minWidth: '25px', padding: '3px', backgroundColor: '#F44336', margin: '6px 0 4px 15px' }}
               variant="contained"
               size="small"
               onClick={() => {

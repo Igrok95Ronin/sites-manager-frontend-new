@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { FormControlLabel, Checkbox, Button, Menu, Box, Grid, Typography, TextField } from '@mui/material';
+import { FormControlLabel, Checkbox, Button, Menu, Box, Grid, Typography } from '@mui/material';
 // import SettingsIcon from '@mui/icons-material/Settings';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ViewWeekIcon from '@mui/icons-material/ViewWeek';
@@ -11,9 +11,6 @@ import Tooltip from '@mui/material/Tooltip';
 import Switch from '@mui/material/Switch';
 
 // Импортируем компоненты для выбора даты
-import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import ruLocale from 'date-fns/locale/ru';
 import ResetCheckedForm from '../ResetCheckedForm/ResetCheckedForm';
 import DownloadFileLogsADS from '../DownloadFileLogsADS/DownloadFileLogsADS';
 import Spinner from '../../../Spinner/Spinner';
@@ -29,10 +26,6 @@ const ColumnSelector = ({
   // Массив "видимых" dataKey (строки), вместо объектов
   visibleDataKeys,
   setVisibleDataKeys,
-  startDate,
-  setStartDate,
-  endDate,
-  setEndDate,
   headerFieldsDataKeys,
   jsDataFieldsDataKeys,
   setCheckedRows,
@@ -185,33 +178,6 @@ const ColumnSelector = ({
         }}
       >
         <Box sx={{ width: '100%' }}>
-          {/* Верхняя часть: Выбор даты */}
-          <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ruLocale}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <DatePicker
-                  label="Начальная дата"
-                  value={startDate}
-                  onChange={(newValue) => setStartDate(newValue)}
-                  renderInput={(params) => <TextField {...params} fullWidth />}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <DatePicker
-                  label="Конечная дата"
-                  value={endDate}
-                  onChange={(newValue) => setEndDate(newValue)}
-                  renderInput={(params) => <TextField {...params} fullWidth />}
-                />
-              </Grid>
-            </Grid>
-          </LocalizationProvider>
-
-          {/* Разделитель */}
-          <Box sx={{ my: 2 }}>
-            <hr />
-          </Box>
-
           {/* Чеки */}
           <Tooltip title="Двойной вывод Headers и JS" arrow placement="top">
             <Switch
