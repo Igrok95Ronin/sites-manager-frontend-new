@@ -69,8 +69,8 @@ export default function ReactVirtualizedTable() {
   // const [orderBy, setOrderBy] = useState(defaultVisibleDataKeys[0] || 'ID');
   const [orderBy, setOrderBy] = useState('CreatedAt');
 
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
 
   const loadingRef = useRef(false);
   const [searchQuery, setSearchQuery] = React.useState('');

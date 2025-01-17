@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Grid, TextField, FormControl, InputLabel, Select, MenuItem, Tooltip, Button } from '@mui/material';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -29,6 +29,9 @@ const Search = ({
 
   // Используем кастомный хук для сохранения searchField
   const [localSearchField, setLocalSearchField] = useLocalStorage('search_searchField', searchField);
+
+  // Который показывает кнопку Reset
+  const [flag, setFlag] = useState(false);
 
   // Функция для обработки изменений в поле ввода
   const handleInputChange = (e) => {
@@ -62,9 +65,11 @@ const Search = ({
   // Обработчик для кнопок быстрого фильтра по датам
   const handleQuickFilter = (days) => {
     if (days === 'm') {
+      setFlag(true);
       setStartDate(startOfMonth(new Date())); // Устанавливаем начало месяца
       setEndDate(endOfMonth(new Date())); // Устанавливаем конец месяца
     } else {
+      setFlag(true);
       setStartDate(subDays(new Date(), days)); // Устанавливаем начальную дату
       setEndDate(new Date()); // Устанавливаем сегодняшнюю дату
     }
@@ -283,14 +288,15 @@ const Search = ({
             </Tooltip>
           </Grid>
           {/* Кнопка сброса */}
-          {startDate && (
+          {flag && (
             <Button
               sx={{ minWidth: '25px', padding: '3px', backgroundColor: '#F44336', margin: '6px 0 4px 15px' }}
               variant="contained"
               size="small"
               onClick={() => {
-                setStartDate(null);
-                setEndDate(null);
+                setStartDate(new Date());
+                setEndDate(new Date());
+                setFlag(false);
               }}
             >
               Reset
