@@ -22,6 +22,7 @@ export default function TableRowRender({
   formattedJSON,
   setFormattedJSON,
   setFilterByDomain,
+  setFilterCompanyID,
   doubleOutput,
 }) {
   // valueRenderer для JSONTree (ссылки и т.д.)
@@ -160,6 +161,31 @@ export default function TableRowRender({
                 size="small"
                 color="secondary"
                 onClick={() => setFilterByDomain(cellValue)}
+                sx={{
+                  textTransform: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {cellValue}
+              </Button>
+            </TableCell>
+          );
+        }
+
+        // Логика для CompanyID (фильтр по CompanyID)
+        if (cellKey === 'CompanyID') {
+          return (
+            <TableCell
+              className="statistics__padding"
+              key={cellKey}
+              align="left"
+              style={{ backgroundColor: rowBackgroundColor }}
+            >
+              <Button
+                variant="text"
+                size="small"
+                color="secondary"
+                onClick={() => setFilterCompanyID(cellValue)}
                 sx={{
                   textTransform: 'none',
                   whiteSpace: 'nowrap',

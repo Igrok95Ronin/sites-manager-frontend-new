@@ -101,8 +101,9 @@ export default function ReactVirtualizedTable() {
     }
   });
 
-  // Состояние для фильтрации по домену
-  const [filterByDomain, setFilterByDomain] = useLocalStorageDataKeys('filterByDomain', null);
+  // Фильтры
+  const [filterByDomain, setFilterByDomain] = useLocalStorageDataKeys('filterByDomain', null); // Состояние для фильтрации по домену
+  const [filterCompanyID, setFilterCompanyID] = useLocalStorageDataKeys('filterCompanyID', null); // Состояние для фильтрации по CompanyID
 
   // -----------------------------------
   // (C) Загрузка данных
@@ -220,9 +221,12 @@ export default function ReactVirtualizedTable() {
     if (filterByDomain) {
       data = data.filter((item) => item.Domain === filterByDomain);
     }
+    if (filterCompanyID) {
+      data = data.filter((item) => item.CompanyID === filterCompanyID);
+    }
 
     return data;
-  }, [sortedRows, searchField, searchQuery, filterByDomain]);
+  }, [sortedRows, searchField, searchQuery, filterByDomain, filterCompanyID]);
 
   const processedData = React.useMemo(() => {
     return filteredData.map((row) => {
@@ -341,6 +345,8 @@ export default function ReactVirtualizedTable() {
             handleSelectAllClick={handleSelectAllClick}
             setFilterByDomain={setFilterByDomain}
             filterByDomain={filterByDomain}
+            filterCompanyID={filterCompanyID}
+            setFilterCompanyID={setFilterCompanyID}
             allColumns={allColumns}
             processedData={processedData}
             loadMoreRows={loadMoreRows}
@@ -363,6 +369,7 @@ export default function ReactVirtualizedTable() {
             formattedJSON={formattedJSON}
             setFormattedJSON={setFormattedJSON}
             setFilterByDomain={setFilterByDomain}
+            setFilterCompanyID={setFilterCompanyID}
             doubleOutput={doubleOutput}
           />
         )}
