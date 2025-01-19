@@ -8,6 +8,7 @@ import Tabs from './Tabs/Tabs.js';
 import ColumnSelector from './Tabs/ColumnSelector/ColumnSelector.js';
 import useLocalStorageDataKeys from './Tabs/UseLocalStorage/UseLocalStorage.js'; // Импортируем кастомный хук
 import CompanyNames from './Tabs/CompanyNames/CompanyNames.js';
+import GoogleAccounts from './Tabs/GoogleAccounts/GoogleAccounts.js';
 
 // Все заголовки
 import {
@@ -105,8 +106,11 @@ export default function ReactVirtualizedTable() {
   // Фильтры
   const [filterByDomain, setFilterByDomain] = useLocalStorageDataKeys('filterByDomain', null); // Состояние для фильтрации по домену
   const [filterCompanyID, setFilterCompanyID] = useLocalStorageDataKeys('filterCompanyID', null); // Состояние для фильтрации по CompanyID
+  const [filterAccountID, setFilterAccountID] = useLocalStorageDataKeys('filterAccountID', null); // Состояние для фильтрации по AccountID
   // Данные CompanyID
   const [companyIDData, setCompanyIDData] = useState([]);
+  // Данные GoogleAC
+  const [dataGoogleAccounts, setDataGoogleAccounts] = useState([]);
 
   // -----------------------------------
   // (C) Загрузка данных
@@ -350,6 +354,8 @@ export default function ReactVirtualizedTable() {
             filterByDomain={filterByDomain}
             filterCompanyID={filterCompanyID}
             setFilterCompanyID={setFilterCompanyID}
+            filterAccountID={filterAccountID}
+            setFilterAccountID={setFilterAccountID}
             allColumns={allColumns}
             processedData={processedData}
             loadMoreRows={loadMoreRows}
@@ -373,8 +379,10 @@ export default function ReactVirtualizedTable() {
             setFormattedJSON={setFormattedJSON}
             setFilterByDomain={setFilterByDomain}
             setFilterCompanyID={setFilterCompanyID}
+            setFilterAccountID={setFilterAccountID}
             doubleOutput={doubleOutput}
             companyIDData={companyIDData}
+            dataGoogleAccounts={dataGoogleAccounts}
           />
         )}
         loadMoreRows={loadMoreRows}
@@ -410,6 +418,7 @@ export default function ReactVirtualizedTable() {
         setEndDate={setEndDate}
       />
       <CompanyNames setCompanyIDData={setCompanyIDData} />
+      <GoogleAccounts setDataGoogleAccounts={setDataGoogleAccounts} />
     </>
   );
 }

@@ -26,6 +26,8 @@ export default function TableHeader({
   filterByDomain,
   filterCompanyID,
   setFilterCompanyID,
+  filterAccountID,
+  setFilterAccountID,
   allColumns,
   processedData,
   loadMoreRows,
@@ -137,6 +139,22 @@ export default function TableHeader({
                             onClick={(e) => {
                               e.stopPropagation();
                               setFilterCompanyID(null);
+                            }}
+                          >
+                            <RestartAltIcon sx={{ width: '18px' }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+
+                      {/* Дополнительные элементы (например, Tooltips, Buttons) */}
+                      {column.dataKey === 'AccountID' && filterAccountID && (
+                        <Tooltip title="Сбросить фильтр по AccountID" arrow placement="top">
+                          <IconButton
+                            sx={{ padding: '5px 0', marginLeft: '0' }}
+                            color="success"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFilterAccountID(null);
                             }}
                           >
                             <RestartAltIcon sx={{ width: '18px' }} />

@@ -23,8 +23,10 @@ export default function TableRowRender({
   setFormattedJSON,
   setFilterByDomain,
   setFilterCompanyID,
+  setFilterAccountID,
   doubleOutput,
   companyIDData,
+  dataGoogleAccounts,
 }) {
   // valueRenderer для JSONTree (ссылки и т.д.)
   function valueRenderer(valueAsString, value) {
@@ -196,6 +198,35 @@ export default function TableRowRender({
                 {(() => {
                   const company = companyIDData.find((company) => company.CompanyID === cellValue);
                   return company ? company.Name : cellValue;
+                })()}
+              </Button>
+            </TableCell>
+          );
+        }
+
+        // Логика для AccountID (фильтр по CompanyID)
+        if (cellKey === 'AccountID') {
+          return (
+            <TableCell
+              className="statistics__padding"
+              key={cellKey}
+              align="left"
+              style={{ backgroundColor: rowBackgroundColor }}
+            >
+              <Button
+                variant="text"
+                size="small"
+                color="secondary"
+                onClick={() => setFilterAccountID(cellValue)}
+                sx={{
+                  textTransform: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {/* Находим и подставляем название компании если его нету то CompanyID */}
+                {(() => {
+                  const account = dataGoogleAccounts.find((account) => account.account_id === cellValue);
+                  return account ? account.email : cellValue;
                 })()}
               </Button>
             </TableCell>

@@ -14,6 +14,8 @@ const GoogleAccounts = () => {
   const [loading, setLoading] = useState(true); // Состояние загрузки
   const [errorMessage, setErrorMessage] = useState(''); // Сообщение об ошибке
 
+  console.log(dataGoogleAccounts)
+
   // Функция для получения данных Google Accounts
   const fetchData = async () => {
     try {
