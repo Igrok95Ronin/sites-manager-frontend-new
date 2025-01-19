@@ -24,6 +24,7 @@ export default function TableRowRender({
   setFilterByDomain,
   setFilterCompanyID,
   doubleOutput,
+  companyIDData,
 }) {
   // valueRenderer для JSONTree (ссылки и т.д.)
   function valueRenderer(valueAsString, value) {
@@ -191,7 +192,11 @@ export default function TableRowRender({
                   whiteSpace: 'nowrap',
                 }}
               >
-                {cellValue}
+                {/* Находим и подставляем название компании если его нету то CompanyID */}
+                {(() => {
+                  const company = companyIDData.find((company) => company.CompanyID === cellValue);
+                  return company ? company.Name : cellValue;
+                })()}
               </Button>
             </TableCell>
           );

@@ -7,6 +7,7 @@ import { startOfDay, endOfDay, isToday, isSameYear } from 'date-fns'; // Доб�
 import Tabs from './Tabs/Tabs.js';
 import ColumnSelector from './Tabs/ColumnSelector/ColumnSelector.js';
 import useLocalStorageDataKeys from './Tabs/UseLocalStorage/UseLocalStorage.js'; // Импортируем кастомный хук
+import CompanyNames from './Tabs/CompanyNames/CompanyNames.js';
 
 // Все заголовки
 import {
@@ -104,6 +105,8 @@ export default function ReactVirtualizedTable() {
   // Фильтры
   const [filterByDomain, setFilterByDomain] = useLocalStorageDataKeys('filterByDomain', null); // Состояние для фильтрации по домену
   const [filterCompanyID, setFilterCompanyID] = useLocalStorageDataKeys('filterCompanyID', null); // Состояние для фильтрации по CompanyID
+  // Данные CompanyID
+  const [companyIDData, setCompanyIDData] = useState([]);
 
   // -----------------------------------
   // (C) Загрузка данных
@@ -371,6 +374,7 @@ export default function ReactVirtualizedTable() {
             setFilterByDomain={setFilterByDomain}
             setFilterCompanyID={setFilterCompanyID}
             doubleOutput={doubleOutput}
+            companyIDData={companyIDData}
           />
         )}
         loadMoreRows={loadMoreRows}
@@ -405,6 +409,7 @@ export default function ReactVirtualizedTable() {
         endDate={endDate}
         setEndDate={setEndDate}
       />
+      <CompanyNames setCompanyIDData={setCompanyIDData} />
     </>
   );
 }
