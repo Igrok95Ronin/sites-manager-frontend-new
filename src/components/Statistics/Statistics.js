@@ -340,6 +340,7 @@ export default function ReactVirtualizedTable() {
         rows={filteredData} // передаём уже отфильтрованные и отсортированные
         VirtuosoTableComponents={VirtuosoTableComponents}
         companyIDData={companyIDData}
+        dataGoogleAccounts={dataGoogleAccounts}
         fixedHeaderContent={() => (
           <TableHeader
             visibleColumns={visibleColumns}

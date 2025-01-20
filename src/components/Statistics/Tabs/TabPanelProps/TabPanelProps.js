@@ -52,6 +52,7 @@ export default function FullWidthTabs({
   rows,
   VirtuosoTableComponents,
   companyIDData,
+  dataGoogleAccounts,
   fixedHeaderContent,
   rowContent,
   loadMoreRows,
@@ -176,7 +177,7 @@ export default function FullWidthTabs({
 
         {/* Третий таб Компаний*/}
         <TabPanel value={value} index={2} dir={theme.direction}>
-          <Company rows={rows} companyIDData={companyIDData} />
+          <Company rows={rows} companyIDData={companyIDData} dataGoogleAccounts={dataGoogleAccounts} />
         </TabPanel>
         <TabPanel value={value} index={3} dir={theme.direction}>
           Узбакойся уходиd
