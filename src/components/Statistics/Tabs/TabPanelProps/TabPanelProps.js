@@ -11,6 +11,7 @@ import { TableVirtuoso } from 'react-virtuoso';
 import Search from '../Search/Search';
 import Spinner from '../../../Spinner/Spinner';
 import MarkedLogs from '../MarkedLogs/MarkedLogs';
+import Company from '../Company/Company';
 
 import './TabPanelProps.scss';
 
@@ -123,7 +124,8 @@ export default function FullWidthTabs({
         >
           <Tab label="Логи ADS" {...a11yProps(0)} />
           <Tab label="Отмеченные логи" {...a11yProps(1)} />
-          <Tab label="Item Three" {...a11yProps(2)} />
+          <Tab label="Компания" {...a11yProps(2)} />
+          <Tab label="Item Three" {...a11yProps(3)} />
         </Tabs>
       </AppBar>
       <Box sx={{ flex: 1, overflow: 'auto' }}>
@@ -170,8 +172,13 @@ export default function FullWidthTabs({
         <TabPanel value={value} index={1} dir={theme.direction}>
           <MarkedLogs />
         </TabPanel>
+
+        {/* Третий таб Компаний*/}
         <TabPanel value={value} index={2} dir={theme.direction}>
-          Узбакойся уходи
+          <Company rows={rows} />
+        </TabPanel>
+        <TabPanel value={value} index={3} dir={theme.direction}>
+          Узбакойся уходиd
         </TabPanel>
       </Box>
     </Box>
