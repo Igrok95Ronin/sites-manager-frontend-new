@@ -16,17 +16,17 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 /**
  * Функция для группировки ключевых слов с подсчётом их количества и кликов.
- * @param {Array} data - массив объектов с полями `Keyword`, `Domain`, и `ClickOnNumber`.
+ * @param {Array} data - массив объектов с полями `Keyword`, `Domain`, `ClickOnNumber`, `AccountID`.
  * @returns {Object} объект, где ключ — ключевое слово, значение — количество, клики, и домен.
  */
 function groupKeywords(data) {
   return data.reduce((acc, { Keyword, Domain, ClickOnNumber, AccountID }) => {
     if (!acc[Keyword]) {
-      acc[Keyword] = { count: 0, clicks: 0, domain: Domain, accountId: AccountID }; // Инициализация
+      acc[Keyword] = { count: 0, clicks: 0, domain: Domain, accountId: AccountID };
     }
-    acc[Keyword].count += 1; // Увеличиваем общее использование ключевого слова
+    acc[Keyword].count += 1;
     if (ClickOnNumber) {
-      acc[Keyword].clicks += 1; // Увеличиваем количество кликов
+      acc[Keyword].clicks += 1;
     }
     return acc;
   }, {});
@@ -40,33 +40,46 @@ function groupKeywords(data) {
 function groupByCompanyID(data) {
   const grouped = data.reduce((acc, curr) => {
     if (!acc[curr.CompanyID]) {
-      acc[curr.CompanyID] = { ...curr, Keywords: [], TotalKeywords: 0, TotalClicks: 0 };
+      acc[curr.CompanyID] = {
+        ...curr,
+        Keywords: [],
+        TotalKeywords: 0,
+        TotalClicks: 0,
+      };
     }
-    acc[curr.CompanyID].Keywords.push(curr.Keyword); // Сохраняем ключевое слово
-    acc[curr.CompanyID].TotalKeywords += 1; // Увеличиваем общее количество ключевых слов
+    acc[curr.CompanyID].Keywords.push(curr.Keyword);
+    acc[curr.CompanyID].TotalKeywords += 1;
     if (curr.ClickOnNumber) {
-      acc[curr.CompanyID].TotalClicks += 1; // Увеличиваем общее количество кликов
+      acc[curr.CompanyID].TotalClicks += 1;
     }
     return acc;
   }, {});
-  return Object.values(grouped); // Преобразуем объект обратно в массив
+  return Object.values(grouped);
 }
 
 /**
  * Компонент строки таблицы.
- * @param {Object} props - пропсы компонента.
- * @returns {JSX.Element} строка таблицы с вложенной таблицей ключевых слов.
  */
-function Row(props) {
-  const { row, originalData, openRow, setOpenRow } = props; // Получаем данные строки и оригинальный массив
+function Row({ row, originalData, openRow, setOpenRow, companyIDData }) {
+  // Поиск совпадения по CompanyID из companyIDData
+  const foundCompany = companyIDData.find(
+    (company) => company.CompanyID === row.CompanyID
+  );
+
+  // Если Name не пуст — показываем, иначе показываем сам CompanyID
+  const displayName = foundCompany && foundCompany.Name
+    ? foundCompany.Name
+    : row.CompanyID;
 
   // Вычисление общей конверсии
   const conversion = row.TotalKeywords
-    ? ((row.TotalClicks / row.TotalKeywords) * 100).toFixed(2) // Конверсия в процентах
+    ? ((row.TotalClicks / row.TotalKeywords) * 100).toFixed(2)
     : '0.00';
 
-  // Фильтруем ключевые слова, относящиеся к текущему `CompanyID`
-  const keywordsForCompany = originalData.filter((item) => item.CompanyID === row.CompanyID);
+  // Фильтруем ключевые слова для данной компании
+  const keywordsForCompany = originalData.filter(
+    (item) => item.CompanyID === row.CompanyID
+  );
   const groupedKeywords = groupKeywords(keywordsForCompany);
 
   return (
@@ -77,14 +90,20 @@ function Row(props) {
           <IconButton
             aria-label="expand row"
             size="small"
-            onClick={() => setOpenRow(openRow === row.CompanyID ? null : row.CompanyID)}
+            onClick={() =>
+              setOpenRow(openRow === row.CompanyID ? null : row.CompanyID)
+            }
           >
-            {openRow === row.CompanyID ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+            {openRow === row.CompanyID ? (
+              <KeyboardArrowUpIcon />
+            ) : (
+              <KeyboardArrowDownIcon />
+            )}
           </IconButton>
         </TableCell>
         {/* Основная информация о компании */}
         <TableCell component="th" scope="row">
-          {row.CompanyID}
+          {displayName}
         </TableCell>
         <TableCell align="right">{row.TotalKeywords}</TableCell>
         <TableCell align="right">{row.TotalClicks}</TableCell>
@@ -93,10 +112,14 @@ function Row(props) {
       {/* Вложенная таблица с ключевыми словами */}
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-          <Collapse in={openRow === row.CompanyID} timeout="auto" unmountOnExit>
+          <Collapse
+            in={openRow === row.CompanyID}
+            timeout="auto"
+            unmountOnExit
+          >
             <Box sx={{ margin: 1 }}>
               <Typography variant="h6" gutterBottom component="div">
-                Keywords for CompanyID: {row.CompanyID}
+                Keywords for: {displayName}
               </Typography>
               <Table size="small" aria-label="keywords">
                 <TableHead>
@@ -110,20 +133,25 @@ function Row(props) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {/* Отображаем ключевые слова и их статистику */}
-                  {Object.entries(groupedKeywords).map(([keyword, { count, clicks, domain, accountId }]) => {
-                    const keywordConversion = count ? ((clicks / count) * 100).toFixed(2) : '0.00';
-                    return (
-                      <TableRow key={keyword}>
-                        <TableCell>{keyword}</TableCell>
-                        <TableCell>{domain}</TableCell>
-                        <TableCell>{accountId}</TableCell>
-                        <TableCell align="right">{count}</TableCell>
-                        <TableCell align="right">{clicks}</TableCell>
-                        <TableCell align="right">{keywordConversion} %</TableCell>
-                      </TableRow>
-                    );
-                  })}
+                  {Object.entries(groupedKeywords).map(
+                    ([keyword, { count, clicks, domain, accountId }]) => {
+                      const keywordConversion = count
+                        ? ((clicks / count) * 100).toFixed(2)
+                        : '0.00';
+                      return (
+                        <TableRow key={keyword}>
+                          <TableCell>{keyword}</TableCell>
+                          <TableCell>{domain}</TableCell>
+                          <TableCell>{accountId}</TableCell>
+                          <TableCell align="right">{count}</TableCell>
+                          <TableCell align="right">{clicks}</TableCell>
+                          <TableCell align="right">
+                            {keywordConversion} %
+                          </TableCell>
+                        </TableRow>
+                      );
+                    }
+                  )}
                 </TableBody>
               </Table>
             </Box>
@@ -150,21 +178,22 @@ Row.propTypes = {
       ClickOnNumber: PropTypes.bool.isRequired,
       Domain: PropTypes.string.isRequired,
       AccountID: PropTypes.string.isRequired,
-    }),
+    })
   ).isRequired,
   openRow: PropTypes.string,
   setOpenRow: PropTypes.func.isRequired,
+  companyIDData: PropTypes.arrayOf(
+    PropTypes.shape({
+      CompanyID: PropTypes.string,
+      Name: PropTypes.string,
+    })
+  ).isRequired,
 };
 
 /**
  * Основной компонент таблицы.
- * @param {Object} props - пропсы компонента.
- * @returns {JSX.Element} таблица с данными.
  */
 export default function CollapsibleTable({ rows, companyIDData }) {
-  //   console.log('Исходные данные:', rows);
-  console.log(companyIDData);
-
   // Состояние для открытой строки
   const [openRow, setOpenRow] = React.useState(null);
 
@@ -177,7 +206,7 @@ export default function CollapsibleTable({ rows, companyIDData }) {
         <TableHead>
           <TableRow>
             <TableCell />
-            <TableCell>Компания (CompanyID)</TableCell>
+            <TableCell>Компания (CompanyID/Name)</TableCell>
             <TableCell align="right">Показы (Всего ключевых слов)</TableCell>
             <TableCell align="right">Клики (Всего кликов)</TableCell>
             <TableCell align="right">Конверсия (%)</TableCell>
@@ -185,7 +214,14 @@ export default function CollapsibleTable({ rows, companyIDData }) {
         </TableHead>
         <TableBody>
           {uniqueRows.map((row) => (
-            <Row key={row.CompanyID} row={row} originalData={rows} openRow={openRow} setOpenRow={setOpenRow} />
+            <Row
+              key={row.CompanyID}
+              row={row}
+              originalData={rows}
+              openRow={openRow}
+              setOpenRow={setOpenRow}
+              companyIDData={companyIDData}
+            />
           ))}
         </TableBody>
       </Table>
@@ -202,6 +238,12 @@ CollapsibleTable.propTypes = {
       ClickOnNumber: PropTypes.bool.isRequired,
       Domain: PropTypes.string.isRequired,
       AccountID: PropTypes.string.isRequired,
-    }),
+    })
+  ).isRequired,
+  companyIDData: PropTypes.arrayOf(
+    PropTypes.shape({
+      CompanyID: PropTypes.string,
+      Name: PropTypes.string,
+    })
   ).isRequired,
 };
