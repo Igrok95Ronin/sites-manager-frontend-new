@@ -51,6 +51,7 @@ function a11yProps(index) {
 export default function FullWidthTabs({
   rows,
   VirtuosoTableComponents,
+  companyIDData,
   fixedHeaderContent,
   rowContent,
   loadMoreRows,
@@ -175,7 +176,7 @@ export default function FullWidthTabs({
 
         {/* Третий таб Компаний*/}
         <TabPanel value={value} index={2} dir={theme.direction}>
-          <Company rows={rows} />
+          <Company rows={rows} companyIDData={companyIDData} />
         </TabPanel>
         <TabPanel value={value} index={3} dir={theme.direction}>
           Узбакойся уходиd

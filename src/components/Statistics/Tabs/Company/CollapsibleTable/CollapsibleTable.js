@@ -161,8 +161,9 @@ Row.propTypes = {
  * @param {Object} props - пропсы компонента.
  * @returns {JSX.Element} таблица с данными.
  */
-export default function CollapsibleTable({ rows }) {
-  console.log('Исходные данные:', rows);
+export default function CollapsibleTable({ rows, companyIDData }) {
+  //   console.log('Исходные данные:', rows);
+  console.log(companyIDData);
 
   // Состояние для открытой строки
   const [openRow, setOpenRow] = React.useState(null);
@@ -171,8 +172,8 @@ export default function CollapsibleTable({ rows }) {
   const uniqueRows = groupByCompanyID(rows);
 
   return (
-    <TableContainer component={Paper}>
-      <Table aria-label="collapsible table">
+    <TableContainer component={Paper} sx={{ maxHeight: '75vh' }}>
+      <Table aria-label="collapsible table" stickyHeader>
         <TableHead>
           <TableRow>
             <TableCell />

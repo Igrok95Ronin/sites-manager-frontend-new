@@ -111,7 +111,6 @@ export default function ReactVirtualizedTable() {
   const [companyIDData, setCompanyIDData] = useState([]);
   // Данные GoogleAC
   const [dataGoogleAccounts, setDataGoogleAccounts] = useState([]);
-
   // -----------------------------------
   // (C) Загрузка данных
   // -----------------------------------
@@ -340,6 +339,7 @@ export default function ReactVirtualizedTable() {
       <Tabs
         rows={filteredData} // передаём уже отфильтрованные и отсортированные
         VirtuosoTableComponents={VirtuosoTableComponents}
+        companyIDData={companyIDData}
         fixedHeaderContent={() => (
           <TableHeader
             visibleColumns={visibleColumns}

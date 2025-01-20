@@ -5,6 +5,7 @@ import './Tabs.scss';
 const Tabs = ({
   rows,
   VirtuosoTableComponents,
+  companyIDData,
   fixedHeaderContent,
   rowContent,
   loadMoreRows,
@@ -31,6 +32,7 @@ const Tabs = ({
           <TabPanelProps
             rows={rows}
             VirtuosoTableComponents={VirtuosoTableComponents}
+            companyIDData={companyIDData}
             fixedHeaderContent={fixedHeaderContent}
             rowContent={rowContent}
             loadMoreRows={loadMoreRows}
