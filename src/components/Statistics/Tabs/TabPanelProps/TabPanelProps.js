@@ -176,7 +176,7 @@ export default function FullWidthTabs({
         </TabPanel>
 
         {/* Третий таб Компаний*/}
-        <TabPanel value={value} index={2} dir={theme.direction}>
+        <TabPanel className="tabPanelProps__tabPanel" value={value} index={2} dir={theme.direction}>
           <Company rows={rows} companyIDData={companyIDData} dataGoogleAccounts={dataGoogleAccounts} />
         </TabPanel>
         <TabPanel value={value} index={3} dir={theme.direction}>

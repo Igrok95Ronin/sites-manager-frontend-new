@@ -1,0 +1,8 @@
+.collapsibleTable {
+  &__paddingtd > td {
+    padding: 5px 10px !important;
+  }
+  &__paddingtd > th {
+    padding: 10px !important;
+  }
+}

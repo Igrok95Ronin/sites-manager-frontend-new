@@ -16,6 +16,8 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 // Новый импорт для индикации сортировки
 import TableSortLabel from '@mui/material/TableSortLabel';
 
+import './CollapsibleTable.scss';
+
 /**
  * Функция для группировки ключевых слов с подсчётом их количества и кликов.
  * @param {Array} data - массив объектов с полями `Keyword`, `Domain`, `ClickOnNumber`, `AccountID`.
@@ -175,19 +177,21 @@ function Row({ row, originalData, openRow, setOpenRow, companyIDData, dataGoogle
     return entries;
   }, [groupedKeywords, sortField, sortOrder]);
 
-    // Основной обработчик на всю строку:
-    const handleToggle = () => {
-      setOpenRow(openRow === row.CompanyID ? null : row.CompanyID);
-    };
+  // Основной обработчик на всю строку:
+  const handleToggle = () => {
+    setOpenRow(openRow === row.CompanyID ? null : row.CompanyID);
+  };
 
   return (
     <React.Fragment>
       {/* Основная строка с данными компании */}
       {/* Теперь кликабельна вся строка */}
       <TableRow
+        className="collapsibleTable__paddingtd"
         sx={{
           cursor: 'pointer',
-          '& > *': { borderBottom: 'unset' },
+          '& > *': {},
+          padding: 0,
         }}
         onClick={handleToggle} // <-- Обработчик клика по всей строке
       >
@@ -198,9 +202,7 @@ function Row({ row, originalData, openRow, setOpenRow, companyIDData, dataGoogle
             {openRow === row.CompanyID ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell component="th" scope="row">
-          {displayName}
-        </TableCell>
+        <TableCell scope="row">{displayName}</TableCell>
         <TableCell align="right">{row.TotalKeywords}</TableCell>
         <TableCell align="right">{row.TotalClicks}</TableCell>
         <TableCell align="right">{conversion} %</TableCell>
@@ -362,10 +364,10 @@ export default function CollapsibleTable({ rows, companyIDData, dataGoogleAccoun
   const uniqueRows = groupByCompanyID(rows);
 
   return (
-    <TableContainer component={Paper} sx={{ maxHeight: '75vh' }}>
+    <TableContainer component={Paper} sx={{ maxHeight: '80vh' }}>
       <Table aria-label="collapsible table" stickyHeader>
         <TableHead>
-          <TableRow>
+          <TableRow className="collapsibleTable__paddingtd">
             {/* Пустая ячейка для "раскрывающей" кнопки */}
             <TableCell />
             <TableCell>Компания (CompanyID/Name)</TableCell>
