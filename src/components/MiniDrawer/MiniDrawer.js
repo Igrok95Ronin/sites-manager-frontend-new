@@ -81,14 +81,13 @@ export default function MiniDrawer({ children }) {
   return (
     <Box sx={{ display: 'flex' }}>
       <Drawer variant="permanent" open={open}>
-        <DrawerHeader>
+        <DrawerHeader sx={{padding: '10px 4px'}}>
           <IconButton
             sx={{
               fontSize: 24, // Размер кнопки
               color: 'primary.main', // Цвет кнопки
               padding: 0,
               display: '',
-              paddingLeft: '4px',
             }}
             onClick={handleDrawerToggle}
           >
