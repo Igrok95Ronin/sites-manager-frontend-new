@@ -180,7 +180,7 @@ export default function FullWidthTabs({
         </TabPanel>
 
         {/* Третий таб Компаний*/}
-        <TabPanel className="tabPanelProps__tabPanel" value={value} index={2} dir={theme.direction}>
+        <TabPanel className="tabPanelProps__tabPanel tabPanelProps__tabPanelPadding" value={value} index={2} dir={theme.direction}>
           <Company
             rows={rows}
             companyIDData={companyIDData}

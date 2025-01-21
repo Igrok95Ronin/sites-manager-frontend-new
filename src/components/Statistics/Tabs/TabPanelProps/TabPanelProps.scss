@@ -10,7 +10,10 @@
   &__tabPanel > div {
     padding: 0 5px !important;
   }
-//   &__columns > div > table > tbody > tr > td {
-//     background-color: red !important;
-//   }
+  &__tabPanelPadding {
+    padding-top: 10px;
+  }
+  //   &__columns > div > table > tbody > tr > td {
+  //     background-color: red !important;
+  //   }
 }

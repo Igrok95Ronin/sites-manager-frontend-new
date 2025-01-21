@@ -8,8 +8,9 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
+import Tooltip from '@mui/material/Tooltip';
+
 // Новый импорт для индикации сортировки
 import TableSortLabel from '@mui/material/TableSortLabel';
 
@@ -196,36 +197,31 @@ function Row({
       {/* Основная строка с данными компании */}
       {/* Теперь кликабельна вся строка */}
       <TableRow
-        className="collapsibleTable__paddingtd"
-        sx={{
-          cursor: 'pointer',
-          '& > *': {},
-          padding: 0,
-        }}
-        onClick={handleToggle} // <-- Обработчик клика по всей строке
+        className="collapsibleTable__row"
+        onClick={handleToggle} // Обработчик клика по всей строке
       >
-        {/* <TableCell>
-          <IconButton aria-label="expand row" size="small">
-            {openRow === row.CompanyID ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </TableCell> */}
-        {/* Устанавливаем фильтер по CompanyID и переходим на первую вкладку */}
-        <TableCell scope="row">
+        <TableCell scope="row" className="collapsibleTable__cell collapsibleTable__companyCell">
           <span
             onClick={(e) => {
               e.stopPropagation(); // Останавливаем всплытие, чтобы не срабатывал клик на всю строку
               setValue(0); // Устанавливаем значение 0 для переключения таба
               setFilterCompanyID(row.CompanyID);
             }}
-            style={{ cursor: 'pointer', color: '#1976d2', textDecoration: 'none' }}
+            className="collapsibleTable__link"
           >
             {displayName}
           </span>
         </TableCell>
 
-        <TableCell align="right">{row.TotalKeywords}</TableCell>
-        <TableCell align="right">{row.TotalClicks}</TableCell>
-        <TableCell align="right">{conversion} %</TableCell>
+        <TableCell align="right" className="collapsibleTable__cell collapsibleTable__numericCell">
+          {row.TotalKeywords}
+        </TableCell>
+        <TableCell align="right" className="collapsibleTable__cell collapsibleTable__numericCell">
+          {row.TotalClicks}
+        </TableCell>
+        <TableCell align="right" className="collapsibleTable__cell collapsibleTable__numericCell">
+          {conversion} %
+        </TableCell>
       </TableRow>
 
       {/* Вложенная таблица (при раскрытии) */}
@@ -234,76 +230,67 @@ function Row({
           <Collapse in={openRow === row.CompanyID} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               {/* Заголовок вложенной таблицы */}
-              <Typography variant="h6" gutterBottom component="div">
+              {/* <Typography variant="h6" gutterBottom component="div">
                 {displayName}
-              </Typography>
+              </Typography> */}
 
               <Table size="small" aria-label="keywords">
                 <TableHead>
-                  <TableRow>
-                    {/* Keyword */}
-                    <TableCell>
+                  <TableRow className="collapsibleTable__headerRow">
+                    <TableCell className="collapsibleTable__headerCell collapsibleTable__sortableHeader">
                       <TableSortLabel
                         active={sortField === 'keyword'}
                         direction={sortField === 'keyword' ? sortOrder : 'asc'}
                         onClick={() => handleSort('keyword')}
                       >
-                        Keyword
+                        <span className="collapsibleTable__sortableText">Keyword</span>
                       </TableSortLabel>
                     </TableCell>
-
-                    {/* Domain */}
-                    <TableCell>
+                    <TableCell className="collapsibleTable__headerCell collapsibleTable__sortableHeader">
                       <TableSortLabel
                         active={sortField === 'domain'}
                         direction={sortField === 'domain' ? sortOrder : 'asc'}
                         onClick={() => handleSort('domain')}
                       >
-                        Domain
+                        <span className="collapsibleTable__sortableText">Domain</span>
                       </TableSortLabel>
                     </TableCell>
-
-                    {/* AccountID */}
-                    <TableCell>
+                    <TableCell className="collapsibleTable__headerCell collapsibleTable__sortableHeader">
                       <TableSortLabel
                         active={sortField === 'accountId'}
                         direction={sortField === 'accountId' ? sortOrder : 'asc'}
                         onClick={() => handleSort('accountId')}
                       >
-                        AccountID (или email)
+                        <span className="collapsibleTable__sortableText">AccountID (или email)</span>
                       </TableSortLabel>
                     </TableCell>
-
-                    {/* Count */}
-                    <TableCell align="right">
+                    <TableCell className="collapsibleTable__headerCell collapsibleTable__sortableHeader collapsibleTable__headerCell--right">
                       <TableSortLabel
                         active={sortField === 'count'}
                         direction={sortField === 'count' ? sortOrder : 'asc'}
                         onClick={() => handleSort('count')}
                       >
-                        Count
+                        <Tooltip title="Сколько запросов был по данному Keyword" arrow placement="top">
+                          <span className="collapsibleTable__sortableText">Count</span>
+                        </Tooltip>
                       </TableSortLabel>
                     </TableCell>
-
-                    {/* Clicks */}
-                    <TableCell align="right">
+                    <TableCell className="collapsibleTable__headerCell collapsibleTable__sortableHeader collapsibleTable__headerCell--right">
                       <TableSortLabel
                         active={sortField === 'clicks'}
                         direction={sortField === 'clicks' ? sortOrder : 'asc'}
                         onClick={() => handleSort('clicks')}
                       >
-                        Clicks
+                        <span className="collapsibleTable__sortableText">Clicks</span>
                       </TableSortLabel>
                     </TableCell>
-
-                    {/* Conversion */}
-                    <TableCell align="right">
+                    <TableCell className="collapsibleTable__headerCell collapsibleTable__sortableHeader collapsibleTable__headerCell--right">
                       <TableSortLabel
                         active={sortField === 'conversion'}
                         direction={sortField === 'conversion' ? sortOrder : 'asc'}
                         onClick={() => handleSort('conversion')}
                       >
-                        Conversion (%)
+                        <span className="collapsibleTable__sortableText">Conversion (%)</span>
                       </TableSortLabel>
                     </TableCell>
                   </TableRow>
@@ -431,15 +418,20 @@ export default function CollapsibleTable({
     <TableContainer component={Paper} sx={{ maxHeight: '80vh' }}>
       <Table aria-label="collapsible table" stickyHeader>
         <TableHead>
-          <TableRow className="collapsibleTable__paddingtd">
-            {/* Пустая ячейка для "раскрывающей" кнопки */}
-            {/* <TableCell /> */}
-            <TableCell>Компания</TableCell>
-            <TableCell align="right">Показы </TableCell>
-            <TableCell align="right">Клики </TableCell>
-            <TableCell align="right">Конверсия (%)</TableCell>
+          <TableRow className="collapsibleTable__headerRow">
+            <TableCell className="collapsibleTable__headerCell">Компания</TableCell>
+            <TableCell className="collapsibleTable__headerCell" align="right">
+              Показы
+            </TableCell>
+            <TableCell className="collapsibleTable__headerCell" align="right">
+              Клики
+            </TableCell>
+            <TableCell className="collapsibleTable__headerCell" align="right">
+              Конверсия (%)
+            </TableCell>
           </TableRow>
         </TableHead>
+
         <TableBody>
           {uniqueRows
             .filter((row) => row.CompanyID !== '-')
