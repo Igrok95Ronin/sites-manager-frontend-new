@@ -35,9 +35,9 @@ const closedMixin = (theme) => ({
     duration: theme.transitions.duration.leavingScreen,
   }),
   overflowX: 'hidden',
-  width: `calc(${theme.spacing(7)} + 1px)`,
+  width: 30, // Установите фиксированное значение ширины
   [theme.breakpoints.up('sm')]: {
-    width: `calc(${theme.spacing(8)} + 1px)`,
+    width: 30, // Установите фиксированное значение ширины
   },
 });
 
@@ -82,7 +82,18 @@ export default function MiniDrawer({ children }) {
     <Box sx={{ display: 'flex' }}>
       <Drawer variant="permanent" open={open}>
         <DrawerHeader>
-          <IconButton onClick={handleDrawerToggle}>{open ? <ChevronLeftIcon /> : <MenuIcon />}</IconButton>
+          <IconButton
+            sx={{
+              fontSize: 24, // Размер кнопки
+              color: 'primary.main', // Цвет кнопки
+              padding: 0,
+              display: '',
+              paddingLeft: "4px",
+            }}
+            onClick={handleDrawerToggle}
+          >
+            {open ? <ChevronLeftIcon /> : <MenuIcon />}
+          </IconButton>
         </DrawerHeader>
         <Divider />
         <List>
@@ -93,7 +104,7 @@ export default function MiniDrawer({ children }) {
                 to={route.path}
                 sx={{
                   minHeight: 48,
-                  px: 2.5,
+                  px: 0.5,
                   justifyContent: open ? 'initial' : 'center',
                 }}
               >
