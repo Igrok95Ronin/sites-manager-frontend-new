@@ -2,7 +2,6 @@ import * as React from 'react';
 import PropTypes from 'prop-types';
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
-import IconButton from '@mui/material/IconButton';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -11,8 +10,6 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 // Новый импорт для индикации сортировки
 import TableSortLabel from '@mui/material/TableSortLabel';
 
@@ -195,13 +192,11 @@ function Row({ row, originalData, openRow, setOpenRow, companyIDData, dataGoogle
         }}
         onClick={handleToggle} // <-- Обработчик клика по всей строке
       >
-        <TableCell>
-          {/* Оставляем иконку как элемент оформления (без собственного onClick),
-              чтобы избежать двойного переключения. */}
+        {/* <TableCell>
           <IconButton aria-label="expand row" size="small">
             {openRow === row.CompanyID ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
-        </TableCell>
+        </TableCell> */}
         <TableCell scope="row">{displayName}</TableCell>
         <TableCell align="right">{row.TotalKeywords}</TableCell>
         <TableCell align="right">{row.TotalClicks}</TableCell>
@@ -369,10 +364,10 @@ export default function CollapsibleTable({ rows, companyIDData, dataGoogleAccoun
         <TableHead>
           <TableRow className="collapsibleTable__paddingtd">
             {/* Пустая ячейка для "раскрывающей" кнопки */}
-            <TableCell />
-            <TableCell>Компания (CompanyID/Name)</TableCell>
-            <TableCell align="right">Показы (Всего ключевых слов)</TableCell>
-            <TableCell align="right">Клики (Всего кликов)</TableCell>
+            {/* <TableCell /> */}
+            <TableCell>Компания</TableCell>
+            <TableCell align="right">Показы </TableCell>
+            <TableCell align="right">Клики </TableCell>
             <TableCell align="right">Конверсия (%)</TableCell>
           </TableRow>
         </TableHead>
