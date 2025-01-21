@@ -77,41 +77,27 @@ function groupByCompanyID(data) {
 /**
  * Компонент, отвечающий за рендер строки таблицы и вложенной таблицы с ключевыми словами.
  */
-function Row({
-  row,
-  originalData,
-  openRow,
-  setOpenRow,
-  companyIDData,
-  dataGoogleAccounts,
-}) {
+function Row({ row, originalData, openRow, setOpenRow, companyIDData, dataGoogleAccounts }) {
   /**
    * В companyIDData ищем совпадение по полю CompanyID,
    * чтобы при наличии Name отобразить его вместо самого CompanyID
    */
-  const foundCompany = companyIDData.find(
-    (company) => company.CompanyID === row.CompanyID
-  );
+  const foundCompany = companyIDData.find((company) => company.CompanyID === row.CompanyID);
 
   // Если в foundCompany есть Name, то отображаем его, иначе — исходный CompanyID
-  const displayName =
-    foundCompany && foundCompany.Name ? foundCompany.Name : row.CompanyID;
+  const displayName = foundCompany && foundCompany.Name ? foundCompany.Name : row.CompanyID;
 
   /**
    * Подсчёт общей конверсии в процентах (TotalClicks / TotalKeywords * 100).
    * Если TotalKeywords = 0, ставим '0.00'
    */
-  const conversion = row.TotalKeywords
-    ? ((row.TotalClicks / row.TotalKeywords) * 100).toFixed(2)
-    : '0.00';
+  const conversion = row.TotalKeywords ? ((row.TotalClicks / row.TotalKeywords) * 100).toFixed(2) : '0.00';
 
   /**
    * Фильтрация оригинальных данных по текущему CompanyID,
    * чтобы получить только те строки, которые относятся к данной компании
    */
-  const keywordsForCompany = originalData.filter(
-    (item) => item.CompanyID === row.CompanyID
-  );
+  const keywordsForCompany = originalData.filter((item) => item.CompanyID === row.CompanyID);
 
   /**
    * Группировка ключевых слов (ключ: Keyword) => { count, clicks, domain, accountId }
@@ -189,27 +175,29 @@ function Row({
     return entries;
   }, [groupedKeywords, sortField, sortOrder]);
 
+    // Основной обработчик на всю строку:
+    const handleToggle = () => {
+      setOpenRow(openRow === row.CompanyID ? null : row.CompanyID);
+    };
+
   return (
     <React.Fragment>
       {/* Основная строка с данными компании */}
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
-        {/* Кнопка "раскрыть/свернуть" подтаблицу */}
+      {/* Теперь кликабельна вся строка */}
+      <TableRow
+        sx={{
+          cursor: 'pointer',
+          '& > *': { borderBottom: 'unset' },
+        }}
+        onClick={handleToggle} // <-- Обработчик клика по всей строке
+      >
         <TableCell>
-          <IconButton
-            aria-label="expand row"
-            size="small"
-            onClick={() =>
-              setOpenRow(openRow === row.CompanyID ? null : row.CompanyID)
-            }
-          >
-            {openRow === row.CompanyID ? (
-              <KeyboardArrowUpIcon />
-            ) : (
-              <KeyboardArrowDownIcon />
-            )}
+          {/* Оставляем иконку как элемент оформления (без собственного onClick),
+              чтобы избежать двойного переключения. */}
+          <IconButton aria-label="expand row" size="small">
+            {openRow === row.CompanyID ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        {/* Отображаем название или CompanyID */}
         <TableCell component="th" scope="row">
           {displayName}
         </TableCell>
@@ -225,7 +213,7 @@ function Row({
             <Box sx={{ margin: 1 }}>
               {/* Заголовок вложенной таблицы */}
               <Typography variant="h6" gutterBottom component="div">
-                Keywords for: {displayName}
+                {displayName}
               </Typography>
 
               <Table size="small" aria-label="keywords">
@@ -290,9 +278,7 @@ function Row({
                     <TableCell align="right">
                       <TableSortLabel
                         active={sortField === 'conversion'}
-                        direction={
-                          sortField === 'conversion' ? sortOrder : 'asc'
-                        }
+                        direction={sortField === 'conversion' ? sortOrder : 'asc'}
                         onClick={() => handleSort('conversion')}
                       >
                         Conversion (%)
@@ -303,18 +289,11 @@ function Row({
 
                 <TableBody>
                   {sortedKeywords.map(([keyword, { count, clicks, domain, accountId }]) => {
-                    const keywordConversion = count
-                      ? ((clicks / count) * 100).toFixed(2)
-                      : '0.00';
+                    const keywordConversion = count ? ((clicks / count) * 100).toFixed(2) : '0.00';
 
                     // Сопоставление с данными из dataGoogleAccounts
-                    const foundAccount = dataGoogleAccounts.find(
-                      (acc) => acc.account_id === accountId
-                    );
-                    const displayAccount =
-                      foundAccount && foundAccount.email
-                        ? foundAccount.email
-                        : accountId;
+                    const foundAccount = dataGoogleAccounts.find((acc) => acc.account_id === accountId);
+                    const displayAccount = foundAccount && foundAccount.email ? foundAccount.email : accountId;
 
                     return (
                       <TableRow key={keyword}>
@@ -323,9 +302,7 @@ function Row({
                         <TableCell>{displayAccount}</TableCell>
                         <TableCell align="right">{count}</TableCell>
                         <TableCell align="right">{clicks}</TableCell>
-                        <TableCell align="right">
-                          {keywordConversion} %
-                        </TableCell>
+                        <TableCell align="right">{keywordConversion} %</TableCell>
                       </TableRow>
                     );
                   })}
@@ -355,7 +332,7 @@ Row.propTypes = {
       ClickOnNumber: PropTypes.bool.isRequired,
       Domain: PropTypes.string.isRequired,
       AccountID: PropTypes.string.isRequired,
-    })
+    }),
   ).isRequired,
   openRow: PropTypes.string,
   setOpenRow: PropTypes.func.isRequired,
@@ -363,13 +340,13 @@ Row.propTypes = {
     PropTypes.shape({
       CompanyID: PropTypes.string,
       Name: PropTypes.string,
-    })
+    }),
   ).isRequired,
   dataGoogleAccounts: PropTypes.arrayOf(
     PropTypes.shape({
       account_id: PropTypes.string,
       email: PropTypes.string,
-    })
+    }),
   ).isRequired,
 };
 
@@ -377,11 +354,7 @@ Row.propTypes = {
  * Основной компонент таблицы.
  * Здесь отображаются строки (Row) по компаниям.
  */
-export default function CollapsibleTable({
-  rows,
-  companyIDData,
-  dataGoogleAccounts,
-}) {
+export default function CollapsibleTable({ rows, companyIDData, dataGoogleAccounts }) {
   // Состояние для отслеживания, какая строка сейчас "раскрыта"
   const [openRow, setOpenRow] = React.useState(null);
 
@@ -429,18 +402,18 @@ CollapsibleTable.propTypes = {
       ClickOnNumber: PropTypes.bool.isRequired,
       Domain: PropTypes.string.isRequired,
       AccountID: PropTypes.string.isRequired,
-    })
+    }),
   ).isRequired,
   companyIDData: PropTypes.arrayOf(
     PropTypes.shape({
       CompanyID: PropTypes.string,
       Name: PropTypes.string,
-    })
+    }),
   ).isRequired,
   dataGoogleAccounts: PropTypes.arrayOf(
     PropTypes.shape({
       account_id: PropTypes.string,
       email: PropTypes.string,
-    })
+    }),
   ).isRequired,
 };
