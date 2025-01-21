@@ -71,11 +71,11 @@ export default function MiniDrawer({ children }) {
   };
 
   const routes = [
-    { text: 'Accordion', path: '/', icon: <DashboardIcon /> },
-    { text: 'Domains', path: '/domains', icon: <PublicIcon /> },
-    { text: 'Google Accounts', path: '/google-accounts', icon: <AccountCircleIcon /> },
-    { text: 'Logs', path: '/logs', icon: <ListAltIcon /> },
-    { text: 'Statistics', path: '/statistics', icon: <BarChartIcon /> },
+    { text: 'Шаблоны', path: '/', icon: <DashboardIcon /> },
+    { text: 'Домены', path: '/domains', icon: <PublicIcon /> },
+    { text: 'Аккаунты Google', path: '/google-accounts', icon: <AccountCircleIcon /> },
+    { text: 'Логи', path: '/logs', icon: <ListAltIcon /> },
+    { text: 'Статистика', path: '/statistics', icon: <BarChartIcon /> },
   ];
 
   return (
@@ -88,7 +88,7 @@ export default function MiniDrawer({ children }) {
               color: 'primary.main', // Цвет кнопки
               padding: 0,
               display: '',
-              paddingLeft: "4px",
+              paddingLeft: '4px',
             }}
             onClick={handleDrawerToggle}
           >
