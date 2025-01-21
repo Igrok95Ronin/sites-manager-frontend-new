@@ -57,15 +57,9 @@ const MarkedLogs = () => {
 
   return (
     <>
-      <p className="markedLogs__allRecords">
-        Всего записей: {`${totalCount} / ${totalCountAll}`}
-      </p>
+      <p className="markedLogs__allRecords">Всего записей: {`${totalCount} / ${totalCountAll}`}</p>
       {loading && <Spinner loading={loading} />}
-      <ReactVirtualizedTableCustom
-        dataLogs={dataLogs}
-        fetchData={fetchData}
-        hasMore={hasMore}
-      />
+      <ReactVirtualizedTableCustom dataLogs={dataLogs} fetchData={fetchData} hasMore={hasMore} />
     </>
   );
 };

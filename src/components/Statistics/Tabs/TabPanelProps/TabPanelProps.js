@@ -157,7 +157,7 @@ export default function FullWidthTabs({
             <div className="tabPanelProps__settings">{ColumnSelector}</div>
           </div>
 
-          <Paper style={{ height: '74vh', width: '100%' }}>
+          <Paper style={{ height: '84vh', width: '100%' }}>
             <TableVirtuoso
               classID="tabPanelProps__columns"
               data={filteredData}

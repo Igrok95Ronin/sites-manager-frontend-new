@@ -1,15 +1,15 @@
 .markedLogs {
-    &__allRecords {
-        color: #4caf50;
-        font-weight: 700;
-        display: flex;
-        padding: 0 0 20px;
-    }
-    &__link {
-        color: rgb(25, 118, 210);
-        font-weight: 500;
-        text-decoration: underline;
-        cursor: pointer;
-        text-transform: lowercase;
-    }
+  &__allRecords {
+    color: #4caf50;
+    font-weight: 700;
+    display: flex;
+    padding: 0 0 20px;
+  }
+  &__link {
+    color: rgb(25, 118, 210);
+    font-weight: 500;
+    text-decoration: underline;
+    cursor: pointer;
+    text-transform: lowercase;
+  }
 }

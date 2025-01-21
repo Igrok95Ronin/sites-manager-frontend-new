@@ -415,7 +415,7 @@ export default function CollapsibleTable({
   const uniqueRows = groupByCompanyID(rows);
 
   return (
-    <TableContainer component={Paper} sx={{ maxHeight: '80vh' }}>
+    <TableContainer component={Paper} sx={{ maxHeight: '90vh' }}>
       <Table aria-label="collapsible table" stickyHeader>
         <TableHead>
           <TableRow className="collapsibleTable__headerRow">

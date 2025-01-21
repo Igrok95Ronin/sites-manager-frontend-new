@@ -14,7 +14,7 @@ const GoogleAccounts = () => {
   const [loading, setLoading] = useState(true); // Состояние загрузки
   const [errorMessage, setErrorMessage] = useState(''); // Сообщение об ошибке
 
-  console.log(dataGoogleAccounts)
+  console.log(dataGoogleAccounts);
 
   // Функция для получения данных Google Accounts
   const fetchData = async () => {
@@ -37,7 +37,7 @@ const GoogleAccounts = () => {
 
   // Фильтрация данных по поисковому запросу
   const filteredData = dataGoogleAccounts.filter((item) =>
-    item.account_id.toLowerCase().includes(searchQuery.toLowerCase())
+    item.account_id.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const numberOfAccounts = filteredData.length;
@@ -45,7 +45,7 @@ const GoogleAccounts = () => {
   return (
     <div className="google-accounts-container">
       <Search onSearch={setSearchQuery} numberOfDomains={numberOfAccounts} />
-      
+
       {loading ? (
         <Spinner loading={loading} />
       ) : errorMessage ? (
@@ -53,10 +53,7 @@ const GoogleAccounts = () => {
           {errorMessage}
         </div>
       ) : (
-        <Table
-          items={filteredData}
-          onUpdateGoogleAccounts={fetchData}
-        />
+        <Table items={filteredData} onUpdateGoogleAccounts={fetchData} />
       )}
     </div>
   );

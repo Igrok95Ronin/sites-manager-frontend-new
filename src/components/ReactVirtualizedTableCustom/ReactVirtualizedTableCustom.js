@@ -130,7 +130,7 @@ export default function ReactVirtualizedTableCustom({
   }
 
   return (
-    <Paper style={{ height: '70vh', width: '100%' }}>
+    <Paper style={{ height: '82vh', width: '100%' }}>
       <TableVirtuoso
         data={sortedDataLogs} // Передаем отсортированные данные
         components={VirtuosoTableComponents}
