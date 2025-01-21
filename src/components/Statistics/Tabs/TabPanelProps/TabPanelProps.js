@@ -54,6 +54,9 @@ export default function FullWidthTabs({
   companyIDData,
   dataGoogleAccounts,
   setFilterCompanyID,
+  setFilterKeyword,
+  setFilterByDomain,
+  setFilterAccountID,
   fixedHeaderContent,
   rowContent,
   loadMoreRows,
@@ -184,6 +187,9 @@ export default function FullWidthTabs({
             dataGoogleAccounts={dataGoogleAccounts}
             setValue={setValue}
             setFilterCompanyID={setFilterCompanyID}
+            setFilterKeyword={setFilterKeyword}
+            setFilterByDomain={setFilterByDomain}
+            setFilterAccountID={setFilterAccountID}
           />
         </TabPanel>
         <TabPanel value={value} index={3} dir={theme.direction}>

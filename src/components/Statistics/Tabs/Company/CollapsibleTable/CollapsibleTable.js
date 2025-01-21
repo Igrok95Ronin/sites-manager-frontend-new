@@ -85,6 +85,9 @@ function Row({
   dataGoogleAccounts,
   setValue,
   setFilterCompanyID,
+  setFilterKeyword,
+  setFilterByDomain,
+  setFilterAccountID,
 }) {
   /**
    * В companyIDData ищем совпадение по полю CompanyID,
@@ -316,9 +319,44 @@ function Row({
 
                     return (
                       <TableRow key={keyword}>
-                        <TableCell>{keyword}</TableCell>
-                        <TableCell>{domain}</TableCell>
-                        <TableCell>{displayAccount}</TableCell>
+                        <TableCell>
+                          <span
+                            onClick={(e) => {
+                              e.stopPropagation(); // Останавливаем всплытие, чтобы не срабатывал клик на всю строку
+                              setValue(0); // Устанавливаем значение 0 для переключения таба
+                              setFilterKeyword(keyword);
+                            }}
+                            style={{ cursor: 'pointer', color: '#1976d2', textDecoration: 'none' }}
+                          >
+                            {keyword}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          {' '}
+                          <span
+                            onClick={(e) => {
+                              e.stopPropagation(); // Останавливаем всплытие, чтобы не срабатывал клик на всю строку
+                              setValue(0); // Устанавливаем значение 0 для переключения таба
+                              setFilterByDomain(domain);
+                            }}
+                            style={{ cursor: 'pointer', color: '#1976d2', textDecoration: 'none' }}
+                          >
+                            {domain}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          {' '}
+                          <span
+                            onClick={(e) => {
+                              e.stopPropagation(); // Останавливаем всплытие, чтобы не срабатывал клик на всю строку
+                              setValue(0); // Устанавливаем значение 0 для переключения таба
+                              setFilterAccountID(accountId);
+                            }}
+                            style={{ cursor: 'pointer', color: '#1976d2', textDecoration: 'none' }}
+                          >
+                            {displayAccount}
+                          </span>
+                        </TableCell>
                         <TableCell align="right">{count}</TableCell>
                         <TableCell align="right">{clicks}</TableCell>
                         <TableCell align="right">{keywordConversion} %</TableCell>
@@ -373,7 +411,16 @@ Row.propTypes = {
  * Основной компонент таблицы.
  * Здесь отображаются строки (Row) по компаниям.
  */
-export default function CollapsibleTable({ rows, companyIDData, dataGoogleAccounts, setValue, setFilterCompanyID }) {
+export default function CollapsibleTable({
+  rows,
+  companyIDData,
+  dataGoogleAccounts,
+  setValue,
+  setFilterCompanyID,
+  setFilterKeyword,
+  setFilterByDomain,
+  setFilterAccountID,
+}) {
   // Состояние для отслеживания, какая строка сейчас "раскрыта"
   const [openRow, setOpenRow] = React.useState(null);
 
@@ -407,6 +454,9 @@ export default function CollapsibleTable({ rows, companyIDData, dataGoogleAccoun
                 dataGoogleAccounts={dataGoogleAccounts}
                 setValue={setValue}
                 setFilterCompanyID={setFilterCompanyID}
+                setFilterKeyword={setFilterKeyword}
+                setFilterByDomain={setFilterByDomain}
+                setFilterAccountID={setFilterAccountID}
               />
             ))}
         </TableBody>

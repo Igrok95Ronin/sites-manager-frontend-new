@@ -1,6 +1,15 @@
 import CollapsibleTable from './CollapsibleTable/CollapsibleTable';
 
-export default function Company({ rows, companyIDData, dataGoogleAccounts, setValue, setFilterCompanyID }) {
+export default function Company({
+  rows,
+  companyIDData,
+  dataGoogleAccounts,
+  setValue,
+  setFilterCompanyID,
+  setFilterKeyword,
+  setFilterByDomain,
+  setFilterAccountID,
+}) {
   return (
     <CollapsibleTable
       rows={rows}
@@ -8,6 +17,9 @@ export default function Company({ rows, companyIDData, dataGoogleAccounts, setVa
       dataGoogleAccounts={dataGoogleAccounts}
       setValue={setValue}
       setFilterCompanyID={setFilterCompanyID}
+      setFilterKeyword={setFilterKeyword}
+      setFilterByDomain={setFilterByDomain}
+      setFilterAccountID={setFilterAccountID}
     />
   );
 }

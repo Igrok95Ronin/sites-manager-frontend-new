@@ -8,6 +8,9 @@ const Tabs = ({
   companyIDData,
   dataGoogleAccounts,
   setFilterCompanyID,
+  setFilterKeyword,
+  setFilterByDomain,
+  setFilterAccountID,
   fixedHeaderContent,
   rowContent,
   loadMoreRows,
@@ -37,6 +40,9 @@ const Tabs = ({
             companyIDData={companyIDData}
             dataGoogleAccounts={dataGoogleAccounts}
             setFilterCompanyID={setFilterCompanyID}
+            setFilterKeyword={setFilterKeyword}
+            setFilterByDomain={setFilterByDomain}
+            setFilterAccountID={setFilterAccountID}
             fixedHeaderContent={fixedHeaderContent}
             rowContent={rowContent}
             loadMoreRows={loadMoreRows}

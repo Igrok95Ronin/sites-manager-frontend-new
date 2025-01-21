@@ -349,6 +349,9 @@ export default function ReactVirtualizedTable() {
         companyIDData={companyIDData}
         dataGoogleAccounts={dataGoogleAccounts}
         setFilterCompanyID={setFilterCompanyID}
+        setFilterKeyword={setFilterKeyword}
+        setFilterByDomain={setFilterByDomain}
+        setFilterAccountID={setFilterAccountID}
         fixedHeaderContent={() => (
           <TableHeader
             visibleColumns={visibleColumns}
