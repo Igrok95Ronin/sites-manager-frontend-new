@@ -7,6 +7,7 @@ const Tabs = ({
   VirtuosoTableComponents,
   companyIDData,
   dataGoogleAccounts,
+  setFilterCompanyID,
   fixedHeaderContent,
   rowContent,
   loadMoreRows,
@@ -35,6 +36,7 @@ const Tabs = ({
             VirtuosoTableComponents={VirtuosoTableComponents}
             companyIDData={companyIDData}
             dataGoogleAccounts={dataGoogleAccounts}
+            setFilterCompanyID={setFilterCompanyID}
             fixedHeaderContent={fixedHeaderContent}
             rowContent={rowContent}
             loadMoreRows={loadMoreRows}

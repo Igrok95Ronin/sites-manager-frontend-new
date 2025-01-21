@@ -107,6 +107,7 @@ export default function ReactVirtualizedTable() {
   const [filterByDomain, setFilterByDomain] = useLocalStorageDataKeys('filterByDomain', null); // Состояние для фильтрации по домену
   const [filterCompanyID, setFilterCompanyID] = useLocalStorageDataKeys('filterCompanyID', null); // Состояние для фильтрации по CompanyID
   const [filterAccountID, setFilterAccountID] = useLocalStorageDataKeys('filterAccountID', null); // Состояние для фильтрации по AccountID
+  const [filterKeyword, setFilterKeyword] = useLocalStorageDataKeys('filterKeyword', null); // Состояние для фильтрации по filterKeyword
   // Данные CompanyID
   const [companyIDData, setCompanyIDData] = useState([]);
   // Данные GoogleAC
@@ -230,9 +231,15 @@ export default function ReactVirtualizedTable() {
     if (filterCompanyID) {
       data = data.filter((item) => item.CompanyID === filterCompanyID);
     }
+    if (filterAccountID) {
+      data = data.filter((item) => item.AccountID === filterAccountID);
+    }
+    if (filterKeyword) {
+      data = data.filter((item) => item.Keyword === filterKeyword);
+    }
 
     return data;
-  }, [sortedRows, searchField, searchQuery, filterByDomain, filterCompanyID]);
+  }, [sortedRows, searchField, searchQuery, filterByDomain, filterCompanyID, filterAccountID, filterKeyword]);
 
   const processedData = React.useMemo(() => {
     return filteredData.map((row) => {
@@ -341,6 +348,7 @@ export default function ReactVirtualizedTable() {
         VirtuosoTableComponents={VirtuosoTableComponents}
         companyIDData={companyIDData}
         dataGoogleAccounts={dataGoogleAccounts}
+        setFilterCompanyID={setFilterCompanyID}
         fixedHeaderContent={() => (
           <TableHeader
             visibleColumns={visibleColumns}
@@ -357,6 +365,8 @@ export default function ReactVirtualizedTable() {
             setFilterCompanyID={setFilterCompanyID}
             filterAccountID={filterAccountID}
             setFilterAccountID={setFilterAccountID}
+            filterKeyword={filterKeyword}
+            setFilterKeyword={setFilterKeyword}
             allColumns={allColumns}
             processedData={processedData}
             loadMoreRows={loadMoreRows}
@@ -381,6 +391,7 @@ export default function ReactVirtualizedTable() {
             setFilterByDomain={setFilterByDomain}
             setFilterCompanyID={setFilterCompanyID}
             setFilterAccountID={setFilterAccountID}
+            setFilterKeyword={setFilterKeyword}
             doubleOutput={doubleOutput}
             companyIDData={companyIDData}
             dataGoogleAccounts={dataGoogleAccounts}

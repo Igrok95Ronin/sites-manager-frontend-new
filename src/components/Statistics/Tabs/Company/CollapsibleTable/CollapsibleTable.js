@@ -76,7 +76,16 @@ function groupByCompanyID(data) {
 /**
  * Компонент, отвечающий за рендер строки таблицы и вложенной таблицы с ключевыми словами.
  */
-function Row({ row, originalData, openRow, setOpenRow, companyIDData, dataGoogleAccounts }) {
+function Row({
+  row,
+  originalData,
+  openRow,
+  setOpenRow,
+  companyIDData,
+  dataGoogleAccounts,
+  setValue,
+  setFilterCompanyID,
+}) {
   /**
    * В companyIDData ищем совпадение по полю CompanyID,
    * чтобы при наличии Name отобразить его вместо самого CompanyID
@@ -197,7 +206,20 @@ function Row({ row, originalData, openRow, setOpenRow, companyIDData, dataGoogle
             {openRow === row.CompanyID ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell> */}
-        <TableCell scope="row">{displayName}</TableCell>
+        {/* Устанавливаем фильтер по CompanyID и переходим на первую вкладку */}
+        <TableCell scope="row">
+          <span
+            onClick={(e) => {
+              e.stopPropagation(); // Останавливаем всплытие, чтобы не срабатывал клик на всю строку
+              setValue(0); // Устанавливаем значение 0 для переключения таба
+              setFilterCompanyID(row.CompanyID);
+            }}
+            style={{ cursor: 'pointer', color: '#1976d2', textDecoration: 'none' }}
+          >
+            {displayName}
+          </span>
+        </TableCell>
+
         <TableCell align="right">{row.TotalKeywords}</TableCell>
         <TableCell align="right">{row.TotalClicks}</TableCell>
         <TableCell align="right">{conversion} %</TableCell>
@@ -351,7 +373,7 @@ Row.propTypes = {
  * Основной компонент таблицы.
  * Здесь отображаются строки (Row) по компаниям.
  */
-export default function CollapsibleTable({ rows, companyIDData, dataGoogleAccounts }) {
+export default function CollapsibleTable({ rows, companyIDData, dataGoogleAccounts, setValue, setFilterCompanyID }) {
   // Состояние для отслеживания, какая строка сейчас "раскрыта"
   const [openRow, setOpenRow] = React.useState(null);
 
@@ -383,6 +405,8 @@ export default function CollapsibleTable({ rows, companyIDData, dataGoogleAccoun
                 setOpenRow={setOpenRow}
                 companyIDData={companyIDData}
                 dataGoogleAccounts={dataGoogleAccounts}
+                setValue={setValue}
+                setFilterCompanyID={setFilterCompanyID}
               />
             ))}
         </TableBody>

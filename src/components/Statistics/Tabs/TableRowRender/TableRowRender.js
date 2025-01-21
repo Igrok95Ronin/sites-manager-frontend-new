@@ -24,6 +24,7 @@ export default function TableRowRender({
   setFilterByDomain,
   setFilterCompanyID,
   setFilterAccountID,
+  setFilterKeyword,
   doubleOutput,
   companyIDData,
   dataGoogleAccounts,
@@ -228,6 +229,31 @@ export default function TableRowRender({
                   const account = dataGoogleAccounts.find((account) => account.account_id === cellValue);
                   return account ? account.email : cellValue;
                 })()}
+              </Button>
+            </TableCell>
+          );
+        }
+
+        // Логика для Keyword (фильтр по CompanyID)
+        if (cellKey === 'Keyword') {
+          return (
+            <TableCell
+              className="statistics__padding"
+              key={cellKey}
+              align="left"
+              style={{ backgroundColor: rowBackgroundColor }}
+            >
+              <Button
+                variant="text"
+                size="small"
+                color="secondary"
+                onClick={() => setFilterKeyword(cellValue)}
+                sx={{
+                  textTransform: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {cellValue}
               </Button>
             </TableCell>
           );

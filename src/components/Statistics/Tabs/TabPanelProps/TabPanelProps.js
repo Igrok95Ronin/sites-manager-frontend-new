@@ -53,6 +53,7 @@ export default function FullWidthTabs({
   VirtuosoTableComponents,
   companyIDData,
   dataGoogleAccounts,
+  setFilterCompanyID,
   fixedHeaderContent,
   rowContent,
   loadMoreRows,
@@ -177,10 +178,31 @@ export default function FullWidthTabs({
 
         {/* Третий таб Компаний*/}
         <TabPanel className="tabPanelProps__tabPanel" value={value} index={2} dir={theme.direction}>
-          <Company rows={rows} companyIDData={companyIDData} dataGoogleAccounts={dataGoogleAccounts} />
+          <Company
+            rows={rows}
+            companyIDData={companyIDData}
+            dataGoogleAccounts={dataGoogleAccounts}
+            setValue={setValue}
+            setFilterCompanyID={setFilterCompanyID}
+          />
         </TabPanel>
         <TabPanel value={value} index={3} dir={theme.direction}>
-          Узбакойся уходиd
+          <div>
+            <p>Успокойся, уходиd</p>
+            <button
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#4caf50',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+              }}
+              onClick={() => setValue(0)}
+            >
+              Перейти на первый таб
+            </button>
+          </div>
         </TabPanel>
       </Box>
     </Box>

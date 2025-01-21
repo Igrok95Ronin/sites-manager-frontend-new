@@ -28,6 +28,8 @@ export default function TableHeader({
   setFilterCompanyID,
   filterAccountID,
   setFilterAccountID,
+  filterKeyword,
+  setFilterKeyword,
   allColumns,
   processedData,
   loadMoreRows,
@@ -96,7 +98,6 @@ export default function TableHeader({
                           transform: snapshotDraggable.isDragging ? 'rotate(15deg)' : 'none',
                         }}
                       />
-
                       {/* Sortable Column Label */}
                       <TableSortLabel
                         active={orderBy === column.dataKey}
@@ -113,7 +114,6 @@ export default function TableHeader({
                       >
                         {column.label}
                       </TableSortLabel>
-
                       {/* Дополнительные элементы (например, Tooltips, Buttons) */}
                       {column.dataKey === 'Domain' && filterByDomain && (
                         <Tooltip title="Сбросить фильтр по домену" arrow placement="top">
@@ -129,7 +129,6 @@ export default function TableHeader({
                           </IconButton>
                         </Tooltip>
                       )}
-
                       {/* Дополнительные элементы (например, Tooltips, Buttons) */}
                       {column.dataKey === 'CompanyID' && filterCompanyID && (
                         <Tooltip title="Сбросить фильтр по CompanyID" arrow placement="top">
@@ -145,7 +144,6 @@ export default function TableHeader({
                           </IconButton>
                         </Tooltip>
                       )}
-
                       {/* Дополнительные элементы (например, Tooltips, Buttons) */}
                       {column.dataKey === 'AccountID' && filterAccountID && (
                         <Tooltip title="Сбросить фильтр по AccountID" arrow placement="top">
@@ -155,6 +153,22 @@ export default function TableHeader({
                             onClick={(e) => {
                               e.stopPropagation();
                               setFilterAccountID(null);
+                            }}
+                          >
+                            <RestartAltIcon sx={{ width: '18px' }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+
+                      {/* Дополнительные элементы (например, Tooltips, Buttons) */}
+                      {column.dataKey === 'Keyword' && filterKeyword && (
+                        <Tooltip title="Сбросить фильтр по Keyword" arrow placement="top">
+                          <IconButton
+                            sx={{ padding: '5px 0', marginLeft: '0' }}
+                            color="success"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFilterKeyword(null);
                             }}
                           >
                             <RestartAltIcon sx={{ width: '18px' }} />
@@ -175,7 +189,6 @@ export default function TableHeader({
                           Description={'Заголовки Headers'}
                         />
                       )}
-
                       {column.dataKey === 'language' && (
                         <FullScreenDialog
                           AcceptLanguage={<DataObjectIcon />}
@@ -188,7 +201,6 @@ export default function TableHeader({
                           Description={'Данные JS'}
                         />
                       )}
-
                       {(column.dataKey === 'Headers' || column.dataKey === 'JsData') && (
                         <Tooltip title="Сбросить расширение JSON" arrow placement="top">
                           <IconButton
