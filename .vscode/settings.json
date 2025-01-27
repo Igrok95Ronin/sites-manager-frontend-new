@@ -48,5 +48,6 @@
     "borderRadius": "2px",
     "isWholeLine": false
     //other styling properties goes here ...
-  }
+  },
+  "commentTranslate.multiLineMerge": true
 }

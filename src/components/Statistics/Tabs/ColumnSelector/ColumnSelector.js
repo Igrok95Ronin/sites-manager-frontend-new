@@ -9,6 +9,7 @@ import RotateLeftIcon from '@mui/icons-material/RotateLeft';
 import SimCardDownloadIcon from '@mui/icons-material/SimCardDownload';
 import Tooltip from '@mui/material/Tooltip';
 import Switch from '@mui/material/Switch';
+import KebabDiningIcon from '@mui/icons-material/KebabDining';
 
 // Импортируем компоненты для выбора даты
 import ResetCheckedForm from '../ResetCheckedForm/ResetCheckedForm';
@@ -16,6 +17,7 @@ import DownloadFileLogsADS from '../DownloadFileLogsADS/DownloadFileLogsADS';
 import Spinner from '../../../Spinner/Spinner';
 import SnackbarCustom from '../../../SnackbarCustom/SnackbarCustom';
 import FontSizeChanger from '../../Tabs/FontSizeChanger/FontSizeChanger.js';
+import { UpdateCompanyNames } from '../UpdateCompanyNames/UpdateCompanyNames.js';
 
 import './ColumnSelector.scss';
 
@@ -186,6 +188,13 @@ const ColumnSelector = ({
               inputProps={{ 'aria-label': 'controlled' }}
               size={'small'}
             />
+          </Tooltip>
+
+          {/* Обновить записи имен для Компаний */}
+          <Tooltip title="Обновить или добавить новые именам компании по Company ID" arrow placement="top">
+            <Button variant="text" onClick={() => UpdateCompanyNames(setLoading, setData, setError)}>
+              <KebabDiningIcon />
+            </Button>
           </Tooltip>
 
           {/* Разделитель */}
