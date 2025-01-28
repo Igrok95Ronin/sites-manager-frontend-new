@@ -13,6 +13,7 @@ const GoogleAccounts = () => {
   const [searchQuery, setSearchQuery] = useState(''); // Поисковый запрос
   const [loading, setLoading] = useState(true); // Состояние загрузки
   const [errorMessage, setErrorMessage] = useState(''); // Сообщение об ошибке
+  const [deleteGA, setDeleteGA] = useState(false);
 
   console.log(dataGoogleAccounts);
 
@@ -33,7 +34,7 @@ const GoogleAccounts = () => {
 
   useEffect(() => {
     fetchData(); // Вызываем функцию при монтировании компонента
-  }, []);
+  }, [deleteGA]);
 
   // Фильтрация данных по поисковому запросу
   const filteredData = dataGoogleAccounts.filter((item) =>
@@ -53,7 +54,7 @@ const GoogleAccounts = () => {
           {errorMessage}
         </div>
       ) : (
-        <Table items={filteredData} onUpdateGoogleAccounts={fetchData} />
+        <Table items={filteredData} onUpdateGoogleAccounts={fetchData} setDeleteGA={setDeleteGA} />
       )}
     </div>
   );

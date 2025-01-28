@@ -13,6 +13,7 @@ import Button from '@mui/material/Button';
 
 import EditGA from '../EditGA/EditGA';
 import AddGoogleAccount from '../AddGoogleAccount/AddGoogleAccount';
+import { DeleteGA } from '../DeleteGA/DeleteGA';
 
 import './Table.scss'; // Импорт стилей для таблицы
 
@@ -37,11 +38,10 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-export default function Tables({ items, onUpdateGoogleAccounts, setLoading }) {
+export default function Tables({ items, onUpdateGoogleAccounts, setLoading, setDeleteGA }) {
   const [order, setOrder] = React.useState('asc'); // Направление сортировки
   const [orderBy, setOrderBy] = React.useState('account_id'); // Столбец для сортировки
-  const [callEditGoogleAccount, setCallEditGoogleAccount] =
-    React.useState(false); // Оправить запрос на сервер для редактирования GA
+  const [callEditGoogleAccount, setCallEditGoogleAccount] = React.useState(false); // Оправить запрос на сервер для редактирования GA
   const [dataGA, setDataGa] = React.useState({}); // Данные которые нужно отпарвить на сервер для обновнения статуса
 
   const handleClickBtn = (account_id, status) => {
@@ -84,18 +84,12 @@ export default function Tables({ items, onUpdateGoogleAccounts, setLoading }) {
     <section className="googleAccount">
       <div className="container">
         <div className="googleAccount__box">
-          <TableContainer
-            className="googleAccount__container"
-            component={Paper}
-          >
+          <TableContainer className="googleAccount__container" component={Paper}>
             <Table sx={{ minWidth: 700 }} aria-label="customized table">
               <TableHead className="googleAccount__header">
                 <TableRow className="googleAccount__row">
                   {/* Используем TableSortLabel для добавления сортировки */}
-                  <StyledTableCell
-                    className="googleAccount__headerCell"
-                    onClick={() => handleSort('account_id')}
-                  >
+                  <StyledTableCell className="googleAccount__headerCell" onClick={() => handleSort('account_id')}>
                     <TableSortLabel
                       active={orderBy === 'account_id'}
                       direction={orderBy === 'account_id' ? order : 'asc'}
@@ -103,47 +97,23 @@ export default function Tables({ items, onUpdateGoogleAccounts, setLoading }) {
                       account_id
                     </TableSortLabel>
                   </StyledTableCell>
-                  <StyledTableCell
-                    className="googleAccount__headerCell"
-                    onClick={() => handleSort('email')}
-                  >
-                    <TableSortLabel
-                      active={orderBy === 'email'}
-                      direction={orderBy === 'email' ? order : 'asc'}
-                    >
+                  <StyledTableCell className="googleAccount__headerCell" onClick={() => handleSort('email')}>
+                    <TableSortLabel active={orderBy === 'email'} direction={orderBy === 'email' ? order : 'asc'}>
                       email
                     </TableSortLabel>
                   </StyledTableCell>
-                  <StyledTableCell
-                    className="googleAccount__headerCell"
-                    onClick={() => handleSort('gtag_id')}
-                  >
-                    <TableSortLabel
-                      active={orderBy === 'gtag_id'}
-                      direction={orderBy === 'gtag_id' ? order : 'asc'}
-                    >
+                  <StyledTableCell className="googleAccount__headerCell" onClick={() => handleSort('gtag_id')}>
+                    <TableSortLabel active={orderBy === 'gtag_id'} direction={orderBy === 'gtag_id' ? order : 'asc'}>
                       gtag_id
                     </TableSortLabel>
                   </StyledTableCell>
-                  <StyledTableCell
-                    className="googleAccount__headerCell"
-                    onClick={() => handleSort('gtag_key')}
-                  >
-                    <TableSortLabel
-                      active={orderBy === 'gtag_key'}
-                      direction={orderBy === 'gtag_key' ? order : 'asc'}
-                    >
+                  <StyledTableCell className="googleAccount__headerCell" onClick={() => handleSort('gtag_key')}>
+                    <TableSortLabel active={orderBy === 'gtag_key'} direction={orderBy === 'gtag_key' ? order : 'asc'}>
                       gtag_key
                     </TableSortLabel>
                   </StyledTableCell>
-                  <StyledTableCell
-                    className="googleAccount__headerCell"
-                    onClick={() => handleSort('status')}
-                  >
-                    <TableSortLabel
-                      active={orderBy === 'status'}
-                      direction={orderBy === 'status' ? order : 'asc'}
-                    >
+                  <StyledTableCell className="googleAccount__headerCell" onClick={() => handleSort('status')}>
+                    <TableSortLabel active={orderBy === 'status'} direction={orderBy === 'status' ? order : 'asc'}>
                       status
                     </TableSortLabel>
                   </StyledTableCell>
@@ -157,23 +127,39 @@ export default function Tables({ items, onUpdateGoogleAccounts, setLoading }) {
                     <StyledTableCell>{row.gtag_id}</StyledTableCell>
                     <StyledTableCell>{row.gtag_key}</StyledTableCell>
                     <StyledTableCell>
-                      <Stack direction="row">
+                      <Stack sx={{ display: 'flex', gap: '10px' }} direction="row">
                         <Button
                           onClick={() => {
                             handleClickBtn(row.account_id, row.status);
                           }}
                           variant="contained"
                           sx={{
-                            backgroundColor:
-                              row.status === 'new' ? '#198754' : '#d32f2f',
+                            backgroundColor: row.status === 'new' ? '#198754' : '#FF5722',
                             fontSize: '11px',
                             '&:hover': {
-                              backgroundColor:
-                                row.status === 'new' ? 'darkgreen' : '#b91f1f',
+                              backgroundColor: row.status === 'new' ? 'darkgreen' : '#e44919',
                             },
                           }}
                         >
                           {row.status}
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            const confirmed = window.confirm('Вы уверены, что хотите удалить GA?');
+                            if (confirmed) {
+                              DeleteGA(row.ID, setDeleteGA);
+                            }
+                          }}
+                          variant="contained"
+                          sx={{
+                            backgroundColor: '#d32f2f',
+                            fontSize: '11px',
+                            '&:hover': {
+                              backgroundColor: '#b91f1f',
+                            },
+                          }}
+                        >
+                          DELETE
                         </Button>
                       </Stack>
                     </StyledTableCell>
