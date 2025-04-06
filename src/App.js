@@ -35,6 +35,7 @@ function App() {
           <Route path="/google-accounts" element={<GoogleAccounts />} />
           <Route path="/logs" element={<Logs />} />
           <Route path="/statistics" element={<Statistics />} />
+          <Route path="/monitordomainsstatus" element={<Statistics />} />
         </Routes>
       </MiniDrawer>
     </Router>
