@@ -16,6 +16,7 @@ import PublicIcon from '@mui/icons-material/Public'; // Для Domains
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'; // Для Google Accounts
 import ListAltIcon from '@mui/icons-material/ListAlt'; // Для Logs
 import BarChartIcon from '@mui/icons-material/BarChart'; // Для Statistics
+import MonitorIcon from '@mui/icons-material/Monitor'; // Для domainmonitoring
 import { Link } from 'react-router-dom';
 
 const drawerWidth = 240;
@@ -76,12 +77,13 @@ export default function MiniDrawer({ children }) {
     { text: 'Аккаунты Google', path: '/google-accounts', icon: <AccountCircleIcon /> },
     { text: 'Логи', path: '/logs', icon: <ListAltIcon /> },
     { text: 'Статистика', path: '/statistics', icon: <BarChartIcon /> },
+    { text: 'Мониторинг доменов', path: '/domainmonitoring', icon: <MonitorIcon /> },
   ];
 
   return (
     <Box sx={{ display: 'flex' }}>
       <Drawer variant="permanent" open={open}>
-        <DrawerHeader sx={{padding: '10px 4px'}}>
+        <DrawerHeader sx={{ padding: '10px 4px' }}>
           <IconButton
             sx={{
               fontSize: 24, // Размер кнопки

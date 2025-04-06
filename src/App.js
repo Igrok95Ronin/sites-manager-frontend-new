@@ -8,6 +8,7 @@ import Domains from './components/Domains/Domains';
 import GoogleAccounts from './components/GoogleAccounts/GoogleAccounts';
 import Logs from './components/Logs/Logs';
 import Statistics from './components/Statistics/Statistics';
+import DomainMonitoring from './components/DomainMonitoring/DomainMonitoring';
 import AuthorizationForm from './components/AuthorizationForm/AuthorizationForm';
 import Spinner from './components/Spinner/Spinner';
 
@@ -35,7 +36,7 @@ function App() {
           <Route path="/google-accounts" element={<GoogleAccounts />} />
           <Route path="/logs" element={<Logs />} />
           <Route path="/statistics" element={<Statistics />} />
-          <Route path="/monitordomainsstatus" element={<Statistics />} />
+          <Route path="/domainmonitoring" element={<DomainMonitoring />} />
         </Routes>
       </MiniDrawer>
     </Router>
