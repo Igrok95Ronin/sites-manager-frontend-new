@@ -87,6 +87,7 @@ export default function Tables({ data, fetchData, setError }) {
             component="h2"
             sx={{
               fontWeight: 'bold',
+              fontSize: '',
               mb: 2,
               borderBottom: '2px solid #1976d2',
               display: 'inline-block',
