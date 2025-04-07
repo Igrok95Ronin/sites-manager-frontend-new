@@ -65,9 +65,18 @@ export default function Tables({ data, fetchData, setError }) {
     }
   };
 
-  const handleDeleteClick = (domain) => {
-    console.log(`Удалить домен: ${domain}`);
+  // Удалить домен из отслеживать
+  const handleDeleteClick = async (id) => {
+    try {
+      await axiosInstance.delete(`/removedomainfromtrack/${id}`);
+      console.log(`Домен с ID ${id} удалён из отслеживания`);
+      fetchData(); // обновим таблицу после удаления
+    } catch (error) {
+      setError(error);
+      console.error('Ошибка при удалении домена:', error);
+    }
   };
+  
 
   return (
     <section className="domainMonitoring">
@@ -181,7 +190,7 @@ export default function Tables({ data, fetchData, setError }) {
                           {item.track !== true ? 'Мониторить' : 'Остановить'}
                         </Button>
                         <Button
-                          onClick={() => handleDeleteClick(item.domain)}
+                          onClick={() => handleDeleteClick(item.ID)}
                           variant="contained"
                           sx={{
                             backgroundColor: '#d32f2f',
