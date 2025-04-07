@@ -76,7 +76,6 @@ export default function Tables({ data, fetchData, setError }) {
       console.error('Ошибка при удалении домена:', error);
     }
   };
-  
 
   return (
     <section className="domainMonitoring">
@@ -85,7 +84,7 @@ export default function Tables({ data, fetchData, setError }) {
           {/* // Контейнер таблицы с максимальной высотой и возможностью прокрутки */}
           <TableContainer component={Paper} sx={{ maxHeight: '89vh' }}>
             {/* Таблица с фиксированной шапкой */}
-            <Table stickyHeader sx={{ minWidth: 650 }} aria-label="domain monitoring table">
+            <Table stickyHeader size="small" sx={{ minWidth: 650 }} aria-label="domain monitoring table">
               <TableHead>
                 <TableRow>
                   {/* Заголовок: Домен */}
@@ -103,7 +102,7 @@ export default function Tables({ data, fetchData, setError }) {
                   </TableCell>
 
                   {/* Заголовок: Статус */}
-                  <TableCell
+                  {/* <TableCell
                     className="domainMonitoring__headerCell"
                     sortDirection={orderBy === 'status' ? order : false}
                   >
@@ -114,7 +113,7 @@ export default function Tables({ data, fetchData, setError }) {
                     >
                       Статус
                     </TableSortLabel>
-                  </TableCell>
+                  </TableCell> */}
 
                   {/* Заголовок: Код ответа */}
                   <TableCell
@@ -168,10 +167,11 @@ export default function Tables({ data, fetchData, setError }) {
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        {item.domain}
+                        {/* Убираем приставку */}
+                        {item.domain.replace(/^https?:\/\//, '')}
                       </a>
                     </TableCell>
-                    <TableCell>{item.status}</TableCell>
+                    {/* <TableCell>{item.status}</TableCell> */}
                     <TableCell>{item.responseCode}</TableCell>
                     <TableCell>{item.track ? 'Да' : 'Нет'}</TableCell>
                     <TableCell>
@@ -179,9 +179,10 @@ export default function Tables({ data, fetchData, setError }) {
                         <Button
                           onClick={() => handleStopClick(item.ID)}
                           variant="contained"
+                          size='small'
                           sx={{
-                            backgroundColor: item.track !== true ? '#198754' : '#FF5722',
-                            fontSize: '11px',
+                            backgroundColor: item.track === true ? '#198754' : '#FF5722',
+                            fontSize: '10px',
                             '&:hover': {
                               backgroundColor: '#198754',
                             },
@@ -192,9 +193,10 @@ export default function Tables({ data, fetchData, setError }) {
                         <Button
                           onClick={() => handleDeleteClick(item.ID)}
                           variant="contained"
+                          size='small'
                           sx={{
                             backgroundColor: '#d32f2f',
-                            fontSize: '11px',
+                            fontSize: '10px',
                             '&:hover': {
                               backgroundColor: '#b91f1f',
                             },
