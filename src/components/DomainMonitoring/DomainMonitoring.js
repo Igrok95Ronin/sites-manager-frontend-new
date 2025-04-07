@@ -3,6 +3,7 @@ import axiosInstance from '../../axiosInstance'; // Используем цен�
 
 import Spinner from '../Spinner/Spinner';
 import Table from './Table/Table';
+import TableSource from './TableSource/TableSource'
 import Search from './Search/Search';
 
 export default function DomainMonitoring() {
@@ -49,7 +50,9 @@ export default function DomainMonitoring() {
       ) : (
         // <Table items={filteredData} onUpdateGoogleAccounts={fetchData} setDeleteGA={setDeleteGA} />
         <div>
+          {/* Выводим домены */}
           <Table data={filteredData} fetchData={fetchData} setError={setError} />
+          <TableSource data={filteredData} fetchData={fetchData} setError={setError} />
         </div>
       )}
     </>

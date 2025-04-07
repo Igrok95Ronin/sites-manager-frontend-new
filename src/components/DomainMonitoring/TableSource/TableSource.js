@@ -13,15 +13,13 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography'; // Добавь в импорт
 
-import './Table.scss'; // Импорт стилей для таблицы
+import './TableSource.scss'; // Импорт стилей для таблицы
 
 export default function Tables({ data, fetchData, setError }) {
   // Стейт для хранения по какому полю сортируем
   const [orderBy, setOrderBy] = React.useState('domain');
   // Стейт для направления сортировки: 'asc' или 'desc'
   const [order, setOrder] = React.useState('asc');
-
-  console.log(data);
 
   // Функция, вызываемая при нажатии на заголовок таблицы
   const handleSort = (property) => {
@@ -55,17 +53,6 @@ export default function Tables({ data, fetchData, setError }) {
     });
   }, [data, orderBy, order]);
 
-  // Следить за доменом или остановить
-  const handleStopClick = async (id) => {
-    try {
-      await axiosInstance.patch(`/donottrack/${id}`);
-      fetchData(); // обновим таблицу после запроса
-    } catch (error) {
-      setError(error);
-      console.error('Ошибка при отключении отслеживания:', error);
-    }
-  };
-
   // Удалить домен из отслеживать
   const handleDeleteClick = async (id) => {
     try {
@@ -94,8 +81,9 @@ export default function Tables({ data, fetchData, setError }) {
               color: '#1976d2',
             }}
           >
-            Домены
+            Источники доменов
           </Typography>
+
           {/* // Контейнер таблицы с максимальной высотой и возможностью прокрутки */}
           <TableContainer component={Paper} sx={{ maxHeight: '60vh' }}>
             {/* Таблица с фиксированной шапкой */}
@@ -116,50 +104,8 @@ export default function Tables({ data, fetchData, setError }) {
                     </TableSortLabel>
                   </TableCell>
 
-                  {/* Заголовок: Статус */}
-                  {/* <TableCell
-                    className="domainMonitoring__headerCell"
-                    sortDirection={orderBy === 'status' ? order : false}
-                  >
-                    <TableSortLabel
-                      active={orderBy === 'status'}
-                      direction={orderBy === 'status' ? order : 'asc'}
-                      onClick={() => handleSort('status')}
-                    >
-                      Статус
-                    </TableSortLabel>
-                  </TableCell> */}
-
-                  {/* Заголовок: Код ответа */}
-                  <TableCell
-                    className="domainMonitoring__headerCell"
-                    sortDirection={orderBy === 'responseCode' ? order : false}
-                  >
-                    <TableSortLabel
-                      active={orderBy === 'responseCode'}
-                      direction={orderBy === 'responseCode' ? order : 'asc'}
-                      onClick={() => handleSort('responseCode')}
-                    >
-                      Код ответа
-                    </TableSortLabel>
-                  </TableCell>
-
-                  {/* Заголовок: В отслеживании */}
-                  <TableCell
-                    className="domainMonitoring__headerCell"
-                    sortDirection={orderBy === 'track' ? order : false}
-                  >
-                    <TableSortLabel
-                      active={orderBy === 'track'}
-                      direction={orderBy === 'track' ? order : 'asc'}
-                      onClick={() => handleSort('track')}
-                    >
-                      В отслеживании
-                    </TableSortLabel>
-                  </TableCell>
-
                   {/* Заголовок: Дата создания */}
-                  <TableCell className="domainMonitoring__headerCell">
+                  <TableCell className="domainMonitoring__headerCell"   align="right">
                     <TableSortLabel
                       active={orderBy === 'CreatedAt'}
                       direction={orderBy === 'CreatedAt' ? order : 'asc'}
@@ -173,67 +119,42 @@ export default function Tables({ data, fetchData, setError }) {
 
               <TableBody>
                 {/* Рендер отсортированных данных */}
-                {sortedData.map((item) =>
-                  item.source ? (
-                    ''
-                  ) : (
-                    <TableRow key={item.ID}>
-                      <TableCell>
-                        <a
-                          className="domainMonitoring__link"
-                          href={item.domain}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {/* Убираем приставку */}
-                          {item.domain.replace(/^https?:\/\//, '')}
-                        </a>
-                      </TableCell>
-                      {/* <TableCell>{item.status}</TableCell> */}
-                      <TableCell
-                        sx={{
-                          backgroundColor: item.responseCode === 200 ? '#4caf50' : '#FF5722',
-                          fontWeight: 700,
-                          color: '#fff',
-                        }}
-                      >
-                        {item.responseCode}
-                      </TableCell>
-                      <TableCell>{item.track ? 'Да' : 'Нет'}</TableCell>
-                      <TableCell>
-                        <Stack sx={{ display: 'flex', gap: '10px' }} direction="row">
-                          <Button
-                            onClick={() => handleStopClick(item.ID)}
-                            variant="contained"
-                            size="small"
-                            sx={{
-                              backgroundColor: item.track === true ? '#198754' : '#FF5722',
-                              fontSize: '10px',
-                              '&:hover': {
-                                backgroundColor: '#198754',
-                              },
-                            }}
+                {sortedData.map(
+                  (item) =>
+                    item.source && (
+                      <TableRow key={item.ID}>
+                        <TableCell>
+                          <a
+                            className="domainMonitoring__link"
+                            href={item.domain}
+                            target="_blank"
+                            rel="noopener noreferrer"
                           >
-                            {item.track !== true ? 'Мониторить' : 'Остановить'}
-                          </Button>
-                          <Button
-                            onClick={() => handleDeleteClick(item.ID)}
-                            variant="contained"
-                            size="small"
-                            sx={{
-                              backgroundColor: '#d32f2f',
-                              fontSize: '10px',
-                              '&:hover': {
-                                backgroundColor: '#b91f1f',
-                              },
-                            }}
-                          >
-                            Удалить
-                          </Button>
-                        </Stack>
-                      </TableCell>
-                    </TableRow>
-                  ),
+                            {/* Убираем приставку */}
+                            {item.domain.replace(/^https?:\/\//, '')}
+                          </a>
+                        </TableCell>
+
+                        <TableCell>
+                          <Stack sx={{ display: 'flex', gap: '10px' }} justifyContent="flex-end" direction="row">
+                            <Button
+                              onClick={() => handleDeleteClick(item.ID)}
+                              variant="contained"
+                              size="small"
+                              sx={{
+                                backgroundColor: '#d32f2f',
+                                fontSize: '10px',
+                                '&:hover': {
+                                  backgroundColor: '#b91f1f',
+                                },
+                              }}
+                            >
+                              Удалить
+                            </Button>
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    ),
                 )}
               </TableBody>
             </Table>
