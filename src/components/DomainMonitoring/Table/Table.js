@@ -1,4 +1,5 @@
 import * as React from 'react';
+import axiosInstance from '../../../axiosInstance'; // Используем централизованный экземпляр Axios
 // Импортируем компоненты из MUI
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -8,14 +9,18 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { TableSortLabel } from '@mui/material';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 
 import './Table.scss'; // Импорт стилей для таблицы
 
-export default function Tables({ data }) {
+export default function Tables({ data, fetchData, setError }) {
   // Стейт для хранения по какому полю сортируем
   const [orderBy, setOrderBy] = React.useState('domain');
   // Стейт для направления сортировки: 'asc' или 'desc'
   const [order, setOrder] = React.useState('asc');
+
+  console.log(data);
 
   // Функция, вызываемая при нажатии на заголовок таблицы
   const handleSort = (property) => {
@@ -48,6 +53,21 @@ export default function Tables({ data }) {
       return 0;
     });
   }, [data, orderBy, order]);
+
+  // Следить за доменом или остановить
+  const handleStopClick = async (id) => {
+    try {
+      await axiosInstance.patch(`/donottrack/${id}`);
+      fetchData(); // обновим таблицу после запроса
+    } catch (error) {
+      setError(error);
+      console.error('Ошибка при отключении отслеживания:', error);
+    }
+  };
+
+  const handleDeleteClick = (domain) => {
+    console.log(`Удалить домен: ${domain}`);
+  };
 
   return (
     <section className="domainMonitoring">
@@ -116,16 +136,13 @@ export default function Tables({ data }) {
                   </TableCell>
 
                   {/* Заголовок: Дата создания */}
-                  <TableCell
-                    className="domainMonitoring__headerCell"
-                    sortDirection={orderBy === 'CreatedAt' ? order : false}
-                  >
+                  <TableCell className="domainMonitoring__headerCell">
                     <TableSortLabel
                       active={orderBy === 'CreatedAt'}
                       direction={orderBy === 'CreatedAt' ? order : 'asc'}
                       onClick={() => handleSort('CreatedAt')}
                     >
-                      Создан
+                      Меню
                     </TableSortLabel>
                   </TableCell>
                 </TableRow>
@@ -148,7 +165,36 @@ export default function Tables({ data }) {
                     <TableCell>{item.status}</TableCell>
                     <TableCell>{item.responseCode}</TableCell>
                     <TableCell>{item.track ? 'Да' : 'Нет'}</TableCell>
-                    <TableCell>{new Date(item.CreatedAt).toLocaleString()}</TableCell>
+                    <TableCell>
+                      <Stack sx={{ display: 'flex', gap: '10px' }} direction="row">
+                        <Button
+                          onClick={() => handleStopClick(item.ID)}
+                          variant="contained"
+                          sx={{
+                            backgroundColor: item.track !== true ? '#198754' : '#FF5722',
+                            fontSize: '11px',
+                            '&:hover': {
+                              backgroundColor: '#198754',
+                            },
+                          }}
+                        >
+                          {item.track !== true ? 'Мониторить' : 'Остановить'}
+                        </Button>
+                        <Button
+                          onClick={() => handleDeleteClick(item.domain)}
+                          variant="contained"
+                          sx={{
+                            backgroundColor: '#d32f2f',
+                            fontSize: '11px',
+                            '&:hover': {
+                              backgroundColor: '#b91f1f',
+                            },
+                          }}
+                        >
+                          Удалить
+                        </Button>
+                      </Stack>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

@@ -15,6 +15,7 @@ export default function DomainMonitoring() {
   // Асинхронная функция для получения данных
   const fetchData = async () => {
     try {
+      setLoading(true);
       const response = await axiosInstance.get('/monitordomainsstatus');
       setData(response.data); // Сохранение полученных данных
     } catch (err) {
@@ -31,14 +32,10 @@ export default function DomainMonitoring() {
   }, []); // Пустой массив зависимостей означает, что эффект выполнится один раз
 
   // Фильтрация данных по поисковому запросу
-  const filteredData = data.filter((item) =>
-    item.domain.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const filteredData = data.filter((item) => item.domain.toLowerCase().includes(searchQuery.toLowerCase()));
 
+  // Количество доменов
   const numberOfDomains = filteredData.length;
-
-  if (loading) return <p>Загрузка...</p>;
-  if (error) return <p>Ошибка: {error.message}</p>;
 
   return (
     <>
@@ -52,7 +49,7 @@ export default function DomainMonitoring() {
       ) : (
         // <Table items={filteredData} onUpdateGoogleAccounts={fetchData} setDeleteGA={setDeleteGA} />
         <div>
-          <Table data={filteredData} />
+          <Table data={filteredData} fetchData={fetchData} setError={setError} />
         </div>
       )}
     </>
