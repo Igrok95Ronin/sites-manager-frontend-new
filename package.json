@@ -27,7 +27,7 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.0",
     "react-json-tree": "^0.19.0",
-    "react-router-dom": "^6.26.1",
+    "react-router-dom": "^7.5.0",
     "react-scripts": "5.0.1",
     "react-virtuoso": "^4.10.4",
     "sass": "^1.77.8",
@@ -57,5 +57,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.16",
+    "react-refresh": "^0.17.0"
   }
 }

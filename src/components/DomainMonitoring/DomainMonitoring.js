@@ -12,13 +12,15 @@ export default function DomainMonitoring() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(''); // Поисковый запрос
+  const [isMonitoring, setIsMonitoring] = useState(true); // флаг, указывающий, запущен ли мониторинг.
 
   // Асинхронная функция для получения данных
   const fetchData = async () => {
     try {
       setLoading(true);
       const response = await axiosInstance.get('/monitordomainsstatus');
-      setData(response.data); // Сохранение полученных данных
+      setData(response.data.domains); // Сохранение полученных данных
+      setIsMonitoring(response.data.isMonitoring)
     } catch (err) {
       console.error('Произошла ошибка при получении данных:', err);
       setError(err);
@@ -38,9 +40,11 @@ export default function DomainMonitoring() {
   // Количество доменов
   const numberOfDomains = filteredData.length;
 
+  console.log(data, isMonitoring)
+
   return (
     <>
-      <Search onSearch={setSearchQuery} numberOfDomains={numberOfDomains} />
+      <Search onSearch={setSearchQuery} numberOfDomains={numberOfDomains} setError={setError} isMonitoring={isMonitoring} setIsMonitoring={setIsMonitoring}/>
       {loading ? (
         <Spinner loading={loading} />
       ) : error ? (
