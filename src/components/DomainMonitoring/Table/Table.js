@@ -15,13 +15,13 @@ import Typography from '@mui/material/Typography'; // Добавь в импор
 
 import './Table.scss'; // Импорт стилей для таблицы
 
-export default function Tables({ data, fetchData, setError }) {
+export default function Tables({ data, fetchData, formattedDuration, setError }) {
   // Стейт для хранения по какому полю сортируем
   const [orderBy, setOrderBy] = React.useState('domain');
   // Стейт для направления сортировки: 'asc' или 'desc'
   const [order, setOrder] = React.useState('asc');
 
-  console.log(data);
+  // console.log(data);
 
   // Функция, вызываемая при нажатии на заголовок таблицы
   const handleSort = (property) => {
@@ -95,7 +95,7 @@ export default function Tables({ data, fetchData, setError }) {
               color: '#1976d2',
             }}
           >
-            Домены
+           Мониторинг доменов каждый {formattedDuration}
           </Typography>
           {/* // Контейнер таблицы с максимальной высотой и возможностью прокрутки */}
           <TableContainer component={Paper} sx={{ maxHeight: '60vh' }}>

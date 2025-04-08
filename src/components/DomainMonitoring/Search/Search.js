@@ -10,8 +10,8 @@ import axiosInstance from '../../../axiosInstance';
 
 import './Search.scss';
 
-const Search = ({ onSearch, numberOfDomains, setError, isMonitoring, setIsMonitoring }) => {
-  const [interval, setInterval] = React.useState(1);
+const Search = ({ onSearch, numberOfDomains, setError, isMonitoring, setIsMonitoring, fetchData }) => {
+  const [interval, setInterval] = React.useState(3);
   const [typeTime, setTypeTime] = React.useState('1h');
 
   const handleInputChange = (e) => {
@@ -31,7 +31,7 @@ const Search = ({ onSearch, numberOfDomains, setError, isMonitoring, setIsMonito
         typeTime,
       });
       setIsMonitoring(true); // ✅ Обновляем состояние сразу
-      // fetchData(); // Перезагрузим данные
+      fetchData(); // Перезагрузим данные
     } catch (err) {
       console.error('Ошибка при запуске мониторинга:', err);
       setError(err);

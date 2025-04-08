@@ -1,50 +1,79 @@
-import React, { useEffect, useState } from 'react';
-import axiosInstance from '../../axiosInstance'; // Используем централизованный экземпляр Axios
-
+import React, { useEffect, useState, useCallback } from 'react';
+import axiosInstance from '../../axiosInstance';
 import Spinner from '../Spinner/Spinner';
 import Table from './Table/Table';
-import TableSource from './TableSource/TableSource'
+import TableSource from './TableSource/TableSource';
 import Search from './Search/Search';
 
 export default function DomainMonitoring() {
-  // Состояния для хранения данных и ошибок
   const [data, setData] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState(''); // Поисковый запрос
-  const [isMonitoring, setIsMonitoring] = useState(true); // флаг, указывающий, запущен ли мониторинг.
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isMonitoring, setIsMonitoring] = useState(true);
+  const [formattedDuration, setFormattedDuration] = useState('');
 
-  // Асинхронная функция для получения данных
-  const fetchData = async () => {
+  // Обновленный парсинг длительности
+  const parseDuration = (durationString) => {
+    let hours = 0, minutes = 0, seconds = 0;
+    
+    // Используем более надежный парсинг
+    const hoursMatch = durationString.match(/(\d+)h/);
+    const minutesMatch = durationString.match(/(\d+)m/);
+    const secondsMatch = durationString.match(/(\d+)s/);
+
+    if (hoursMatch) hours = parseInt(hoursMatch[1], 10);
+    if (minutesMatch) minutes = parseInt(minutesMatch[1], 10);
+    if (secondsMatch) seconds = parseInt(secondsMatch[1], 10);
+
+    return { hours, minutes, seconds };
+  };
+
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axiosInstance.get('/monitordomainsstatus');
-      setData(response.data.domains); // Сохранение полученных данных
-      setIsMonitoring(response.data.isMonitoring)
+      setData(response.data.domains);
+      setIsMonitoring(response.data.isMonitoring);
+
+      // Обновленное форматирование времени
+      const { hours, minutes, seconds } = parseDuration(response.data.finalDuration);
+
+      // Новая логика отображения времени
+      let result;
+      if (hours > 0) {
+        result = `${hours}ч`;
+      } else if (minutes > 0) {
+        result = `${minutes}м`;
+      } else {
+        result = `${seconds}с`; // Всегда показываем хотя бы секунды
+      }
+
+      setFormattedDuration(result);
     } catch (err) {
-      console.error('Произошла ошибка при получении данных:', err);
+      console.error('Ошибка:', err);
       setError(err);
     } finally {
-      setLoading(false); // Завершение загрузки
+      setLoading(false);
     }
-  };
+  }, []);
 
-  // Выполнение запроса при монтировании компонента
-  useEffect(() => {
-    fetchData();
-  }, []); // Пустой массив зависимостей означает, что эффект выполнится один раз
+  useEffect(() => { fetchData(); }, [fetchData]);
 
-  // Фильтрация данных по поисковому запросу
-  const filteredData = data.filter((item) => item.domain.toLowerCase().includes(searchQuery.toLowerCase()));
-
-  // Количество доменов
-  const numberOfDomains = filteredData.length;
-
-  console.log(data, isMonitoring)
+  const filteredData = data.filter(item => 
+    item.domain.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <>
-      <Search onSearch={setSearchQuery} numberOfDomains={numberOfDomains} setError={setError} isMonitoring={isMonitoring} setIsMonitoring={setIsMonitoring}/>
+      <Search
+        onSearch={setSearchQuery}
+        numberOfDomains={filteredData.length}
+        setError={setError}
+        isMonitoring={isMonitoring}
+        setIsMonitoring={setIsMonitoring}
+        fetchData={fetchData}
+      />
       {loading ? (
         <Spinner loading={loading} />
       ) : error ? (
@@ -52,11 +81,18 @@ export default function DomainMonitoring() {
           {error}
         </div>
       ) : (
-        // <Table items={filteredData} onUpdateGoogleAccounts={fetchData} setDeleteGA={setDeleteGA} />
         <div>
-          {/* Выводим домены */}
-          <Table data={filteredData} fetchData={fetchData} setError={setError} />
-          <TableSource data={filteredData} fetchData={fetchData} setError={setError} />
+          <Table 
+            data={filteredData} 
+            fetchData={fetchData} 
+            formattedDuration={formattedDuration} 
+            setError={setError} 
+          />
+          <TableSource 
+            data={filteredData} 
+            fetchData={fetchData} 
+            setError={setError} 
+          />
         </div>
       )}
     </>
