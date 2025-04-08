@@ -8,10 +8,12 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import Box from '@mui/material/Box';
 import { TableSortLabel } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography'; // Добавь в импорт
+import FormAddDomain from '../FormAddDomain/FormAddDomain';
 
 import './TableSource.scss'; // Импорт стилей для таблицы
 
@@ -69,21 +71,28 @@ export default function Tables({ data, fetchData, setError }) {
     <section className="domainMonitoring">
       <div className="container">
         <div className="domainMonitoring__box">
-          <Typography
-            variant="h6"
-            component="h2"
-            sx={{
-              fontWeight: 'bold',
-              fontSize: '',
-              mb: 2,
-              borderBottom: '2px solid #1976d2',
-              display: 'inline-block',
-              paddingBottom: '4px',
-              color: '#1976d2',
-            }}
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mb={2}
+            borderBottom="2px solid #1976d2"
+            pb={1}
           >
-            Источники доменов
-          </Typography>
+            <Typography
+              variant="h6"
+              component="h2"
+              sx={{
+                fontWeight: 'bold',
+                color: '#1976d2',
+              }}
+            >
+              Источники доменов
+            </Typography>
+
+            {/* Кнопка открытия формы */}
+            <FormAddDomain fetchData={fetchData} />
+          </Box>
 
           {/* // Контейнер таблицы с максимальной высотой и возможностью прокрутки */}
           <TableContainer component={Paper} sx={{ maxHeight: '60vh' }}>
@@ -106,7 +115,7 @@ export default function Tables({ data, fetchData, setError }) {
                   </TableCell>
 
                   {/* Заголовок: Дата создания */}
-                  <TableCell className="domainMonitoring__headerCell"   align="right">
+                  <TableCell className="domainMonitoring__headerCell" align="right">
                     <TableSortLabel
                       active={orderBy === 'CreatedAt'}
                       direction={orderBy === 'CreatedAt' ? order : 'asc'}
