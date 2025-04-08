@@ -6,17 +6,30 @@ import TableSource from './TableSource/TableSource';
 import Search from './Search/Search';
 
 export default function DomainMonitoring() {
+  // Состояние для хранения данных, полученных с сервера (например, домены или статус мониторинга)
   const [data, setData] = useState([]);
+
+  // Состояние для хранения ошибок, которые могут возникнуть при запросах данных
   const [error, setError] = useState(null);
+
+  // Состояние для отслеживания состояния загрузки данных (true, пока данные загружаются)
   const [loading, setLoading] = useState(true);
+
+  // Состояние для хранения текста поискового запроса, который используется для фильтрации данных
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Состояние для хранения флага, который указывает, запущен ли мониторинг (true или false)
   const [isMonitoring, setIsMonitoring] = useState(true);
+
+  // Состояние для хранения отформатированного времени (например, "4h 30m 20s")
   const [formattedDuration, setFormattedDuration] = useState('');
 
   // Обновленный парсинг длительности
   const parseDuration = (durationString) => {
-    let hours = 0, minutes = 0, seconds = 0;
-    
+    let hours = 0,
+      minutes = 0,
+      seconds = 0;
+
     // Используем более надежный парсинг
     const hoursMatch = durationString.match(/(\d+)h/);
     const minutesMatch = durationString.match(/(\d+)m/);
@@ -42,11 +55,11 @@ export default function DomainMonitoring() {
       // Новая логика отображения времени
       let result;
       if (hours > 0) {
-        result = `${hours}ч`;
+        result = `${hours} ч`;
       } else if (minutes > 0) {
-        result = `${minutes}м`;
+        result = `${minutes} м`;
       } else {
-        result = `${seconds}с`; // Всегда показываем хотя бы секунды
+        result = `${seconds} с`; // Всегда показываем хотя бы секунды
       }
 
       setFormattedDuration(result);
@@ -58,11 +71,11 @@ export default function DomainMonitoring() {
     }
   }, []);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-  const filteredData = data.filter(item => 
-    item.domain.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredData = data.filter((item) => item.domain.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
     <>
@@ -82,17 +95,8 @@ export default function DomainMonitoring() {
         </div>
       ) : (
         <div>
-          <Table 
-            data={filteredData} 
-            fetchData={fetchData} 
-            formattedDuration={formattedDuration} 
-            setError={setError} 
-          />
-          <TableSource 
-            data={filteredData} 
-            fetchData={fetchData} 
-            setError={setError} 
-          />
+          <Table data={filteredData} fetchData={fetchData} formattedDuration={formattedDuration} setError={setError} />
+          <TableSource data={filteredData} fetchData={fetchData} setError={setError} />
         </div>
       )}
     </>
