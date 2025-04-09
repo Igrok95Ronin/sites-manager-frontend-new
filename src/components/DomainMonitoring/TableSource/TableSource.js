@@ -13,7 +13,9 @@ import { TableSortLabel } from '@mui/material';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography'; // Добавь в импорт
+
 import FormAddDomain from '../FormAddDomain/FormAddDomain';
+import JSONTemplate from '../JSONTemplate/JSONTemplate';
 
 import './TableSource.scss'; // Импорт стилей для таблицы
 
@@ -84,14 +86,18 @@ export default function Tables({ data, fetchData, setError }) {
               component="h2"
               sx={{
                 fontWeight: 'bold',
+                fontSize: '',
                 color: '#1976d2',
               }}
             >
-              Источники доменов
+              Источники доменов : (Обход 1 раз в сутке)
             </Typography>
 
             {/* Кнопка открытия формы */}
-            <FormAddDomain fetchData={fetchData} />
+            <div>
+              <JSONTemplate />
+              <FormAddDomain fetchData={fetchData} />
+            </div>
           </Box>
 
           {/* // Контейнер таблицы с максимальной высотой и возможностью прокрутки */}

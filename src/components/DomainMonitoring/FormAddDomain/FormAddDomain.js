@@ -59,7 +59,6 @@ export default function AddDomainDialog({ fetchData }) {
       console.error(err);
     }
   };
-//   color="primary" | "secondary" | "error" | "info" | "success" | "warning"
 
   return (
     <React.Fragment>

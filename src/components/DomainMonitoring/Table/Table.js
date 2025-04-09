@@ -95,7 +95,7 @@ export default function Tables({ data, fetchData, formattedDuration, setError })
               color: '#1976d2',
             }}
           >
-            Мониторинг доменов {formattedDuration}
+            Мониторинг доменов каждый : {formattedDuration}
           </Typography>
           {/* // Контейнер таблицы с максимальной высотой и возможностью прокрутки */}
           <TableContainer component={Paper} sx={{ maxHeight: '60vh' }}>
