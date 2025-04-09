@@ -20,6 +20,8 @@ export default function Tables({ data, fetchData, formattedDuration, setError })
   const [orderBy, setOrderBy] = React.useState('domain');
   // Стейт для направления сортировки: 'asc' или 'desc'
   const [order, setOrder] = React.useState('asc');
+  const [statusOK, setStatusOK] = React.useState(0);
+  const [statusNotOK, setStatusNotOK] = React.useState(0);
 
   // console.log(data);
 
@@ -78,6 +80,14 @@ export default function Tables({ data, fetchData, formattedDuration, setError })
     }
   };
 
+  React.useEffect(() => {
+    const count = data.filter((item) => item.responseCode === 200).length;
+    setStatusOK(count);
+    const countNot = data.filter((item) => item.responseCode !== 200 && item.source !== true).length;
+    setStatusNotOK(countNot);
+  }, [data]);
+  
+
   return (
     <section className="domainMonitoring">
       <div className="container">
@@ -96,6 +106,37 @@ export default function Tables({ data, fetchData, formattedDuration, setError })
             }}
           >
             Мониторинг доменов каждый : {formattedDuration}
+          </Typography>
+          {/* '#4caf50' : '#FF5722' */}
+          <Typography
+            variant="h6"
+            component="h2"
+            sx={{
+              fontWeight: 'bold',
+              fontSize: '',
+              ml: 2,
+              borderBottom: '2px solid #4caf50',
+              display: 'inline-block',
+              paddingBottom: '4px',
+              color: '#4caf50',
+            }}
+          >
+            200 / {statusOK}
+          </Typography>
+          <Typography
+            variant="h6"
+            component="h2"
+            sx={{
+              fontWeight: 'bold',
+              fontSize: '',
+              ml: 2,
+              borderBottom: '2px solid #FF5722',
+              display: 'inline-block',
+              paddingBottom: '4px',
+              color: '#FF5722',
+            }}
+          >
+            0 / {statusNotOK}
           </Typography>
           {/* // Контейнер таблицы с максимальной высотой и возможностью прокрутки */}
           <TableContainer component={Paper} sx={{ maxHeight: '60vh' }}>
