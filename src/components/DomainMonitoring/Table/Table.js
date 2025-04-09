@@ -13,6 +13,14 @@ import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography'; // Добавь в импорт
 
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
+
+
+
 import './Table.scss'; // Импорт стилей для таблицы
 
 export default function Tables({ data, fetchData, formattedDuration, setError }) {
@@ -22,6 +30,19 @@ export default function Tables({ data, fetchData, formattedDuration, setError })
   const [order, setOrder] = React.useState('asc');
   const [statusOK, setStatusOK] = React.useState(0);
   const [statusNotOK, setStatusNotOK] = React.useState(0);
+
+  const [openDialog, setOpenDialog] = React.useState(false);
+  const [selectedId, setSelectedId] = React.useState(null);
+
+  const handleOpenDialog = (id) => {
+    setSelectedId(id);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedId(null);
+  };
 
   // console.log(data);
 
@@ -69,14 +90,16 @@ export default function Tables({ data, fetchData, formattedDuration, setError })
   };
 
   // Удалить домен из отслеживать
-  const handleDeleteClick = async (id) => {
+  const handleConfirmDelete = async () => {
     try {
-      await axiosInstance.delete(`/removedomainfromtrack/${id}`);
-      console.log(`Домен с ID ${id} удалён из отслеживания`);
-      fetchData(); // обновим таблицу после удаления
+      await axiosInstance.delete(`/removedomainfromtrack/${selectedId}`);
+      console.log(`Домен с ID ${selectedId} удалён из отслеживания`);
+      fetchData();
     } catch (error) {
       setError(error);
       console.error('Ошибка при удалении домена:', error);
+    } finally {
+      handleCloseDialog();
     }
   };
 
@@ -86,7 +109,6 @@ export default function Tables({ data, fetchData, formattedDuration, setError })
     const countNot = data.filter((item) => item.responseCode !== 200 && item.source !== true).length;
     setStatusNotOK(countNot);
   }, [data]);
-  
 
   return (
     <section className="domainMonitoring">
@@ -259,7 +281,7 @@ export default function Tables({ data, fetchData, formattedDuration, setError })
                             {item.track !== true ? 'Мониторить' : 'Остановить'}
                           </Button>
                           <Button
-                            onClick={() => handleDeleteClick(item.ID)}
+                            onClick={() => handleOpenDialog(item.ID)}
                             variant="contained"
                             size="small"
                             sx={{
@@ -280,6 +302,23 @@ export default function Tables({ data, fetchData, formattedDuration, setError })
               </TableBody>
             </Table>
           </TableContainer>
+
+          <Dialog open={openDialog} onClose={handleCloseDialog}>
+            <DialogTitle>Подтверждение удаления</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Вы уверены, что хотите удалить этот домен из отслеживания? Это действие необратимо.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseDialog} color="primary">
+                Отмена
+              </Button>
+              <Button onClick={handleConfirmDelete} color="error">
+                Удалить
+              </Button>
+            </DialogActions>
+          </Dialog>
         </div>
       </div>
     </section>
