@@ -111,7 +111,7 @@ export default function Tables({ data, fetchData, setError }) {
                 color: '#1976d2',
               }}
             >
-              Источники доменов : (Обход 1 раз в сутке)
+              Источники доменов : (Обход 1 раз в сутки)
             </Typography>
 
             {/* Кнопка открытия формы */}

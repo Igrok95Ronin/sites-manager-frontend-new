@@ -52,6 +52,8 @@ import NetworkCheckIcon from '@mui/icons-material/NetworkCheck';
 import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
 import DataThresholdingIcon from '@mui/icons-material/DataThresholding';
 import GTranslateIcon from '@mui/icons-material/GTranslate';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+
 
 // =========================================
 // 2) "Эталонный" список столбцов (allColumns) с иконками и т.п.
@@ -158,6 +160,14 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'ClickOnNumber',
+  },
+  {
+    label: (
+      <Tooltip title="Клик по скрытому номеру (ClickOnInvisibleNumber)" arrow placement="top">
+        <VisibilityOffIcon />
+      </Tooltip>
+    ),
+    dataKey: 'ClickOnInvisibleNumber',
   },
   {
     label: (
@@ -518,6 +528,7 @@ export const defaultVisibleDataKeys = [
   'Keyword',
   'CreatedAt',
   'ClickOnNumber',
+  'ClickOnInvisibleNumber',
   'TimeSpent',
   'IP',
   'ScrollCoordinates',

@@ -135,6 +135,7 @@ export default function ReactVirtualizedTable() {
 
       const requestStartTime = performance.now();
       const response = await axiosInstance.get(`${process.env.REACT_APP_APIURL}/userslogsads`, { params });
+
       const requestEndTime = performance.now();
       console.log(`Время отклика сервера: ${(requestEndTime - requestStartTime).toFixed(2)} мс`);
 

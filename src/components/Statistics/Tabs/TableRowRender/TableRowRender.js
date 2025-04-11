@@ -121,6 +121,20 @@ export default function TableRowRender({
           );
         }
 
+        // Логика для ClickOnNumber
+        if (cellKey === 'ClickOnInvisibleNumber') {
+          return (
+            <TableCell
+              className="statistics__padding"
+              key={cellKey}
+              align="left"
+              style={{ backgroundColor: rowBackgroundColor }}
+            >
+              {cellValue ? <CheckIcon color="success" /> : <CloseIcon color="error" />}
+            </TableCell>
+          );
+        }
+
         // Поле даты CreatedAt
         if (cellKey === 'CreatedAt') {
           const date = new Date(cellValue);
