@@ -9,9 +9,7 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { TableSortLabel } from '@mui/material';
-import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography'; // Добавь в импорт
 
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -19,7 +17,11 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import WarningIcon from '@mui/icons-material/Warning';
+import { Box, Stack, Typography, Chip } from '@mui/material';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 
 import './Table.scss'; // Импорт стилей для таблицы
 
@@ -28,8 +30,6 @@ export default function Tables({ data, fetchData, formattedDuration, setError })
   const [orderBy, setOrderBy] = React.useState('domain');
   // Стейт для направления сортировки: 'asc' или 'desc'
   const [order, setOrder] = React.useState('asc');
-  const [statusOK, setStatusOK] = React.useState(0);
-  const [statusNotOK, setStatusNotOK] = React.useState(0);
 
   const [openDialog, setOpenDialog] = React.useState(false);
   const [selectedId, setSelectedId] = React.useState(null);
@@ -103,12 +103,25 @@ export default function Tables({ data, fetchData, formattedDuration, setError })
     }
   };
 
-  React.useEffect(() => {
-    const count = data.filter((item) => item.responseCode === 200).length;
-    setStatusOK(count);
-    const countNot = data.filter((item) => item.responseCode !== 200 && item.source !== true).length;
-    setStatusNotOK(countNot);
-  }, [data]);
+  // Подсчитываем коды ответов
+  const groupedByCode = data.reduce((acc, item) => {
+    const code = item.responseCode;
+    acc[code] = (acc[code] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Цвета и иконки по коду
+  const getStatusStyle = (code) => {
+    if (code.startsWith('2')) {
+      return { color: 'green', icon: <CheckCircleIcon color="success" /> };
+    } else if (code.startsWith('4')) {
+      return { color: 'orange', icon: <WarningIcon color="warning" /> };
+    } else if (code.startsWith('5')) {
+      return { color: 'red', icon: <ErrorIcon color="error" /> };
+    } else {
+      return { color: 'grey', icon: null };
+    }
+  };
 
   return (
     <section className="domainMonitoring">
@@ -127,23 +140,7 @@ export default function Tables({ data, fetchData, formattedDuration, setError })
               color: '#1976d2',
             }}
           >
-            Мониторинг доменов каждый : {formattedDuration}
-          </Typography>
-          {/* '#4caf50' : '#FF5722' */}
-          <Typography
-            variant="h6"
-            component="h2"
-            sx={{
-              fontWeight: 'bold',
-              fontSize: '',
-              ml: 2,
-              borderBottom: '2px solid #4caf50',
-              display: 'inline-block',
-              paddingBottom: '4px',
-              color: '#4caf50',
-            }}
-          >
-            200 / {statusOK}
+            Общий отчет мониторинга доменов каждый : {formattedDuration}
           </Typography>
           <Typography
             variant="h6"
@@ -152,16 +149,75 @@ export default function Tables({ data, fetchData, formattedDuration, setError })
               fontWeight: 'bold',
               fontSize: '',
               ml: 2,
-              borderBottom: '2px solid #FF5722',
+              borderBottom: '2px solid #1976d2',
               display: 'inline-block',
               paddingBottom: '4px',
-              color: '#FF5722',
+              color: '#1976d2',
             }}
           >
-            0 / {statusNotOK}
+            Интервал проверки каждую минуту
           </Typography>
+
+          <Stack direction="row" spacing={1.5} flexWrap="wrap" mb={1}>
+            {Object.entries(groupedByCode).map(([code, count]) => {
+              const isErrorText = code === '0'; // ← текстовая ошибка
+              const { color, icon } = getStatusStyle(code); // твоя функция со стилями
+
+              return (
+                <Box
+                  key={code}
+                  display="flex"
+                  alignItems="center"
+                  gap={1}
+                  p={0.4}
+                  pl={1}
+                  pr={1}
+                  border={`2px solid ${isErrorText ? '#f44336' : color}`}
+                  borderRadius={3}
+                  bgcolor={isErrorText ? '#ffeaea' : '#f9f9f9'}
+                >
+                  {isErrorText ? (
+                    <>
+                      <ErrorOutlineIcon sx={{ color: '#f44336' }} />
+                      <Box>
+                        <div style={{ fontWeight: 'bold', fontSize: 12, color: '#f44336' }}>
+                          Текстовая ошибка{' '}
+                          <Chip
+                            label={`${count} шт.`}
+                            size="small"
+                            sx={{
+                              fontSize: 12,
+                              height: 22,
+                              mb: 0.5,
+                              ml: 0.5,
+                              bgcolor: '#f44336',
+                              color: 'white',
+                              fontWeight: 'bold',
+                            }}
+                          />
+                        </div>
+
+                        <Typography variant="body2" color="textSecondary" fontSize={12}>
+                          Сервер не ответил / DNS ошибка
+                        </Typography>
+                      </Box>
+                    </>
+                  ) : (
+                    <>
+                      {icon}
+                      <Typography variant="body1" color={color} fontWeight="bold">
+                        {code}
+                      </Typography>
+                      <Chip label={`${count} ответа`} size="small" sx={{ fontSize: 12, height: 22 }} />
+                    </>
+                  )}
+                </Box>
+              );
+            })}
+          </Stack>
+
           {/* // Контейнер таблицы с максимальной высотой и возможностью прокрутки */}
-          <TableContainer component={Paper} sx={{ maxHeight: '60vh' }}>
+          <TableContainer component={Paper} sx={{ maxHeight: '58vh' }}>
             {/* Таблица с фиксированной шапкой */}
             <Table stickyHeader size="small" sx={{ minWidth: 650 }} aria-label="domain monitoring table">
               <TableHead>
