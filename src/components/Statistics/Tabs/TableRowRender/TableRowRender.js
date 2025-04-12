@@ -8,6 +8,9 @@ import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 
+import { Tooltip, Chip } from '@mui/material';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+
 import { isToday, isSameYear } from 'date-fns'; // Для проверки дат
 import IPInfo from '../IPInfo/IPInfo.js';
 import AlertDialog from '../../HeadersJS/AlertDialog/AlertDialog.js';
@@ -58,7 +61,16 @@ export default function TableRowRender({
     <>
       {/* Чекбокс каждой строки */}
       <TableCell className="statistics__checked" align="left" style={{ backgroundColor: rowBackgroundColor }}>
-        <Checkbox checked={isChecked} onChange={handleCheckboxChange(row.ID)} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Checkbox checked={isChecked} onChange={handleCheckboxChange(row.ID)} />
+
+          {/* Отметка, если был клик на ClickOnInvisibleNumber */}
+          {row.ClickOnInvisibleNumber && (
+            <Tooltip title="Был клик по скрытому элементу">
+              <Chip size="small" color="warning" variant="container" icon={<VisibilityOffIcon />} />
+            </Tooltip>
+          )}
+        </div>
       </TableCell>
 
       {visibleColumns.map((column) => {
