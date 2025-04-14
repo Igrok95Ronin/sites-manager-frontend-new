@@ -14,6 +14,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { isToday, isSameYear } from 'date-fns'; // Для проверки дат
 import IPInfo from '../IPInfo/IPInfo.js';
 import AlertDialog from '../../HeadersJS/AlertDialog/AlertDialog.js';
+import IncognitoIcon from '@mui/icons-material/Visibility'; // или любой другой иконкой инкогнито
 
 export default function TableRowRender({
   row,
@@ -64,12 +65,119 @@ export default function TableRowRender({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Checkbox checked={isChecked} onChange={handleCheckboxChange(row.ID)} />
 
-          {/* Отметка, если был клик на ClickOnInvisibleNumber */}
+          {/* Отметка, если был клик по скрытому элементу */}
           {row.ClickOnInvisibleNumber && (
             <Tooltip title="Был клик по скрытому элементу">
               <Chip size="small" color="warning" variant="container" icon={<VisibilityOffIcon />} />
             </Tooltip>
           )}
+
+          {/* Анализ JS-данных и Headers */}
+          {(() => {
+            try {
+              const jsData = typeof row.JsData === 'string' ? JSON.parse(row.JsData) : row.JsData;
+              const headers = typeof row.Headers === 'string' ? JSON.parse(row.Headers) : row.Headers;
+
+              let score = 0;
+              let total = 0;
+              const log = [];
+
+              // navigator.languages.length
+              total++;
+              if (Array.isArray(jsData.languages) && jsData.languages.length === 1) {
+                score++;
+                log.push('🌍 navigator.languages.length === 1 → ⚠️ +1 (инкогнито)');
+              } else {
+                log.push('🌍 navigator.languages.length > 1 → ✅ 0');
+              }
+
+              // navigator.language
+              total++;
+              if (jsData.language === 'ru') {
+                score += 0.5;
+                log.push("🗣 navigator.language === 'ru' → ⚠️ +0.5 (возможно инкогнито)");
+              } else {
+                log.push("🗣 navigator.language !== 'ru' → ✅ 0");
+              }
+
+              // navigator.plugins.length
+              total++;
+              if (jsData.pluginsLength === 0) {
+                score++;
+                log.push('🔌 navigator.plugins.length === 0 → ⚠️ +1 (инкогнито)');
+              } else {
+                log.push(`🔌 navigator.plugins.length = ${jsData.pluginsLength} → ✅ 0`);
+              }
+
+              // totalJSHeapSize
+              if (jsData.totalJSHeapSize) {
+                total++;
+                log.push(`🧠 totalJSHeapSize: ${jsData.totalJSHeapSize}`);
+                if (jsData.totalJSHeapSize < 15000000) {
+                  score++;
+                  log.push('🧠 Маленький JS heap → ⚠️ +1 (инкогнито)');
+                } else {
+                  log.push('🧠 Объем памяти нормальный → ✅ 0');
+                }
+              } else {
+                log.push('🧠 performance.memory не поддерживается → ❌ Пропущено');
+              }
+
+              // Sec-Fetch-Storage-Access
+              if (headers['Sec-Fetch-Storage-Access']) {
+                total++;
+                const value = headers['Sec-Fetch-Storage-Access'].toLowerCase();
+                log.push(`📦 Sec-Fetch-Storage-Access: "${value}"`);
+                if (value === 'none') {
+                  score++;
+                  log.push('📦 Хранилище недоступно → ⚠️ +1 (инкогнито)');
+                } else {
+                  log.push('📦 Хранилище активно → ✅ 0');
+                }
+              } else {
+                log.push('📦 Sec-Fetch-Storage-Access не найден → ❌ Пропущено');
+              }
+
+              const confidence = Math.min(Math.round((score / total) * 100), 100);
+              if (confidence === 0) return null;
+
+              let verdict = '';
+              if (confidence >= 75) {
+                verdict = '🕵️ Вывод: Инкогнито';
+              } else if (confidence >= 50) {
+                verdict = '⚠️ Вывод: Возможно инкогнито';
+              } else {
+                verdict = '✅ Вывод: Обычный режим';
+              }
+
+              return (
+                <Tooltip
+                  title={
+                    <div style={{ whiteSpace: 'pre-line', maxWidth: '500px' }}>
+                      <b>Проверка режима браузера (инкогнито или нет)</b>
+                      <br />
+                      {log.map((line, i) => (
+                        <div key={i}>{line}</div>
+                      ))}
+                      <br />
+                      📊 Вероятность: {confidence}%<br />
+                      {verdict}
+                    </div>
+                  }
+                >
+                  <Chip
+                    size="small"
+                    color={confidence >= 75 ? 'error' : confidence >= 50 ? 'warning' : 'success'}
+                    variant="outlined"
+                    icon={<IncognitoIcon />}
+                    label={`${confidence}%`}
+                  />
+                </Tooltip>
+              );
+            } catch (e) {
+              return null;
+            }
+          })()}
         </div>
       </TableCell>
 
