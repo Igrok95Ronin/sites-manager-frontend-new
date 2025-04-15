@@ -7,6 +7,7 @@ import { JSONTree } from 'react-json-tree';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import DataObjectIcon from '@mui/icons-material/DataObject';
+import BlockIcon from '@mui/icons-material/Block'; // не забудь импорт
 
 import { Tooltip, Chip } from '@mui/material';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -18,6 +19,7 @@ import IncognitoIcon from '@mui/icons-material/Visibility'; // или любой
 
 export default function TableRowRender({
   row,
+  rows,
   visibleColumns,
   checkedRows,
   handleCheckboxChange,
@@ -196,8 +198,6 @@ export default function TableRowRender({
           })()}
         </div>
       </TableCell>
-
-      {console.log(row)}
 
       {visibleColumns.map((column) => {
         const cellKey = column.dataKey;
@@ -427,8 +427,37 @@ export default function TableRowRender({
           );
         }
 
-        // Логика для Keyword (фильтр по CompanyID)
+        // Логика для Fingerprint (фильтр по Fingerprint)
         if (cellKey === 'Fingerprint') {
+          // Если отпечатка нет или он пустой
+          if (!cellValue || cellValue === '...' || cellValue.trim() === '') {
+            return (
+              <TableCell
+                className="statistics__padding"
+                key={cellKey}
+                align="center"
+                style={{ backgroundColor: rowBackgroundColor }}
+              >
+                <Tooltip title="Отпечаток не определён">
+                  <BlockIcon color="disabled" />
+                </Tooltip>
+              </TableCell>
+            );
+          }
+
+          const shortFingerprint = cellValue.substring(0, 8) + '...';
+          const currentDomain = row.Domain;
+
+          const allRowsWithSameFingerprint = rows.filter((r) => r.Fingerprint === cellValue);
+          const countAll = allRowsWithSameFingerprint.length;
+          const countCurrentDomain = allRowsWithSameFingerprint.filter((r) => r.Domain === currentDomain).length;
+
+          // Цвет в зависимости от количества заходов
+          let chipColor = 'default';
+          if (countAll >= 10) chipColor = 'error';
+          else if (countAll >= 5) chipColor = 'warning';
+          else chipColor = 'success'; // чистый отпечаток
+
           return (
             <TableCell
               className="statistics__padding"
@@ -436,18 +465,33 @@ export default function TableRowRender({
               align="left"
               style={{ backgroundColor: rowBackgroundColor }}
             >
-              <Button
-                variant="text"
-                size="small"
-                color="secondary"
-                onClick={() => setFilterFingerprint(cellValue)}
-                sx={{
-                  textTransform: 'none',
-                  whiteSpace: 'nowrap',
-                }}
+              <Tooltip
+                arrow
+                placement="top"
+                title={
+                  <div style={{ whiteSpace: 'pre-line' }}>
+                    🆔 <b>Цифровой отпечаток браузера:</b> {cellValue}
+                    {'\n'}
+                    {'\n'}
+                    🌐 <b>Домен:</b> {currentDomain}
+                    {'\n'}
+                    🔁 На этот домен: {countCurrentDomain}
+                    {'\n'}
+                    📊 Всего по всем доменам: {countAll}
+                  </div>
+                }
               >
-                {cellValue}
-              </Button>
+                <Chip
+                  label={`${shortFingerprint} (${countCurrentDomain}/${countAll})`}
+                  size="small"
+                  color={chipColor}
+                  onClick={() => setFilterFingerprint(cellValue)}
+                  sx={{
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                  }}
+                />
+              </Tooltip>
             </TableCell>
           );
         }

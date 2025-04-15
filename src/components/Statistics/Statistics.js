@@ -402,6 +402,7 @@ export default function ReactVirtualizedTable() {
         rowContent={(_index, row) => (
           <TableRowRender
             row={row}
+            rows={rows}
             visibleColumns={visibleColumns}
             checkedRows={checkedRows}
             handleCheckboxChange={handleCheckboxChange}
