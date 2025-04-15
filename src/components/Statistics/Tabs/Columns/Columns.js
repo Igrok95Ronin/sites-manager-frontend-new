@@ -6,6 +6,7 @@ import Tooltip from '@mui/material/Tooltip';
 // ИКОНКИ, используемые в label
 import KeyIcon from '@mui/icons-material/Key';
 import SdStorageIcon from '@mui/icons-material/SdStorage';
+import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import DomainIcon from '@mui/icons-material/Domain';
 import HomeIcon from '@mui/icons-material/Home';
@@ -200,6 +201,14 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'StorageQuota',
+  },
+  {
+    label: (
+      <Tooltip title="Цифровой отпечаток браузера (Fingerprint)" arrow placement="top">
+        <FingerprintIcon />
+      </Tooltip>
+    ),
+    dataKey: 'Fingerprint',
   },
   {
     label: (

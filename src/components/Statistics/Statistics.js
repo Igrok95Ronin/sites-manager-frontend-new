@@ -108,6 +108,8 @@ export default function ReactVirtualizedTable() {
   const [filterCompanyID, setFilterCompanyID] = useLocalStorageDataKeys('filterCompanyID', null); // Состояние для фильтрации по CompanyID
   const [filterAccountID, setFilterAccountID] = useLocalStorageDataKeys('filterAccountID', null); // Состояние для фильтрации по AccountID
   const [filterKeyword, setFilterKeyword] = useLocalStorageDataKeys('filterKeyword', null); // Состояние для фильтрации по filterKeyword
+  const [filterFingerprint, setFilterFingerprint] = useLocalStorageDataKeys('filterFingerprint', null); // Состояние для фильтрации по filterFingerprint
+
   // Данные CompanyID
   const [companyIDData, setCompanyIDData] = useState([]);
   // Данные GoogleAC
@@ -238,9 +240,21 @@ export default function ReactVirtualizedTable() {
     if (filterKeyword) {
       data = data.filter((item) => item.Keyword === filterKeyword);
     }
+    if (filterFingerprint) {
+      data = data.filter((item) => item.Fingerprint === filterFingerprint);
+    }
 
     return data;
-  }, [sortedRows, searchField, searchQuery, filterByDomain, filterCompanyID, filterAccountID, filterKeyword]);
+  }, [
+    sortedRows,
+    searchField,
+    searchQuery,
+    filterByDomain,
+    filterCompanyID,
+    filterAccountID,
+    filterKeyword,
+    filterFingerprint,
+  ]);
 
   const processedData = React.useMemo(() => {
     return filteredData.map((row) => {
@@ -352,6 +366,7 @@ export default function ReactVirtualizedTable() {
         setFilterCompanyID={setFilterCompanyID}
         setFilterKeyword={setFilterKeyword}
         setFilterByDomain={setFilterByDomain}
+        setFilterFingerprint={setFilterFingerprint}
         setFilterAccountID={setFilterAccountID}
         fixedHeaderContent={() => (
           <TableHeader
@@ -371,6 +386,8 @@ export default function ReactVirtualizedTable() {
             setFilterAccountID={setFilterAccountID}
             filterKeyword={filterKeyword}
             setFilterKeyword={setFilterKeyword}
+            filterFingerprint={filterFingerprint}
+            setFilterFingerprint={setFilterFingerprint}
             allColumns={allColumns}
             processedData={processedData}
             loadMoreRows={loadMoreRows}
@@ -396,6 +413,7 @@ export default function ReactVirtualizedTable() {
             setFilterCompanyID={setFilterCompanyID}
             setFilterAccountID={setFilterAccountID}
             setFilterKeyword={setFilterKeyword}
+            setFilterFingerprint={setFilterFingerprint}
             doubleOutput={doubleOutput}
             companyIDData={companyIDData}
             dataGoogleAccounts={dataGoogleAccounts}

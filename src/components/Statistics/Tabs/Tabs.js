@@ -10,6 +10,7 @@ const Tabs = ({
   setFilterCompanyID,
   setFilterKeyword,
   setFilterByDomain,
+  setFilterFingerprint,
   setFilterAccountID,
   fixedHeaderContent,
   rowContent,
@@ -41,6 +42,7 @@ const Tabs = ({
             dataGoogleAccounts={dataGoogleAccounts}
             setFilterCompanyID={setFilterCompanyID}
             setFilterKeyword={setFilterKeyword}
+            setFilterFingerprint={setFilterFingerprint}
             setFilterByDomain={setFilterByDomain}
             setFilterAccountID={setFilterAccountID}
             fixedHeaderContent={fixedHeaderContent}

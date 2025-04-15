@@ -55,6 +55,7 @@ export default function FullWidthTabs({
   dataGoogleAccounts,
   setFilterCompanyID,
   setFilterKeyword,
+  setFilterFingerprint,
   setFilterByDomain,
   setFilterAccountID,
   fixedHeaderContent,
@@ -188,6 +189,7 @@ export default function FullWidthTabs({
             setValue={setValue}
             setFilterCompanyID={setFilterCompanyID}
             setFilterKeyword={setFilterKeyword}
+            setFilterFingerprint={setFilterFingerprint}
             setFilterByDomain={setFilterByDomain}
             setFilterAccountID={setFilterAccountID}
           />

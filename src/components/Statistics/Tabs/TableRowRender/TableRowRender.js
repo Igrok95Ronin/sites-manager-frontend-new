@@ -29,6 +29,7 @@ export default function TableRowRender({
   setFilterCompanyID,
   setFilterAccountID,
   setFilterKeyword,
+  setFilterFingerprint,
   doubleOutput,
   companyIDData,
   dataGoogleAccounts,
@@ -415,6 +416,31 @@ export default function TableRowRender({
                 size="small"
                 color="secondary"
                 onClick={() => setFilterKeyword(cellValue)}
+                sx={{
+                  textTransform: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {cellValue}
+              </Button>
+            </TableCell>
+          );
+        }
+
+        // Логика для Keyword (фильтр по CompanyID)
+        if (cellKey === 'Fingerprint') {
+          return (
+            <TableCell
+              className="statistics__padding"
+              key={cellKey}
+              align="left"
+              style={{ backgroundColor: rowBackgroundColor }}
+            >
+              <Button
+                variant="text"
+                size="small"
+                color="secondary"
+                onClick={() => setFilterFingerprint(cellValue)}
                 sx={{
                   textTransform: 'none',
                   whiteSpace: 'nowrap',

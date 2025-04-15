@@ -30,6 +30,8 @@ export default function TableHeader({
   setFilterAccountID,
   filterKeyword,
   setFilterKeyword,
+  filterFingerprint,
+  setFilterFingerprint,
   allColumns,
   processedData,
   loadMoreRows,
@@ -169,6 +171,22 @@ export default function TableHeader({
                             onClick={(e) => {
                               e.stopPropagation();
                               setFilterKeyword(null);
+                            }}
+                          >
+                            <RestartAltIcon sx={{ width: '18px' }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+
+                      {/* Дополнительные элементы (например, Tooltips, Buttons) */}
+                      {column.dataKey === 'Fingerprint' && filterFingerprint && (
+                        <Tooltip title="Сбросить фильтр по Keyword" arrow placement="top">
+                          <IconButton
+                            sx={{ padding: '5px 0', marginLeft: '0' }}
+                            color="success"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFilterFingerprint(null);
                             }}
                           >
                             <RestartAltIcon sx={{ width: '18px' }} />
