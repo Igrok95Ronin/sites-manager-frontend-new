@@ -5,6 +5,7 @@ import Tooltip from '@mui/material/Tooltip';
 
 // ИКОНКИ, используемые в label
 import KeyIcon from '@mui/icons-material/Key';
+import SdStorageIcon from '@mui/icons-material/SdStorage';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import DomainIcon from '@mui/icons-material/Domain';
 import HomeIcon from '@mui/icons-material/Home';
@@ -53,7 +54,6 @@ import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
 import DataThresholdingIcon from '@mui/icons-material/DataThresholding';
 import GTranslateIcon from '@mui/icons-material/GTranslate';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-
 
 // =========================================
 // 2) "Эталонный" список столбцов (allColumns) с иконками и т.п.
@@ -192,6 +192,14 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'Device',
+  },
+  {
+    label: (
+      <Tooltip title="Память браузера (StorageQuota) (MB)" arrow placement="top">
+        <SdStorageIcon />
+      </Tooltip>
+    ),
+    dataKey: 'StorageQuota',
   },
   {
     label: (

@@ -138,6 +138,21 @@ export default function TableRowRender({
                 log.push('📦 Sec-Fetch-Storage-Access не найден → ❌ Пропущено');
               }
 
+              // StorageQuota (в байтах)
+              if (row.StorageQuota && !isNaN(row.StorageQuota) && row.StorageQuota !== 0) {
+                total++;
+                const quotaMB = row.StorageQuota / 1024 / 1024;
+                log.push(`📦 storageQuota: ${quotaMB.toFixed(2)} MB`);
+                if (quotaMB < 10000) {
+                  score++;
+                  log.push('📦 Мало выделено памяти → ⚠️ +1 (инкогнито)');
+                } else {
+                  log.push('📦 Нормальный объём памяти → ✅ 0');
+                }
+              } else {
+                log.push('📦 StorageQuota не определено или = 0 → ❌ Пропущено');
+              }
+
               const confidence = Math.min(Math.round((score / total) * 100), 100);
               if (confidence === 0) return null;
 
@@ -180,6 +195,8 @@ export default function TableRowRender({
           })()}
         </div>
       </TableCell>
+
+      {console.log(row)}
 
       {visibleColumns.map((column) => {
         const cellKey = column.dataKey;
@@ -251,6 +268,22 @@ export default function TableRowRender({
               style={{ backgroundColor: rowBackgroundColor }}
             >
               {cellValue ? <CheckIcon color="success" /> : <CloseIcon color="error" />}
+            </TableCell>
+          );
+        }
+
+        // Логика для StorageQuota
+        if (cellKey === 'StorageQuota') {
+          const quotaInMB = cellValue ? (cellValue / 1024 / 1024).toFixed(2) : '0.00';
+
+          return (
+            <TableCell
+              className="statistics__padding"
+              key={cellKey}
+              align="left"
+              style={{ backgroundColor: rowBackgroundColor }}
+            >
+              {quotaInMB} MB
             </TableCell>
           );
         }
