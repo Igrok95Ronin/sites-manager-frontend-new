@@ -375,6 +375,14 @@ export default function TableRowRender({
 
         // Логика для AccountID (фильтр по CompanyID)
         if (cellKey === 'AccountID') {
+          // Установка цвета фона в зависимости от значения
+          let background = rowBackgroundColor;
+          const value = (cellValue || '').toLowerCase();
+
+          // Цвета для каждого конкретного значения
+          if (value !== '-') background = '#dbceff'; // Mobile
+          else if (value === '-') background = '#dbe5ff'; // Неизвестное устройство
+
           return (
             <TableCell
               className="statistics__padding"
@@ -390,13 +398,25 @@ export default function TableRowRender({
                 sx={{
                   textTransform: 'none',
                   whiteSpace: 'nowrap',
+                  width: '100%',
+                  color: '#423671',
                 }}
               >
-                {/* Находим и подставляем название компании если его нету то CompanyID */}
-                {(() => {
-                  const account = dataGoogleAccounts.find((account) => account.account_id === cellValue);
-                  return account ? account.email : cellValue;
-                })()}
+                <div
+                  style={{
+                    fontSize: 'inherit',
+                    backgroundColor: background,
+                    width: '100%',
+                    padding: '0 10px',
+                    borderRadius: '5px',
+                  }}
+                >
+                  {/* Находим и подставляем название компании если его нету то CompanyID */}
+                  {(() => {
+                    const account = dataGoogleAccounts.find((account) => account.account_id === cellValue);
+                    return account ? account.email : cellValue;
+                  })()}
+                </div>
               </Button>
             </TableCell>
           );
@@ -656,6 +676,35 @@ export default function TableRowRender({
                 {cellValue}
               </span>
               <span className="statistics__gclidLen">{cellValue?.length}</span>
+            </TableCell>
+          );
+        }
+
+        // Логика для поля Device (значение + цвет фона по типу устройства)
+        if (cellKey === 'Device') {
+          // Установка цвета фона в зависимости от значения
+          let background = rowBackgroundColor;
+          const value = (cellValue || '').toLowerCase();
+
+          // Цвета для каждого конкретного значения
+          if (value === 'm') background = '#ffd5cc'; // Mobile
+          else if (value === 't') background = '#ffb6a1'; // Tablet
+          else if (value === 'c') background = '#ff9c86'; // Computer
+          else if (value === '-') background = '#e8cff7'; // Неизвестное устройство
+
+          return (
+            <TableCell className="statistics__padding" key={cellKey} align="left">
+              <div
+                style={{
+                  fontSize: 'inherit',
+                  backgroundColor: background,
+                  width: '100%',
+                  padding: '0 10px',
+                  borderRadius: '5px',
+                }}
+              >
+                {cellValue}
+              </div>
             </TableCell>
           );
         }
