@@ -467,7 +467,7 @@ export default function TableRowRender({
             >
               <Tooltip
                 arrow
-                placement="top"
+                placement="left"
                 title={
                   <div style={{ whiteSpace: 'pre-line' }}>
                     🆔 <b>Цифровой отпечаток браузера:</b> {cellValue}
