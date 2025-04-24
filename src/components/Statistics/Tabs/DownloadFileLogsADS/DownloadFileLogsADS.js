@@ -3,7 +3,6 @@ import {
   Button,
   Checkbox,
   FormControlLabel,
-  FormGroup,
   Select,
   MenuItem,
   InputLabel,
@@ -20,6 +19,9 @@ import {
   Alert,
   CircularProgress,
   DialogContentText,
+  Divider,
+  Paper,
+  Tooltip,
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -27,39 +29,41 @@ import ruLocale from 'date-fns/locale/ru';
 import axios from 'axios';
 import { format } from 'date-fns';
 import axiosInstance from '../../../../axiosInstance';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'; // Иконка для подсказки
 
-const APIURL = process.env.REACT_APP_APIURL; // Получем url из конфига
+const APIURL = process.env.REACT_APP_APIURL;
 
-const DownloadFileLogsADS = ({
-  showDownloadFileLogsADS,
-  setShowDownloadFileLogsADS,
-}) => {
-  // Состояния для формы
+// Описание каждого чекбокса
+const fieldDescriptions = {
+  createdAt: 'Дата и время посещения сайта',
+  gclid: 'Google Click Identifier — используется для отслеживания рекламных кликов',
+  IP: 'IP-адрес пользователя',
+  headers: 'Заголовки HTTP-запроса пользователя',
+  jsData: 'Данные, собранные с помощью JavaScript (например, язык, плагин и т.д.)',
+  timeSpent: 'Время, проведённое на сайте пользователем',
+  clickCoordinates: 'Координаты кликов на странице',
+  scrollCoordinates: 'Данные о прокрутке страницы пользователем',
+  clickOnNumber: 'Факт нажатия на номер телефона (если был)',
+  accountID: 'ID аккаунта, связанного с пользователем (если применимо)',
+  companyID: 'ID компании, которой принадлежит аккаунт',
+  keyword: 'Ключевое слово, по которому пришёл пользователь',
+  device: 'Устройство пользователя (мобильное, десктоп и т.д.)',
+  fingerprint: 'Цифровой отпечаток браузера',
+  isChecked: 'Флаг, был ли пользователь помечен как подозрительный/проверенный',
+};
+
+const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsADS }) => {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [domain, setDomain] = useState('');
   const [limit, setLimit] = useState('');
-  const [fields, setFields] = useState({
-    createdAt: true,
-    gclid: true,
-    IP: true,
-    headers: true,
-    jsData: true,
-    timeSpent: true,
-    clickCoordinates: true,
-    scrollCoordinates: true,
-    clickOnNumber: true,
-    accountID: true,
-    companyID: true,
-    keyword: true,
-    device: true,
-    isChecked: true,
-  });
-  const [domains, setDomains] = useState([]); // Данные доменов
-  const [subDomains, setSubDomains] = useState([]); // Поддомены
-  // Состояние для отслеживания, был ли выполнен запрос
+  const [fields, setFields] = useState(Object.fromEntries(Object.keys(fieldDescriptions).map((key) => [key, true])));
+  const [domains, setDomains] = useState([]);
+  const [subDomains, setSubDomains] = useState([]);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  const [loading, setLoading] = useState(false);
 
-  // Функция для получения доменов и поддоменов
+  // Получение доменов и поддоменов
   const fetchDomains = async () => {
     try {
       setLoading(true);
@@ -67,7 +71,6 @@ const DownloadFileLogsADS = ({
         axiosInstance.get('/viewdomains'),
         axiosInstance.get('/viewsubdomains'),
       ]);
-
       setDomains(domainsResponse.data);
       setSubDomains(subDomainsResponse.data);
     } catch (error) {
@@ -78,69 +81,31 @@ const DownloadFileLogsADS = ({
   };
 
   useEffect(() => {
-    if (showDownloadFileLogsADS) {
-      fetchDomains();
-    }
+    if (showDownloadFileLogsADS) fetchDomains();
   }, [showDownloadFileLogsADS]);
 
-  //  Все домены и поддомены
-  const domainsSubDomains = [
-    ...domains.map((domain) => domain.domain),
-    ...subDomains.map((subDomain) => subDomain.subDomain),
-  ];
+  const domainsSubDomains = [...domains.map((d) => d.domain), ...subDomains.map((s) => s.subDomain)];
 
-  // Состояния для уведомлений и загрузки
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: '',
-    severity: 'success', // 'success' | 'error' | 'warning' | 'info'
-  });
-  const [loading, setLoading] = useState(false);
+  const handleClose = () => setShowDownloadFileLogsADS(false);
 
-  // Обработчик закрытия модального окна
-  const handleClose = () => {
-    setShowDownloadFileLogsADS(false);
-  };
-
-  // Обработчик изменения чекбоксов
   const handleCheckboxChange = (event) => {
-    setFields({
-      ...fields,
-      [event.target.name]: event.target.checked,
-    });
+    setFields({ ...fields, [event.target.name]: event.target.checked });
   };
 
-  // Обработчик закрытия Snackbar
-  const handleSnackbarClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
+  const handleSnackbarClose = (_, reason) => {
+    if (reason === 'clickaway') return;
     setSnackbar({ ...snackbar, open: false });
   };
 
-  // Обработчик отправки формы и скачивания CSV
   const handleDownload = () => {
-    // Проверка обязательных полей
     if (!startDate || !endDate || !domain) {
-      setSnackbar({
-        open: true,
-        message: 'Пожалуйста, заполните все обязательные поля.',
-        severity: 'warning',
-      });
-      return;
+      return setSnackbar({ open: true, message: 'Заполните все обязательные поля.', severity: 'warning' });
     }
 
-    // Проверка логики дат
     if (startDate > endDate) {
-      setSnackbar({
-        open: true,
-        message: 'Начальная дата не может быть позже конечной.',
-        severity: 'warning',
-      });
-      return;
+      return setSnackbar({ open: true, message: 'Начальная дата позже конечной.', severity: 'warning' });
     }
 
-    // Формирование данных для отправки
     const data = {
       startDate: format(startDate, 'yyyy-MM-dd'),
       endDate: format(endDate, 'yyyy-MM-dd'),
@@ -149,113 +114,70 @@ const DownloadFileLogsADS = ({
       ...fields,
     };
 
-    //  Название скачанного файла будет название домена с датой
-    const nameDownloadFile = () => {
-      const date = new Date();
-      const UserLogsAds = `${domain}${date.getDate()}-${
-        date.getMonth() + 1
-      }-${date.getFullYear()}-${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}`;
-      return UserLogsAds;
+    const fileName = () => {
+      const now = new Date();
+      return `${domain}-${now.toISOString().replace(/[:.]/g, '-')}`;
     };
-    // ${APIURL}
-    // Отправка POST-запроса с использованием Axios
+
     setLoading(true);
     axios
-      .post(`${APIURL}/downloadfilelogsads`, data, {
-        responseType: 'blob',
-      })
+      .post(`${APIURL}/downloadfilelogsads`, data, { responseType: 'blob' })
       .then((response) => {
-        // Создание URL для скачивания файла
         const blob = new Blob([response.data], { type: 'text/csv' });
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = nameDownloadFile() + '.csv';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${fileName()}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
         window.URL.revokeObjectURL(url);
 
-        // Показ уведомления об успехе
-        setSnackbar({
-          open: true,
-          message: 'Файл успешно скачан.',
-          severity: 'success',
-        });
-
-        // Закрытие модального окна после успешной загрузки
+        setSnackbar({ open: true, message: 'Файл успешно скачан.', severity: 'success' });
         handleClose();
       })
       .catch((error) => {
-        console.error('Ошибка при скачивании файла:', error);
-        setSnackbar({
-          open: true,
-          message: 'Не удалось скачать файл. Проверьте консоль для деталей.',
-          severity: 'error',
-        });
+        console.error(error);
+        setSnackbar({ open: true, message: 'Ошибка при скачивании файла.', severity: 'error' });
       })
-      .finally(() => {
-        setLoading(false);
-      });
+      .finally(() => setLoading(false));
   };
 
   return (
     <Box>
-      <Dialog
-        open={showDownloadFileLogsADS}
-        onClose={handleClose}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>Скачать CSV с логами ADS</DialogTitle>
-        <DialogContent>
-          <Box sx={{ mt: 2 }}>
-            <Grid container spacing={3}>
-              {/* Поля с календарём */}
+      <Dialog open={showDownloadFileLogsADS} onClose={handleClose} maxWidth="md" fullWidth>
+        <DialogTitle sx={{ backgroundColor: '#f5f5f5', fontWeight: 600 }}>📄 Скачать CSV с логами ADS</DialogTitle>
+
+        <DialogContent sx={{ backgroundColor: '#fafafa' }}>
+          <Paper elevation={1} sx={{ padding: 4, borderRadius: 3 }}>
+            <Grid container spacing={4}>
+              {/* Дата начала / конца */}
               <Grid item xs={12} sm={6}>
-                <LocalizationProvider
-                  dateAdapter={AdapterDateFns}
-                  adapterLocale={ruLocale}
-                >
+                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ruLocale}>
                   <DatePicker
-                    label="Начальная дата"
+                    label="📅 Начальная дата"
                     value={startDate}
-                    onChange={(newValue) => setStartDate(newValue)}
-                    inputFormat="dd-MM-yyyy"
-                    renderInput={(params) => (
-                      <TextField {...params} fullWidth />
-                    )}
+                    onChange={setStartDate}
+                    renderInput={(params) => <TextField variant="outlined" fullWidth {...params} />}
                   />
                 </LocalizationProvider>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <LocalizationProvider
-                  dateAdapter={AdapterDateFns}
-                  adapterLocale={ruLocale}
-                >
+                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ruLocale}>
                   <DatePicker
-                    label="Конечная дата"
+                    label="📅 Конечная дата"
                     value={endDate}
-                    onChange={(newValue) => setEndDate(newValue)}
-                    inputFormat="dd-MM-yyyy"
-                    renderInput={(params) => (
-                      <TextField {...params} fullWidth />
-                    )}
+                    onChange={setEndDate}
+                    renderInput={(params) => <TextField variant="outlined" fullWidth {...params} />}
                   />
                 </LocalizationProvider>
               </Grid>
 
-              {/* Выпадающий список доменов */}
+              {/* Домен и лимит */}
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth>
-                  <InputLabel id="domain-select-label">Домен</InputLabel>
-                  <Select
-                    labelId="domain-select-label"
-                    id="domain-select"
-                    value={domain}
-                    label="Домен"
-                    onChange={(e) => setDomain(e.target.value)}
-                  >
+                  <InputLabel>🌐 Домен</InputLabel>
+                  <Select label="Домен" value={domain} onChange={(e) => setDomain(e.target.value)}>
                     {domainsSubDomains.map((dom, i) => (
                       <MenuItem key={i} value={dom}>
                         {dom}
@@ -265,49 +187,60 @@ const DownloadFileLogsADS = ({
                 </FormControl>
               </Grid>
 
-              {/* Поле ввода лимита */}
               <Grid item xs={12} sm={6}>
                 <TextField
-                  label="Количество  логов"
+                  label="🔢 Кол-во логов"
                   type="number"
                   value={limit}
                   onChange={(e) => setLimit(e.target.value)}
                   fullWidth
                   InputProps={{ inputProps: { min: 1 } }}
                 />
-                <DialogContentText>
-                  Оставить пустыме если нужно сохранить все логи
+                <DialogContentText sx={{ fontSize: '0.9rem', mt: 1 }}>
+                  Оставьте пустым, чтобы скачать все логи
                 </DialogContentText>
               </Grid>
 
-              {/* Чекбоксы для выбора полей */}
+              {/* Чекбоксы */}
               <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom>
-                  Выберите поля для включения в CSV
+                <Divider sx={{ my: 2 }} />
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: 500 }}>
+                  🧩 Выберите поля для CSV
                 </Typography>
-                <FormGroup row>
-                  {Object.keys(fields).map((key) => (
-                    <FormControlLabel
-                      key={key}
-                      control={
-                        <Checkbox
-                          checked={fields[key]}
-                          onChange={handleCheckboxChange}
-                          name={key}
-                          color="primary"
+                <Grid container spacing={2}>
+                  {Object.entries(fields).map(([key, value]) => (
+                    <Grid item xs={12} sm={6} md={4} key={key}>
+                      <Tooltip title={fieldDescriptions[key]} placement="top" arrow>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={value}
+                              onChange={handleCheckboxChange}
+                              name={key}
+                              color="primary"
+                              sx={{ '&.Mui-checked': { color: '#1976d2' } }}
+                            />
+                          }
+                          label={
+                            <Box display="flex" alignItems="center" gap={0.5}>
+                              {key}
+                              <InfoOutlinedIcon fontSize="small" color="action" />
+                            </Box>
+                          }
                         />
-                      }
-                      label={key.charAt(0).toUpperCase() + key.slice(1)}
-                    />
+                      </Tooltip>
+                    </Grid>
                   ))}
-                </FormGroup>
+                </Grid>
               </Grid>
             </Grid>
-          </Box>
+          </Paper>
         </DialogContent>
-        <DialogActions>
+
+        {/* Кнопки */}
+        <DialogActions sx={{ px: 4, pb: 3, backgroundColor: '#f5f5f5' }}>
           <Button
-            variant="contained"
+            variant="outlined"
             color="warning"
             href="https://drive.google.com/drive/u/0/home"
             target="_blank"
@@ -330,18 +263,13 @@ const DownloadFileLogsADS = ({
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar для уведомлений */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert
-          onClose={handleSnackbarClose}
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
-        >
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
           {snackbar.message}
         </Alert>
       </Snackbar>
