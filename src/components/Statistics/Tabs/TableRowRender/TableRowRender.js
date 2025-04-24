@@ -61,12 +61,27 @@ export default function TableRowRender({
   const isClickOnNumberTrue = row['ClickOnNumber'];
   const rowBackgroundColor = isClickOnNumberTrue ? 'rgb(211 248 212)' : isChecked ? '#e0f7fa' : 'inherit';
 
+  // WebView
+  const headers = typeof row.Headers === 'string' ? JSON.parse(row.Headers) : row.Headers;
+  const userAgent = headers?.['User-Agent'] || '';
+  const xRequestedWith = headers?.['X-Requested-With'] || '';
+
+  const isWebViewBot =
+    userAgent.includes('wv') && typeof xRequestedWith === 'string' && xRequestedWith.startsWith('com.');
+
   return (
     <>
       {/* Чекбокс каждой строки */}
       <TableCell className="statistics__checked" align="left" style={{ backgroundColor: rowBackgroundColor }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Checkbox checked={isChecked} onChange={handleCheckboxChange(row.ID)} />
+
+          {/* Метка WebView */}
+          {isWebViewBot && (
+            <Tooltip title="Обнаружен WebView бот (приложение)">
+              <Chip size="small" color="error" variant="outlined" icon={<BlockIcon />} label="WV" />
+            </Tooltip>
+          )}
 
           {/* Отметка, если был клик по скрытому элементу */}
           {row.ClickOnInvisibleNumber && (
@@ -447,6 +462,43 @@ export default function TableRowRender({
           );
         }
 
+        // Логика для поля IsFirstVisit (отметка первого визита за сутки)
+        if (cellKey === 'IsFirstVisit') {
+          const isFirst = cellValue === true || cellValue === 'true';
+          const isFalse = cellValue === false || cellValue === 'false';
+          const isUnknown = !isFirst && !isFalse;
+
+          let backgroundColor = '#ffd5d5'; // по умолчанию красный (не первый визит)
+          if (isFirst) backgroundColor = '#d0f0c0'; // зелёный
+          else if (isUnknown) backgroundColor = '#e0e0e0'; // серый
+
+          return (
+            <TableCell
+              className="statistics__padding"
+              key={cellKey}
+              align="left"
+              style={{
+                backgroundColor,
+                textAlign: 'center',
+              }}
+            >
+              {isFirst ? (
+                <Tooltip title="✅ Первый визит за сутки (на этом домене)" arrow placement="left">
+                  <CheckIcon color="success" />
+                </Tooltip>
+              ) : isFalse ? (
+                <Tooltip title="❌ Не первый визит" arrow placement="left">
+                  <CloseIcon color="error" />
+                </Tooltip>
+              ) : (
+                <Tooltip title="❓ Неизвестно / данных нет" arrow placement="left">
+                  <span style={{ fontSize: '18px', fontWeight: 'bold' }}>?</span>
+                </Tooltip>
+              )}
+            </TableCell>
+          );
+        }
+
         // Логика для Fingerprint (фильтр по Fingerprint)
         if (cellKey === 'Fingerprint') {
           // Если отпечатка нет или он пустой
@@ -717,7 +769,9 @@ export default function TableRowRender({
             align="left"
             style={{ backgroundColor: rowBackgroundColor }}
           >
-            {cellValue}
+            {cellValue !== undefined && cellValue !== null && typeof cellValue !== 'object'
+              ? cellValue.toString()
+              : '-'}
           </TableCell>
         );
       })}

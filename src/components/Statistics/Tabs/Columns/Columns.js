@@ -9,6 +9,7 @@ import SdStorageIcon from '@mui/icons-material/SdStorage';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import DomainIcon from '@mui/icons-material/Domain';
+import NewReleasesIcon from '@mui/icons-material/NewReleases';
 import HomeIcon from '@mui/icons-material/Home';
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -201,6 +202,14 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'StorageQuota',
+  },
+  {
+    label: (
+      <Tooltip title="Первый визит за 24 часа (только на этом домене) (IsFirstVisit)" arrow placement="top">
+        <NewReleasesIcon />
+      </Tooltip>
+    ),
+    dataKey: 'IsFirstVisit',
   },
   {
     label: (
@@ -551,6 +560,7 @@ export const defaultVisibleDataKeys = [
   'ScrollCoordinates',
   'TimeSpent',
   'Device',
+  'IsFirstVisit',
   'Fingerprint',
   'Accept',
   'Accept-Language',
