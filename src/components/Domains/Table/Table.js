@@ -80,8 +80,8 @@ const Tables = ({ items, onUpdateDomains, searchQuery }) => {
     setOpenSpinner(false); // Закрываем индикатор загрузки
   };
 
-  const [orderDirection, setOrderDirection] = useState('asc'); // Состояние для направления сортировки (по возрастанию)
-  const [valueToOrderBy, setValueToOrderBy] = useState('domain'); // Состояние для столбца, по которому происходит сортировка
+  const [orderDirection, setOrderDirection] = useState('desc'); // Состояние для направления сортировки (по возрастанию)
+  const [valueToOrderBy, setValueToOrderBy] = useState('ID'); // Состояние для столбца, по которому происходит сортировка
   const [showRemovalFrom, setShowRemovalFrom] = useState(false); // Состояние для показа формы удаления домена
   const [domainToDelete, setDomainToDelete] = useState(''); // Состояние для домена, который нужно удалить
   const [error, setError] = useState(false); // Состояние для отображения ошибок

@@ -60,14 +60,10 @@ const Domains = () => {
   const filteredData = organizedData
     ? organizedData
         .map((item) => {
-          const isDomainMatch = item.domain
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase());
+          const isDomainMatch = item.domain.toLowerCase().includes(searchQuery.toLowerCase());
 
           const filteredSubDomains = item.subDomains.filter((subDomain) =>
-            subDomain.subDomain
-              .toLowerCase()
-              .includes(searchQuery.toLowerCase()),
+            subDomain.subDomain.toLowerCase().includes(searchQuery.toLowerCase()),
           );
 
           return {
@@ -75,17 +71,10 @@ const Domains = () => {
             subDomains: isDomainMatch ? item.subDomains : filteredSubDomains,
           };
         })
-        .filter(
-          (item) =>
-            item.domain.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.subDomains.length > 0,
-        )
+        .filter((item) => item.domain.toLowerCase().includes(searchQuery.toLowerCase()) || item.subDomains.length > 0)
     : [];
 
-  const numberOfDomains = filteredData.reduce(
-    (acc, item) => acc + 1 + item.subDomains.length,
-    0,
-  );
+  const numberOfDomains = filteredData.reduce((acc, item) => acc + 1 + item.subDomains.length, 0);
 
   if (loading) {
     return <Spinner loading={loading}></Spinner>;
@@ -98,11 +87,7 @@ const Domains = () => {
   return (
     <>
       <Search onSearch={setSearchQuery} numberOfDomains={numberOfDomains} />
-      <Table
-        items={filteredData}
-        onUpdateDomains={fetchDomains}
-        searchQuery={searchQuery}
-      />
+      <Table items={filteredData} onUpdateDomains={fetchDomains} searchQuery={searchQuery} />
       <AddDomain onUpdateDomains={fetchDomains} />
       {loading && <Spinner loading={loading} />}
     </>
