@@ -56,7 +56,7 @@ export default function ReactVirtualizedTable() {
   const [limit, setLimit] = useState(() => {
     try {
       const item = window.localStorage.getItem('search_limit');
-      return item ? JSON.parse(item) : 300;
+      return item ? JSON.parse(item) : 1000;
     } catch (error) {
       console.error('Ошибка при чтении search_limit из localStorage:', error);
       return 300;
