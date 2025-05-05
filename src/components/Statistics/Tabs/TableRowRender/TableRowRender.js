@@ -682,14 +682,26 @@ export default function TableRowRender({
               align="left"
               style={{ backgroundColor: rowBackgroundColor }}
             >
-              <AlertDialog
-                AcceptLanguage={cellValue}
-                Headers={row.Headers}
-                Label={'Headers'}
-                Title={'Заголовки (Headers)'}
-                doubleOutput={doubleOutput}
-                doubleData={row.JsData}
-              />
+              <div
+                style={{
+                  maxWidth: '200px', // Ограничение ширины блока
+                  overflow: 'hidden', // Скрываем всё, что выходит за пределы
+                  textOverflow: 'ellipsis', // При выходе за пределы показываем "..."
+                  whiteSpace: 'nowrap', // Не переносим текст на новую строку
+                  cursor: 'pointer',
+                  color: '#1976d2',
+                  textDecoration: 'underline',
+                }}
+              >
+                <AlertDialog
+                  AcceptLanguage={cellValue}
+                  Headers={row.Headers}
+                  Label={'Headers'}
+                  Title={'Заголовки (Headers)'}
+                  doubleOutput={doubleOutput}
+                  doubleData={row.JsData}
+                />
+              </div>
             </TableCell>
           );
         }
