@@ -363,7 +363,7 @@ export default function Tables({ data, fetchData, formattedDuration, setError })
             <DialogTitle>Подтверждение удаления</DialogTitle>
             <DialogContent>
               <DialogContentText>
-                Вы уверены, что хотите удалить этот домен из отслеживания? Это действие необратимо.
+                Домен будет исключён из отслеживания (удален), но останется в базе. Вы сможете вернуть его позже.
               </DialogContentText>
             </DialogContent>
             <DialogActions>
