@@ -9,13 +9,13 @@ export default function JSONTemplate() {
   const handleClose = () => setOpen(false);
 
   const jsonData = [
-    { domain: 'deutschservice24.at' },
-    { domain: 'drpetproject.ru' },
-    { domain: 'i-am-ali.store' },
-    { domain: 'lock-man.at' },
-    { domain: 'lock-man.ch' },
-    { domain: 'rohr-man.ch' },
-    { domain: 'serrurier-roi.fr' },
+    'deutschservice24.at',
+    'drpetproject.ru',
+    'i-am-ali.store',
+    'lock-man.at',
+    'lock-man.ch',
+    'rohr-man.ch',
+    'serrurier-roi.fr',
   ];
 
   return (
@@ -27,7 +27,7 @@ export default function JSONTemplate() {
       </Tooltip>
 
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Формат ответа сервера (JSON)</DialogTitle>
+        <DialogTitle>Формат ответа сервера</DialogTitle>
         <DialogContent>
           <Typography variant="body2" mb={1}>
             Пример структуры данных, которую должен возвращать сервер:

@@ -16,6 +16,7 @@ import Typography from '@mui/material/Typography'; // Добавь в импор
 
 import FormAddDomain from '../FormAddDomain/FormAddDomain';
 import JSONTemplate from '../JSONTemplate/JSONTemplate';
+import RemovalForm from '../RemovalForm/RemovalForm';
 
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -118,6 +119,7 @@ export default function Tables({ data, fetchData, setError }) {
             <div>
               <JSONTemplate />
               <FormAddDomain fetchData={fetchData} />
+              <RemovalForm fetchData = {fetchData}/>
             </div>
           </Box>
 
