@@ -205,6 +205,30 @@ export const allColumns = [
   },
   {
     label: (
+      <Tooltip
+        title="Было ли касание или мышь перед скроллом: true — реальный пользователь, false — возможно бот (HadTouchBeforeScroll)"
+        arrow
+        placement="top"
+      >
+        <PanToolIcon />
+      </Tooltip>
+    ),
+    dataKey: 'HadTouchBeforeScroll',
+  },
+  {
+    label: (
+      <Tooltip
+        title="Тип клика по номеру телефона: touch (палец), mouse (ПК), none (возможно бот) (ClickCallType)"
+        arrow
+        placement="top"
+      >
+        <TouchAppIcon />
+      </Tooltip>
+    ),
+    dataKey: 'ClickCallType',
+  },
+  {
+    label: (
       <Tooltip title="Первый визит за 24 часа (только на этом домене) (IsFirstVisit)" arrow placement="top">
         <NewReleasesIcon />
       </Tooltip>
@@ -558,8 +582,10 @@ export const defaultVisibleDataKeys = [
   // 'ClickOnInvisibleNumber',
   'ClickCoordinates',
   'ScrollCoordinates',
+  'HadTouchBeforeScroll',
   'TimeSpent',
   'Device',
+  'ClickCallType',
   'IsFirstVisit',
   'Fingerprint',
   'Accept',

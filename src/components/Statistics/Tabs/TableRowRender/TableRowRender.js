@@ -211,6 +211,40 @@ export default function TableRowRender({
               return null;
             }
           })()}
+
+          {/* Несовпадение User-Agent */}
+          {(() => {
+            try {
+              const jsData = typeof row.JsData === 'string' ? JSON.parse(row.JsData) : row.JsData;
+              const headers = typeof row.Headers === 'string' ? JSON.parse(row.Headers) : row.Headers;
+
+              const headersUA = headers?.['User-Agent'] || '';
+              const jsUA = jsData?.userAgent || '';
+
+              if (headersUA && jsUA && headersUA !== jsUA) {
+                return (
+                  <Tooltip
+                    title={
+                      <div style={{ whiteSpace: 'pre-line', maxWidth: '400px' }}>
+                        ⚠️ <b>Несовпадение User-Agent</b>
+                        {'\n'}
+                        <b>Headers:</b> {headersUA}
+                        {'\n'}
+                        <b>JS:</b> {jsUA}
+                        {'\n'}
+                        Возможный признак бота или подмены окружения.
+                      </div>
+                    }
+                  >
+                    <Chip size="small" color="warning" variant="outlined" icon={<BlockIcon />} label="UA" />
+                  </Tooltip>
+                );
+              }
+              return null;
+            } catch (e) {
+              return null;
+            }
+          })()}
         </div>
       </TableCell>
 
@@ -495,6 +529,76 @@ export default function TableRowRender({
                   <span style={{ fontSize: '18px', fontWeight: 'bold' }}>?</span>
                 </Tooltip>
               )}
+            </TableCell>
+          );
+        }
+
+        // Логика для HadTouchBeforeScroll (определение, был ли скролл с касанием/мышью)
+        if (cellKey === 'HadTouchBeforeScroll') {
+          const value = cellValue;
+
+          let backgroundColor = '#f5f5f5';
+          let icon = null;
+          let tooltip = '';
+
+          if (value === true) {
+            backgroundColor = '#d0f0c0';
+            icon = <CheckIcon color="success" />;
+            tooltip = '✅ Было касание или мышь до скролла';
+          } else if (value === false) {
+            backgroundColor = '#fff3cd';
+            icon = <CloseIcon color="warning" />;
+            tooltip = '⚠ Скролл был без касания или мыши — возможно бот';
+          } else {
+            backgroundColor = '#e0e0e0';
+            tooltip = '🤷 Данных нет — либо не было скролла, либо не сработал флаг';
+            icon = <span style={{ fontWeight: 'bold' }}>?</span>;
+          }
+
+          return (
+            <TableCell
+              className="statistics__padding"
+              key={cellKey}
+              align="left"
+              style={{
+                backgroundColor,
+                textAlign: 'center',
+              }}
+            >
+              <Tooltip title={tooltip} arrow placement="left">
+                {icon}
+              </Tooltip>
+            </TableCell>
+          );
+        }
+
+        // Логика для ClickCallType + HadTouchBeforeScroll (сценарии поведения)
+        if (cellKey === 'ClickCallType') {
+          const type = row.ClickCallType;
+
+          let icon = <span style={{ fontWeight: 'bold' }}>?</span>;
+          let title = '🤷 Нет информации о типе клика';
+          let backgroundColor = '#e0e0e0';
+
+          if (type === 'touch') {
+            icon = <CheckIcon color="success" />;
+            title = '✅ Клик по номеру с касанием (touch) — скорее всего телефон';
+            backgroundColor = '#d0f0c0';
+          } else if (type === 'mouse') {
+            icon = <CheckIcon color="info" />;
+            title = '🖱️ Клик по номеру мышью';
+            backgroundColor = '#f0f4c3';
+          } else if (type === 'none') {
+            icon = <BlockIcon color="error" />;
+            title = '🚫 Клик без мыши и тача — возможно бот';
+            backgroundColor = '#f8d7da';
+          }
+
+          return (
+            <TableCell className="statistics__padding" key={cellKey} align="center" style={{ backgroundColor }}>
+              <Tooltip title={title} arrow placement="left">
+                <span>{icon}</span>
+              </Tooltip>
             </TableCell>
           );
         }
