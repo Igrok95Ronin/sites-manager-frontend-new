@@ -6,6 +6,7 @@ import Tooltip from '@mui/material/Tooltip';
 // ИКОНКИ, используемые в label
 import KeyIcon from '@mui/icons-material/Key';
 import SdStorageIcon from '@mui/icons-material/SdStorage';
+import SensorsIcon from '@mui/icons-material/Sensors';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import DomainIcon from '@mui/icons-material/Domain';
@@ -242,6 +243,18 @@ export const allColumns = [
       </Tooltip>
     ),
     dataKey: 'Fingerprint',
+  },
+  {
+    label: (
+      <Tooltip
+        title="Анализ движения устройства: позволяет определить, использует ли пользователь мобильное устройство или ПК (MotionDataRaw)"
+        arrow
+        placement="top"
+      >
+        <SensorsIcon />
+      </Tooltip>
+    ),
+    dataKey: 'MotionDataRaw',
   },
   {
     label: (
@@ -588,6 +601,7 @@ export const defaultVisibleDataKeys = [
   'ClickCallType',
   'IsFirstVisit',
   'Fingerprint',
+  'MotionDataRaw',
   'Accept',
   'Accept-Language',
   'language',

@@ -8,6 +8,9 @@ import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import BlockIcon from '@mui/icons-material/Block'; // не забудь импорт
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
 import { Tooltip, Chip } from '@mui/material';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -670,6 +673,169 @@ export default function TableRowRender({
               </Tooltip>
             </TableCell>
           );
+        }
+
+        // Логика для MotionDataRaw (анализ движения устройства)
+        if (cellKey === 'MotionDataRaw') {
+          try {
+            const motionData =
+              typeof row.MotionDataRaw === 'string' ? JSON.parse(row.MotionDataRaw) : row.MotionDataRaw;
+
+            const deltaSum = motionData?.deltaSum || 0;
+            const start = motionData?.start;
+            const end = motionData?.end;
+            const analyzeDelayMs = motionData?.analyzeDelayMs;
+            const status = motionData?.status || 'unknown';
+            const permissionState = motionData?.permissionState || 'default';
+            console.log(motionData)
+
+            let icon = <HelpOutlineIcon />;
+            let color = 'default';
+            let shortLabel = '❓ Неизвестно';
+            let fullLabel = '❓ Неизвестный статус анализа движения';
+
+            if (status === 'no-data') {
+              icon = <ErrorIcon />;
+              color = 'warning';
+              shortLabel = '⚠️ Нет данных';
+              fullLabel = `
+            ⚠️ Возможный бот — но зависит от устройства
+            
+            📱 На iPhone (iOS):
+            - Если пользователь не дал разрешение на сенсоры, может быть статус no-data.
+            - Это **не является признаком бота**, если permissionState = default или denied.
+            
+            🖥 На Android/десктопах:
+            - Сенсоры поддерживаются, но данные не поступили.
+            - Возможные причины:
+              - JavaScript исполняется не полностью.
+              - Headless браузер.
+              - Бот с отключёнными событиями.
+            
+            ✅ Считается подозрительным, **если такое поведение повторяется** на Android или ПК.
+              `.trim();
+            } else if (status === 'no-sensor') {
+              icon = <BlockIcon />;
+              color = 'default';
+              shortLabel = '🖥 Нет сенсоров';
+              fullLabel = `
+        🖥 может быть обычный ПК
+        
+        Это означает, что у устройства просто нет сенсоров (обычный десктоп или ноутбук).
+        
+        ❗ Не признак бота сам по себе, но если:
+        - navigator.plugins.length === 0
+        - и нет touchstart или scroll
+        - и нет кликов
+        - и отпечаток часто повторяется
+        → это усиливает подозрения.
+              `.trim();
+            } else if (status === 'not-enough') {
+              icon = <ErrorIcon />;
+              color = 'warning';
+              shortLabel = '⚠️ Недостаточно';
+              fullLabel = `
+        ⚠️ подозрительно
+        
+        Сенсоры активны, но было получено менее 2 значений — очень быстро завершилось или блокировка.
+        
+        Часто бывает в headless или нестабильных WebView.
+        
+        ✅ Используй как сигнал осторожности, особенно если повторяется.
+              `.trim();
+            } else if (status === 'no-permission') {
+              icon = <BlockIcon />;
+              color = 'warning';
+              shortLabel = '📵 Нет доступа';
+              fullLabel = `
+        📵 пользователь не дал разрешение
+        
+        Пользователь отклонил доступ к сенсорам (в основном iOS Safari).
+        
+        🟡 Не всегда бот, но может быть.
+              `.trim();
+            } else if (status === 'unknown') {
+              icon = <HelpOutlineIcon />;
+              color = 'default';
+              shortLabel = '❓ Неизвестно';
+              fullLabel = `
+        ❓ Скрипт не исполнился
+        
+        Статус unknown означает, что ничего не определилось — плохо исполнялся скрипт.
+        
+        🟡 Не всегда бот, но может быть.
+              `.trim();
+            } else if (status === 'ok') {
+              if (deltaSum > 5) {
+                icon = <CheckCircleIcon />;
+                color = 'success';
+                shortLabel = '✅ Движение';
+                fullLabel = `
+        ✅ Обнаружено движение
+        
+        Устройство с сенсорами зафиксировало движение.
+        
+        Это нормальное поведение.
+                `.trim();
+              } else {
+                icon = <ErrorIcon />;
+                color = 'error';
+                shortLabel = '🚨 Нет движения';
+                fullLabel = `
+        🚨 нет движения (Δ < 5)
+        
+        Это подозрительно на мобильных, где сенсоры есть, но движения нет.
+        
+        Особенно если это повторяется и нет других активностей (клик, скролл).
+        
+        ✅ Это индикатор неестественного поведения.
+                `.trim();
+              }
+            }
+
+            const permissionReadable = {
+              granted: '✅ Разрешено пользователем',
+              denied: '❌ Запрещено пользователем',
+              default: '🤷 Нет ответа (по умолчанию)',
+            };
+
+            const techDetails = `
+        Изменение углов: ${deltaSum.toFixed(2)}°
+        📍 Начало: β ${start?.beta ?? '-'}, γ ${start?.gamma ?? '-'}
+        🎯 Конец: β ${end?.beta ?? '-'}, γ ${end?.gamma ?? '-'}
+        ⏱ Анализ через: ${analyzeDelayMs ?? '—'} мс
+        🔐 Разрешение iOS: ${permissionReadable[permissionState]}
+            `.trim();
+
+            const tooltipText = `${fullLabel}\n\n${techDetails}`;
+
+            return (
+              <TableCell className="statistics__padding" key={cellKey} align="center">
+                <Tooltip
+                  title={<pre style={{ whiteSpace: 'pre-line', maxWidth: 300 }}>{tooltipText}</pre>}
+                  arrow
+                  placement="left"
+                >
+                  <Chip
+                    size="small"
+                    color={color}
+                    icon={icon}
+                    label={shortLabel}
+                    variant="outlined"
+                    sx={{ fontWeight: 'bold' }}
+                  />
+                </Tooltip>
+              </TableCell>
+            );
+          } catch (e) {
+            return (
+              <TableCell className="statistics__padding" key={cellKey} align="center">
+                <Tooltip title="Ошибка при разборе MotionDataRaw">
+                  <Chip size="small" color="error" icon={<BlockIcon />} label="Ошибка" variant="outlined" />
+                </Tooltip>
+              </TableCell>
+            );
+          }
         }
 
         // Логика для Headers, JsData (кнопка + раскрытие JSON)
