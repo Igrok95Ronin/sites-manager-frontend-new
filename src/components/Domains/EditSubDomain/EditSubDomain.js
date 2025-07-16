@@ -6,9 +6,13 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
 
 import './EditSubDomain.scss';
-import axios from 'axios';
+import axiosInstance from '../../../axiosInstance';
 import Spinner from '../../Spinner/Spinner';
 import SnackbarCustom from '../../SnackbarCustom/SnackbarCustom';
 import RequestEditSubDomain from '../RequestEditSubDomain/RequestEditSubDomain';
@@ -21,27 +25,30 @@ export default function EditSubDomain({
   setShowEditSubDomain,
 }) {
   // Запрос для получения данных из конфига
-  const request = async () => {
-    try {
-      // JSON данные для отправки
-      const data = {
-        domain: editSubDomain,
-      };
+    const request = async () => {
+      try {
+        const data = {
+          domain: editSubDomain,
+        };
 
-      const responseDataConfig = await axios.post(
-        `${APIURL}/datafromconfig`,
-        data,
-        {},
-      );
+const [responseGA, responseDataConfig] = await Promise.all([
+  axiosInstance.get(`${APIURL}/viewgoogleaccount`),
+  axiosInstance.post(`${APIURL}/datafromconfig`, data, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  }),
+]);
 
-      // Возвращаем результат
-      return {
-        responseDataConfig: responseDataConfig.data,
-      };
-    } catch (error) {
-      console.log(error);
-    }
-  };
+
+        return {
+          responseGA: responseGA.data,
+          responseDataConfig: responseDataConfig.data,
+        };
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
   //   Номер телефона
   const [isPhoneValid, setIsPhoneValid] = React.useState(false); // Валидация номера телефона
@@ -59,6 +66,12 @@ export default function EditSubDomain({
   // Создаем состояние для хранения данных, полученных в результате запроса
   const [data, setData] = React.useState(null);
 
+    // Новые состояния
+  const [selectedGoogleAccount, setSelectedGoogleAccount] = React.useState('');
+  const [googleAccount, setGoogleAccount] = React.useState([]);
+  const [used, setUsed] = React.useState('no'); // Определяет, можно ли выбирать аккаунт
+
+
   const handleClose = () => {
     setShowEditSubDomain(false);
   };
@@ -69,7 +82,8 @@ export default function EditSubDomain({
       setLoading(true);
       const result = await request();
       if (result) {
-        setDataConfig(result.responseDataConfig);
+        setGoogleAccount(result.responseGA); // список аккаунтов
+        setDataConfig(result.responseDataConfig); // данные из конфига
       }
     } catch (error) {
       console.log(error);
@@ -77,7 +91,7 @@ export default function EditSubDomain({
       setLoading(false);
     }
   };
-
+console.log(dataConfig)
   React.useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -86,13 +100,24 @@ export default function EditSubDomain({
   // Логируем данные конфига только после их получения
   React.useEffect(() => {
     if (dataConfig !== undefined) {
-      // Обновляем номер телефона
-      if (dataConfig.phoneNumber) {
-        setVisiblePhoneNumber(dataConfig.visiblePhoneNumber);
-        setPhoneNumber(dataConfig.phoneNumber);
+      setVisiblePhoneNumber(dataConfig.visiblePhoneNumber || '');
+      setPhoneNumber(dataConfig.phoneNumber || '');
+
+      // Если шаблон есть, считаем used = yes
+      if (dataConfig.templatePath !== '') {
+        setUsed('yes');
+      }
+
+      // Найти Google Account по gtagID
+      const foundAcc = googleAccount.find(
+        acc => acc.gtag_id === dataConfig.gtagID && acc.status !== 'blocked'
+      );
+      if (foundAcc) {
+        setSelectedGoogleAccount(foundAcc.account_id);
       }
     }
-  }, [dataConfig]);
+  }, [dataConfig, googleAccount]);
+
 
   React.useEffect(() => {
     if (phoneNumber.trim().length >= 5) {
@@ -128,6 +153,28 @@ export default function EditSubDomain({
             noValidate
             autoComplete="off"
           >
+            <FormControl variant="standard" fullWidth>
+              <InputLabel id="select-ga">Google Account</InputLabel>
+              <Select
+                labelId="select-ga"
+                id="select-ga"
+                value={selectedGoogleAccount}
+                onChange={(e) => setSelectedGoogleAccount(e.target.value)}
+                label="Google Account"
+                disabled={used !== 'yes'}
+              >
+                {googleAccount &&
+                  googleAccount.map((acc, i) =>
+                    acc.status !== 'blocked' ? (
+                      <MenuItem key={i} value={acc.account_id}>
+                        {`${acc.account_id} (${acc.email})`}
+                      </MenuItem>
+                    ) : null
+                  )}
+              </Select>
+            </FormControl>
+
+
             {/* Отображаемый номер телефона */}
             <TextField
               id="standard-basic"
@@ -187,6 +234,7 @@ export default function EditSubDomain({
           setData={setData}
           setError={setError}
           setShowEditSubDomain={setShowEditSubDomain}
+          googleAccount={selectedGoogleAccount}
         />
       )}
     </React.Fragment>

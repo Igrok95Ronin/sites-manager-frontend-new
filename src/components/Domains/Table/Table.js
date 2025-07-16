@@ -231,7 +231,7 @@ const Tables = ({ items, onUpdateDomains, searchQuery }) => {
                             <span>{domainItem.status}</span>
                           </TableCell>
                           <TableCell className="table__bodyCell">
-                            {domainItem.adsId}
+                            {domainItem.adsId === "" ? <HorizontalRuleIcon className="table__imgLine" /> : domainItem.adsId }
                           </TableCell>
                           <TableCell className="table__bodyCell">
                             {domainItem.lang}
@@ -323,7 +323,7 @@ const Tables = ({ items, onUpdateDomains, searchQuery }) => {
                                 <span>{domainItem.status}</span>
                               </TableCell>
                               <TableCell>
-                                <HorizontalRuleIcon className="table__imgLine" />
+                                {subDomainItem.adsId === "" ? <HorizontalRuleIcon className="table__imgLine" /> : subDomainItem.adsId}
                               </TableCell>
                               <TableCell>
                                 <HorizontalRuleIcon className="table__imgLine" />

@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
-import axios from 'axios';
+import axiosInstance from '../../../axiosInstance';
 
 const APIURL = process.env.REACT_APP_APIURL; // Получем url из конфига
 const RequestEditSubDomain = ({
   editSubDomain,
   visiblePhoneNumber,
   phoneNumber,
+  googleAccount,
   setLoading,
   setData,
   setError,
@@ -13,6 +14,7 @@ const RequestEditSubDomain = ({
   setSubmitSubdomainEditRequest,
   setShowEditSubDomain,
 }) => {
+
   useEffect(() => {
     if (submitSubdomainEditRequest) {
       const fetchData = async () => {
@@ -20,15 +22,21 @@ const RequestEditSubDomain = ({
         setLoading(true);
 
         try {
-          const response = await axios.patch(
+          const response = await axiosInstance.patch(
             `${APIURL}/editsubdomain`,
             {
               subDomain: editSubDomain,
               visiblePhoneNumber: visiblePhoneNumber,
               phoneNumber: phoneNumber,
+              googleAccount: googleAccount,
             },
-            {},
+            {
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
           );
+
           setTimeout(() => {
             setShowEditSubDomain(false);
           }, 3000);
@@ -53,6 +61,7 @@ const RequestEditSubDomain = ({
     phoneNumber,
     setData,
     setShowEditSubDomain,
+    googleAccount,
   ]);
 
   return;
