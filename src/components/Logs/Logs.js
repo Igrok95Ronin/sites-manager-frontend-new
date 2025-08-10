@@ -1,126 +1,178 @@
-import React, { useState, useEffect } from 'react';
-import axiosInstance from '../../axiosInstance'; // Используем централизованный экземпляр Axios
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import axiosInstance from '../../axiosInstance';
 import { Virtuoso } from 'react-virtuoso';
 import Paper from '@mui/material/Paper';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
+import InfoIcon from '@mui/icons-material/Info';
+import ErrorIcon from '@mui/icons-material/Error';
+import WarningIcon from '@mui/icons-material/Warning';
 import Spinner from '../Spinner/Spinner';
 
 import './Logs.scss';
 
-const APIURL = process.env.REACT_APP_APIURL; // Получем url из конфига
+const APIURL = process.env.REACT_APP_APIURL;
+const LIMIT = 100;
 
-// Количество строк для загрузки за раз
-const limit = 100;
+// Регулярное выражение для очистки ANSI кодов и лишних символов
+const ANSI_REGEX = /\x1b\[[0-9;]*m|\[\d+m/g;
 
-const VirtuosoTableComponents = {
-  Scroller: React.forwardRef((props, ref) => (
-    <TableContainer component={Paper} {...props} ref={ref} />
-  )),
-  Table: (props) => (
-    <Table
-      {...props}
-      sx={{ borderCollapse: 'separate', tableLayout: 'fixed' }}
-    />
-  ),
-  TableHead: React.forwardRef((props, ref) => (
-    <TableHead {...props} ref={ref}>
-      {fixedHeaderContent()}
-    </TableHead>
-  )),
-  TableBody: React.forwardRef((props, ref) => (
-    <TableBody {...props} ref={ref} />
-  )),
-  TableRow,
+// Функция для определения типа лога
+const getLogType = (logText) => {
+  const upperText = logText.toUpperCase();
+  if (upperText.includes('ERRO') || upperText.includes('ERROR') || upperText.includes('FATAL')) return 'error';
+  if (upperText.includes('WARN')) return 'warning';
+  if (upperText.includes('INFO')) return 'info';
+  return 'info'; // По умолчанию info вместо default
 };
 
-// Компонент для рендеринга заголовка таблицы
-function fixedHeaderContent() {
+// Функция для получения иконки по типу лога
+const getLogIcon = (type) => {
+  switch (type) {
+    case 'error':
+      return <ErrorIcon />;
+    case 'warning':
+      return <WarningIcon />;
+    case 'info':
+      return <InfoIcon />;
+    default:
+      return <InfoIcon />;
+  }
+};
+
+// Функция для очистки и форматирования текста лога
+const cleanLogText = (text) => {
+  return text
+    .replace(ANSI_REGEX, '') // Убираем ANSI коды
+    .replace(/\[36m|\[0m|\[31m|\[33m/g, '') // Убираем старые ANSI коды
+    .trim();
+};
+
+// Компонент для отображения отдельного лога
+const LogItem = React.memo(({ log, index }) => {
+  const cleanText = cleanLogText(log);
+  const logType = getLogType(cleanText);
+  const icon = getLogIcon(logType);
+  
   return (
-    <TableRow>
-      <TableCell
-        variant="head"
-        align="left"
-        sx={{ backgroundColor: 'background.paper' }}
-      >
-        Log Entry
-      </TableCell>
-    </TableRow>
+    <Box className={`logs__item logs__item--${logType}`}>
+      <Box className="logs__item-header">
+        {icon}
+        <Typography variant="caption" className="logs__item-type">
+          {logType.toUpperCase()}
+        </Typography>
+        <Typography variant="caption" className="logs__item-index">
+          #{index + 1}
+        </Typography>
+      </Box>
+      <Typography className="logs__item-text">
+        {cleanText}
+      </Typography>
+    </Box>
   );
-}
+});
 
-// Основной компонент виртуализированной таблицы
-function ReactVirtualizedTable() {
-  const [logs, setLogs] = useState([]); // Состояние для хранения логов
-  const [offset, setOffset] = useState(0); // Состояние для отслеживания смещения
-  const [isLoading, setIsLoading] = useState(false); // Флаг загрузки
+// Основной компонент логов
+function LogsComponent() {
+  const [logs, setLogs] = useState([]);
+  const [offset, setOffset] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
-  // Функция для загрузки логов с сервера
-  const loadLogs = async () => {
-    if (isLoading) return; // Если идет загрузка, ничего не делаем
-    setIsLoading(true); // Устанавливаем флаг загрузки
+  // Мемоизированная функция для загрузки логов
+  const loadLogs = useCallback(async () => {
+    if (isLoading || !hasMore) return;
+    setIsLoading(true);
 
     try {
       const response = await axiosInstance.get(`${APIURL}/logs`, {
-        params: { offset, limit },
+        params: { offset, limit: LIMIT },
       });
 
-      // Убираем мусор
-      const formattedLogs = response.data.logs.map((logs) =>
-        logs.replace('[36m', '').replace('[0m', ' ').replace('[31m', ' ').replace('[33m', ' '),
-      );
+      const newLogs = response.data.logs || [];
+      
+      if (newLogs.length === 0) {
+        setHasMore(false);
+        return;
+      }
 
-      setLogs((prevLogs) => [...prevLogs, ...formattedLogs]);
-      setOffset(offset + limit);
+      setLogs((prevLogs) => [...prevLogs, ...newLogs]);
+      setOffset((prevOffset) => prevOffset + LIMIT);
     } catch (error) {
       console.error('Error fetching logs:', error);
+      setHasMore(false);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [offset, isLoading, hasMore]);
+
+  // Мемоизированная статистика логов
+  const logStats = useMemo(() => {
+    const stats = { total: logs.length, info: 0, warning: 0, error: 0 };
+    logs.forEach(log => {
+      const type = getLogType(log);
+      if (stats[type] !== undefined) {
+        stats[type]++;
+      }
+    });
+    return stats;
+  }, [logs]);
 
   useEffect(() => {
     loadLogs();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <section className="logs">
       <div className="container">
-        <div className="logs__number">{logs.length}</div>
-        <div className="logs__box">
-          <Paper className="logs__paper">
-            <Virtuoso
-              data={logs}
-              components={VirtuosoTableComponents}
-              itemContent={(_index, log) => (
-                <Table>
-                  <TableBody>
-                    <TableRow
-                      className={
-                        log.includes('INFO') ? 'logs__info' : 'logs__error'
-                      }
-                    >
-                      <TableCell align="left">
-                        <span className="logs__font">{log}</span>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              )}
-              endReached={loadLogs}
+        <Box className="logs__header">
+          <Typography variant="h5" className="logs__title">
+            Системные логи
+          </Typography>
+          <Box className="logs__stats">
+            <Chip 
+              label={`Всего: ${logStats.total}`} 
+              className="logs__stat-chip logs__stat-chip--total"
+              size="small"
             />
-          </Paper>
-          {isLoading && <Spinner loading={isLoading} />}
-        </div>
+            <Chip 
+              label={`INFO: ${logStats.info}`} 
+              className="logs__stat-chip logs__stat-chip--info"
+              size="small"
+            />
+            <Chip 
+              label={`WARN: ${logStats.warning}`} 
+              className="logs__stat-chip logs__stat-chip--warning"
+              size="small"
+            />
+            <Chip 
+              label={`ERROR: ${logStats.error}`} 
+              className="logs__stat-chip logs__stat-chip--error"
+              size="small"
+            />
+          </Box>
+        </Box>
+        
+        <Paper className="logs__container">
+          <Virtuoso
+            data={logs}
+            itemContent={(index, log) => (
+              <LogItem log={log} index={index} />
+            )}
+            endReached={loadLogs}
+            overscan={10}
+            className="logs__virtuoso"
+          />
+          {isLoading && (
+            <Box className="logs__loading">
+              <Spinner loading={isLoading} />
+            </Box>
+          )}
+        </Paper>
       </div>
     </section>
   );
 }
 
-export default ReactVirtualizedTable;
+export default LogsComponent;
