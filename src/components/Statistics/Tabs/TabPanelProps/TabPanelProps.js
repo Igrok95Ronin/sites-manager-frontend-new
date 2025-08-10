@@ -165,8 +165,10 @@ export default function FullWidthTabs({
               components={VirtuosoTableComponents}
               fixedHeaderContent={fixedHeaderContent}
               itemContent={rowContent}
-              // endReached={endReachedHandler}   // <-- Удаляем или комментируем
-              // increaseViewportBy={{ bottom: 1000 }} // <-- Тоже не нужно
+              overscan={200}
+              increaseViewportBy={{ top: 500, bottom: 500 }}
+              followOutput={false}
+              style={{ height: '100%' }}
             />
 
             {loading && <Spinner loading={loading} />}

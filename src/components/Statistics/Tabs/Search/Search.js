@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Box, Grid, TextField, FormControl, InputLabel, Select, MenuItem, Tooltip, Button } from '@mui/material';
 import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import ruLocale from 'date-fns/locale/ru';
 import { subDays, startOfMonth, endOfMonth } from 'date-fns';
+import { debounce } from 'lodash';
 
 import './Search.scss';
 import useLocalStorage from '../UseLocalStorage/UseLocalStorage'; // Импортируем кастомный хук
@@ -33,37 +34,52 @@ const Search = ({
   // Который показывает кнопку Reset
   const [flag, setFlag] = useState(false);
 
-  // Функция для обработки изменений в поле ввода
-  const handleInputChange = (e) => {
-    onSearch(e.target.value);
-  };
+  // Debounced функция для оптимизации поиска
+  const debouncedSearch = useMemo(
+    () => debounce((value) => {
+      onSearch(value);
+    }, 300),
+    [onSearch]
+  );
+
+  // Функция для обработки изменений в поле ввода с debounce
+  const handleInputChange = useCallback((e) => {
+    debouncedSearch(e.target.value);
+  }, [debouncedSearch]);
+
+  // Очистка debounce при размонтировании компонента
+  React.useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
 
   // Рассчитываем значение для sm динамически
   const smValue = Math.min(Math.max(Math.ceil(columns.length / 8), 10), 6.5);
 
-  // Обработка изменения localLimit
-  const handleLimitChange = (event) => {
+  // Мемоизированная обработка изменения localLimit
+  const handleLimitChange = useCallback((event) => {
     const value = event.target.value;
     setLocalLimit(value);
-  };
+  }, [setLocalLimit]);
 
-  // Обработка потери фокуса на поле limit
-  const handleLimitBlur = () => {
+  // Мемоизированная обработка потери фокуса на поле limit
+  const handleLimitBlur = useCallback(() => {
     const number = parseInt(localLimit, 10);
     if (!isNaN(number) && number > 0 && number <= 10000) {
       setLimit(number);
     }
-  };
+  }, [localLimit, setLimit]);
 
-  // Обработка изменения поля поиска
-  const handleSearchFieldChange = (event) => {
+  // Мемоизированная обработка изменения поля поиска
+  const handleSearchFieldChange = useCallback((event) => {
     const value = event.target.value;
     setLocalSearchField(value);
     setSearchField(value);
-  };
+  }, [setLocalSearchField, setSearchField]);
 
-  // Обработчик для кнопок быстрого фильтра по датам
-  const handleQuickFilter = (days) => {
+  // Мемоизированный обработчик для кнопок быстрого фильтра по датам
+  const handleQuickFilter = useCallback((days) => {
     if (days === 'm') {
       setFlag(true);
       setStartDate(startOfMonth(new Date())); // Устанавливаем начало месяца
@@ -73,7 +89,7 @@ const Search = ({
       setStartDate(subDays(new Date(), days)); // Устанавливаем начальную дату
       setEndDate(new Date()); // Устанавливаем сегодняшнюю дату
     }
-  };
+  }, [setFlag, setStartDate, setEndDate]);
 
   return (
     <div className="search__box">

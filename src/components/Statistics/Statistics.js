@@ -1,8 +1,10 @@
 import * as React from 'react';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { debounce } from 'lodash'; // Добавляем debounce для оптимизации поиска
 import axiosInstance from '../../axiosInstance'; // Используем централизованный экземпляр Axios
 import axios from 'axios';
 import { startOfDay, endOfDay, isToday, isSameYear } from 'date-fns'; // Добавлено isSameYear
+import './Statistics.scss';
 
 import Tabs from './Tabs/Tabs.js';
 import ColumnSelector from './Tabs/ColumnSelector/ColumnSelector.js';
@@ -27,7 +29,49 @@ import TableRowRender from './Tabs/TableRowRender/TableRowRender.js';
 // Выносим логику формирования шапки (заголовка) таблицы, включая Drag and Drop
 import TableHeader from './Tabs/TableHeader/TableHeader.js';
 
-import './Statistics.scss';
+// Мемоизированный компонент заголовка таблицы для предотвращения лишних ререндеров
+const MemoizedTableHeader = React.memo(TableHeader, (prevProps, nextProps) => {
+  // Кастомная функция сравнения для более точного контроля ререндеров
+  const prevCheckedKeys = Object.keys(prevProps.checkedRows);
+  const nextCheckedKeys = Object.keys(nextProps.checkedRows);
+  
+  // Проверяем изменения в checkedRows более детально
+  const checkedRowsEqual = prevCheckedKeys.length === nextCheckedKeys.length &&
+    prevCheckedKeys.every(key => prevProps.checkedRows[key] === nextProps.checkedRows[key]);
+  
+  // Проверяем изменения в visibleColumns (порядок и содержимое)
+  const visibleColumnsEqual = prevProps.visibleColumns.length === nextProps.visibleColumns.length &&
+    prevProps.visibleColumns.every((col, index) => 
+      col.dataKey === nextProps.visibleColumns[index]?.dataKey
+    );
+  
+  return (
+    prevProps.order === nextProps.order &&
+    prevProps.orderBy === nextProps.orderBy &&
+    visibleColumnsEqual &&
+    prevProps.filteredData.length === nextProps.filteredData.length &&
+    checkedRowsEqual
+  );
+});
+
+// Мемоизированный компонент строки таблицы для предотвращения лишних ререндеров
+const MemoizedTableRowRender = React.memo(TableRowRender, (prevProps, nextProps) => {
+  // Кастомная функция сравнения для строк таблицы
+  
+  // Проверяем изменения в visibleColumns (порядок и содержимое)
+  const visibleColumnsEqual = prevProps.visibleColumns.length === nextProps.visibleColumns.length &&
+    prevProps.visibleColumns.every((col, index) => 
+      col.dataKey === nextProps.visibleColumns[index]?.dataKey
+    );
+  
+  return (
+    prevProps.row.ID === nextProps.row.ID &&
+    visibleColumnsEqual &&
+    prevProps.checkedRows[prevProps.row.ID] === nextProps.checkedRows[nextProps.row.ID] &&
+    prevProps.expandedCell === nextProps.expandedCell &&
+    prevProps.doubleOutput === nextProps.doubleOutput
+  );
+});
 
 // =========================================
 // 5) Главный компонент: ReactVirtualizedTable
@@ -76,6 +120,7 @@ export default function ReactVirtualizedTable() {
 
   const loadingRef = useRef(false);
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(''); // Debounced поисковый запрос
   const [searchField, setSearchField] = useState(() => {
     try {
       const item = window.localStorage.getItem('search_searchField');
@@ -85,6 +130,22 @@ export default function ReactVirtualizedTable() {
       return 'Domain';
     }
   });
+
+  // Debounced поиск для оптимизации производительности
+  const debouncedSearch = useMemo(
+    () => debounce((query) => {
+      setDebouncedSearchQuery(query);
+    }, 300),
+    []
+  );
+  
+  // Обновляем debounced поиск при изменении searchQuery
+  useEffect(() => {
+    debouncedSearch(searchQuery);
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [searchQuery, debouncedSearch]);
 
   // Для показа JSON-структур
   const [formattedJSON, setFormattedJSON] = useState({});
@@ -143,7 +204,12 @@ export default function ReactVirtualizedTable() {
 
       if (response.data.length < limit) setHasMore(false);
 
-      setRows((prevRows) => [...prevRows, ...response.data]);
+      setRows((prevRows) => {
+        // Проверяем на дубликаты по ID для избежания повторной загрузки
+        const existingIds = new Set(prevRows.map(row => row.ID));
+        const uniqueNewData = response.data.filter(row => !existingIds.has(row.ID));
+        return [...prevRows, ...uniqueNewData];
+      });
       setOffset((prevOffset) => prevOffset + response.data.length);
 
       // Инициализация checkedRows
@@ -197,22 +263,45 @@ export default function ReactVirtualizedTable() {
     }
   }, [visibleColumns, orderBy]);
 
-  const sortedRows = React.useMemo(() => {
-    return [...rows].sort((a, b) => {
-      if (a[orderBy] < b[orderBy]) return order === 'asc' ? -1 : 1;
-      if (a[orderBy] > b[orderBy]) return order === 'asc' ? 1 : -1;
-      return 0;
+  // Оптимизированная сортировка строк с мемоизацией
+  const sortedRows = useMemo(() => {
+    if (!rows || rows.length === 0) return [];
+
+    // Используем более эффективную сортировку
+    const sortedArray = [...rows];
+    sortedArray.sort((a, b) => {
+      const aValue = a[orderBy];
+      const bValue = b[orderBy];
+
+      // Оптимизированное сравнение
+      if (aValue === bValue) return 0;
+      if (aValue == null) return order === 'asc' ? -1 : 1;
+      if (bValue == null) return order === 'asc' ? 1 : -1;
+      
+      const comparison = aValue < bValue ? -1 : 1;
+      return order === 'asc' ? comparison : -comparison;
     });
+    
+    return sortedArray;
   }, [rows, order, orderBy]);
 
-  // Фильтрация по полю searchField и поисковой строке searchQuery
-  // Фильтрация по полю searchField, поисковой строке searchQuery и домену
-  const filteredData = React.useMemo(() => {
-    let data = sortedRows;
+  // Оптимизированная фильтрация строк с мемоизацией
+  const filteredData = useMemo(() => {
+    if (!sortedRows || sortedRows.length === 0) return [];
 
-    // Применение фильтрации по полю поиска
-    if (searchQuery) {
-      data = data.filter((item) => {
+    // Предварительно подготавливаем значения фильтров для оптимизации
+    const hasSearchQuery = Boolean(debouncedSearchQuery);
+    const searchQueryLower = hasSearchQuery ? debouncedSearchQuery.toLowerCase() : '';
+    const hasFilters = Boolean(filterByDomain || filterCompanyID || filterAccountID || filterKeyword || filterFingerprint);
+
+    // Если нет фильтров и поискового запроса, возвращаем исходный массив
+    if (!hasSearchQuery && !hasFilters) {
+      return sortedRows;
+    }
+
+    return sortedRows.filter((item) => {
+      // Оптимизированная фильтрация по поисковому запросу
+      if (hasSearchQuery) {
         let fieldValue = item[searchField];
         if (fieldValue === undefined || fieldValue === null) return false;
 
@@ -223,32 +312,24 @@ export default function ReactVirtualizedTable() {
           fieldValue = fieldValue.toString();
         }
 
-        return fieldValue.toLowerCase().includes(searchQuery.toLowerCase());
-      });
-    }
+        if (!fieldValue.toLowerCase().includes(searchQueryLower)) {
+          return false;
+        }
+      }
 
-    // Применение фильтрации по домену
-    if (filterByDomain) {
-      data = data.filter((item) => item.Domain === filterByDomain);
-    }
-    if (filterCompanyID) {
-      data = data.filter((item) => item.CompanyID === filterCompanyID);
-    }
-    if (filterAccountID) {
-      data = data.filter((item) => item.AccountID === filterAccountID);
-    }
-    if (filterKeyword) {
-      data = data.filter((item) => item.Keyword === filterKeyword);
-    }
-    if (filterFingerprint) {
-      data = data.filter((item) => item.Fingerprint === filterFingerprint);
-    }
+      // Быстрая проверка фильтров с ранним выходом
+      if (filterByDomain && item.Domain !== filterByDomain) return false;
+      if (filterCompanyID && item.CompanyID !== filterCompanyID) return false;
+      if (filterAccountID && item.AccountID !== filterAccountID) return false;
+      if (filterKeyword && item.Keyword !== filterKeyword) return false;
+      if (filterFingerprint && item.Fingerprint !== filterFingerprint) return false;
 
-    return data;
+      return true;
+    });
   }, [
     sortedRows,
     searchField,
-    searchQuery,
+    debouncedSearchQuery,
     filterByDomain,
     filterCompanyID,
     filterAccountID,
@@ -256,7 +337,7 @@ export default function ReactVirtualizedTable() {
     filterFingerprint,
   ]);
 
-  const processedData = React.useMemo(() => {
+  const processedData = useMemo(() => {
     return filteredData.map((row) => {
       // Обрабатываем дату 'CreatedAt'
       const createdAt = new Date(row.CreatedAt);
@@ -292,7 +373,7 @@ export default function ReactVirtualizedTable() {
   // -----------------------------------
   // (F) Функции чекбоксов внутри таблицы
   // -----------------------------------
-  const handleCheckboxChange = (rowId) => async (event) => {
+  const handleCheckboxChange = useCallback((rowId) => async (event) => {
     const isChecked = event.target.checked;
     setCheckedRows((prev) => ({ ...prev, [rowId]: isChecked }));
 
@@ -307,10 +388,10 @@ export default function ReactVirtualizedTable() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Выделить все/снять все (только для отфильтрованных)
-  const handleSelectAllClick = async (event) => {
+  const handleSelectAllClick = useCallback(async (event) => {
     const isChecked = event.target.checked;
     const newCheckedRows = { ...checkedRows };
 
@@ -334,12 +415,12 @@ export default function ReactVirtualizedTable() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [checkedRows, filteredData]);
 
   // -----------------------------------
-  // (I) Функция обработки завершения перетаскивания
+  // (I) Мемоизированная функция обработки завершения перетаскивания
   // -----------------------------------
-  const onDragEnd = (result) => {
+  const onDragEnd = useCallback((result) => {
     const { destination, source } = result;
 
     // Если нет назначения или позиция не изменилась, ничего не делаем
@@ -351,7 +432,7 @@ export default function ReactVirtualizedTable() {
     newVisibleDataKeys.splice(destination.index, 0, movedItem);
 
     setVisibleDataKeys(newVisibleDataKeys);
-  };
+  }, [visibleDataKeys, setVisibleDataKeys]);
 
   // -----------------------------------
   // (J) Итоговый рендер
@@ -369,7 +450,7 @@ export default function ReactVirtualizedTable() {
         setFilterFingerprint={setFilterFingerprint}
         setFilterAccountID={setFilterAccountID}
         fixedHeaderContent={() => (
-          <TableHeader
+          <MemoizedTableHeader
             visibleColumns={visibleColumns}
             onDragEnd={onDragEnd}
             handleSort={handleSort}
@@ -400,7 +481,7 @@ export default function ReactVirtualizedTable() {
           />
         )}
         rowContent={(_index, row) => (
-          <TableRowRender
+          <MemoizedTableRowRender
             row={row}
             rows={rows}
             visibleColumns={visibleColumns}
