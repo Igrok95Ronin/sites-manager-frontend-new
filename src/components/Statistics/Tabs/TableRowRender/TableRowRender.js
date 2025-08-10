@@ -19,6 +19,7 @@ import { isToday, isSameYear } from 'date-fns'; // Для проверки да�
 import IPInfo from '../IPInfo/IPInfo.js';
 import AlertDialog from '../../HeadersJS/AlertDialog/AlertDialog.js';
 import IncognitoIcon from '@mui/icons-material/Visibility'; // или любой другой иконкой инкогнито
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 export default function TableRowRender({
   row,
@@ -371,6 +372,62 @@ export default function TableRowRender({
           );
         }
 
+        // Поле ClickCoordinates
+        if (cellKey === 'ClickCoordinates') {
+          let coords = '';
+          let timeStr = '';
+          let last4 = '';
+
+          if (typeof cellValue === 'string') {
+            const parts = cellValue.trim().split(/\s+/);
+            coords = parts.slice(0, 2).join(' '); // X:... Y:...
+            timeStr = parts[2] || '';              // HH:MM:SS
+            last4 = parts[3] ? parts[3].replace('#', '') : '';
+          }
+
+          let dateFormatted = timeStr;
+          if (/^\d{2}:\d{2}:\d{2}$/.test(timeStr)) {
+            // Делаем Date с сегодняшней датой + указанное время
+            const [h, m, s] = timeStr.split(':').map(Number);
+            const dateObj = new Date();
+            // Сначала ставим UTC, потом локализуем
+            dateObj.setUTCHours(h, m, s, 0);
+
+            dateFormatted = dateObj.toLocaleTimeString('ru-RU', {
+              timeZone: 'Europe/Moscow',
+            });
+          }
+
+          return (
+            <TableCell
+              className="statistics__padding"
+              key={cellKey}
+              align="left"
+              style={{
+                backgroundColor: rowBackgroundColor,
+                fontWeight: 'bold',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <span style={{ color: '#555', marginRight: '8px' }}>{coords}</span>
+              <span style={{ color: '#009688', marginRight: '8px' }}>{dateFormatted}</span>
+              {last4 && (
+                <span
+                  style={{
+                    backgroundColor: '#e0f7fa',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    color: '#00796b',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  {last4}
+                </span>
+              )}
+            </TableCell>
+          );
+        }
+
         // Логика для Domain (фильтр по домену)
         if (cellKey === 'Domain') {
           return (
@@ -392,6 +449,21 @@ export default function TableRowRender({
               >
                 {cellValue}
               </Button>
+              {/* Кнопка-ссылка на сайт */}
+              <a
+                href={`https://${cellValue}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()} // чтобы не ломала сортировку при клике на текст
+                style={{
+                  color: '#1976d2',
+                  padding: '2px',
+                  display: 'inline-flex',
+                  alignItems: 'center'
+                }}
+              >
+                <OpenInNewIcon fontSize="small" />
+              </a>
             </TableCell>
           );
         }
@@ -687,7 +759,7 @@ export default function TableRowRender({
             const analyzeDelayMs = motionData?.analyzeDelayMs;
             const status = motionData?.status || 'unknown';
             const permissionState = motionData?.permissionState || 'default';
-            console.log(motionData)
+            // console.log(motionData)
 
             let icon = <HelpOutlineIcon />;
             let color = 'default';
