@@ -37,6 +37,7 @@ export default function TableRowRender({
   setFilterKeyword,
   setFilterFingerprint,
   setFilterMotionDataRaw,
+  setFilterIP,
   doubleOutput,
   companyIDData,
   dataGoogleAccounts,
@@ -1012,7 +1013,7 @@ export default function TableRowRender({
               align="left"
               style={{ backgroundColor: rowBackgroundColor }}
             >
-              <IPInfo IP={cellValue} />
+              <IPInfo IP={cellValue} setFilterIP={setFilterIP} />
             </TableCell>
           );
         }

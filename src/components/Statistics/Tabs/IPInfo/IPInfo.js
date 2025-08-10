@@ -3,13 +3,16 @@ import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import IconButton from '@mui/material/IconButton';
+import Tooltip from '@mui/material/Tooltip';
+import FilterListIcon from '@mui/icons-material/FilterList';
 
 import './IPInfo.scss';
 import axios from 'axios';
 
 const APIURL = process.env.REACT_APP_APIURL; // Получем url из конфига
 
-export default function IPInfo({ IP }) {
+export default function IPInfo({ IP, setFilterIP }) {
   const request = async () => {
     try {
       const response = await axios.post(
@@ -66,6 +69,19 @@ export default function IPInfo({ IP }) {
       >
         {IP}
       </Button>
+      <Tooltip title="Фильтровать по IP">
+        <IconButton
+           size="small"
+           sx={{ ml: 0.5 }}
+           onClick={() => {
+             if (setFilterIP) {
+               setFilterIP(IP);
+             }
+           }}
+         >
+          <FilterListIcon fontSize="small" />
+        </IconButton>
+      </Tooltip>
       <Dialog
         open={open}
         onClose={handleClose}

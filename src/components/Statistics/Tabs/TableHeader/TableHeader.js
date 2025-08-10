@@ -34,6 +34,8 @@ export default function TableHeader({
   setFilterFingerprint,
   filterMotionDataRaw,
   setFilterMotionDataRaw,
+  filterIP,
+  setFilterIP,
   allColumns,
   processedData,
   loadMoreRows,
@@ -205,6 +207,22 @@ export default function TableHeader({
                             onClick={(e) => {
                               e.stopPropagation();
                               setFilterMotionDataRaw(null);
+                            }}
+                          >
+                            <RestartAltIcon sx={{ width: '18px' }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+
+                      {/* Дополнительные элементы (например, Tooltips, Buttons) */}
+                      {column.dataKey === 'IP' && filterIP && (
+                        <Tooltip title="Сбросить фильтр по IP" arrow placement="top">
+                          <IconButton
+                            sx={{ padding: '5px 0', marginLeft: '0' }}
+                            color="success"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFilterIP(null);
                             }}
                           >
                             <RestartAltIcon sx={{ width: '18px' }} />
