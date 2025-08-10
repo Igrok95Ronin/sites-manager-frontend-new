@@ -16,6 +16,7 @@ const APIURL = process.env.REACT_APP_APIURL;
 const LIMIT = 100;
 
 // Регулярное выражение для очистки ANSI кодов и лишних символов
+// eslint-disable-next-line no-control-regex
 const ANSI_REGEX = /\x1b\[[0-9;]*m|\[\d+m/g;
 
 // Функция для определения типа лога
@@ -121,6 +122,7 @@ function LogsComponent() {
 
   useEffect(() => {
     loadLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
