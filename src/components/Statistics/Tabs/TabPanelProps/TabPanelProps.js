@@ -56,6 +56,7 @@ export default function FullWidthTabs({
   setFilterCompanyID,
   setFilterKeyword,
   setFilterFingerprint,
+  setFilterMotionDataRaw,
   setFilterByDomain,
   setFilterAccountID,
   fixedHeaderContent,
@@ -192,6 +193,7 @@ export default function FullWidthTabs({
             setFilterCompanyID={setFilterCompanyID}
             setFilterKeyword={setFilterKeyword}
             setFilterFingerprint={setFilterFingerprint}
+            setFilterMotionDataRaw={setFilterMotionDataRaw}
             setFilterByDomain={setFilterByDomain}
             setFilterAccountID={setFilterAccountID}
           />

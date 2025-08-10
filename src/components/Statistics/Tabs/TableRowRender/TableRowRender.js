@@ -36,6 +36,7 @@ export default function TableRowRender({
   setFilterAccountID,
   setFilterKeyword,
   setFilterFingerprint,
+  setFilterMotionDataRaw,
   doubleOutput,
   companyIDData,
   dataGoogleAccounts,
@@ -894,7 +895,8 @@ export default function TableRowRender({
                     icon={icon}
                     label={shortLabel}
                     variant="outlined"
-                    sx={{ fontWeight: 'bold' }}
+                    onClick={() => setFilterMotionDataRaw(shortLabel)}
+                    sx={{ fontWeight: 'bold', cursor: 'pointer' }}
                   />
                 </Tooltip>
               </TableCell>

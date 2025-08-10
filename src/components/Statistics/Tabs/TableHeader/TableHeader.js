@@ -32,6 +32,8 @@ export default function TableHeader({
   setFilterKeyword,
   filterFingerprint,
   setFilterFingerprint,
+  filterMotionDataRaw,
+  setFilterMotionDataRaw,
   allColumns,
   processedData,
   loadMoreRows,
@@ -180,13 +182,29 @@ export default function TableHeader({
 
                       {/* Дополнительные элементы (например, Tooltips, Buttons) */}
                       {column.dataKey === 'Fingerprint' && filterFingerprint && (
-                        <Tooltip title="Сбросить фильтр по Keyword" arrow placement="top">
+                        <Tooltip title="Сбросить фильтр по Fingerprint" arrow placement="top">
                           <IconButton
                             sx={{ padding: '5px 0', marginLeft: '0' }}
                             color="success"
                             onClick={(e) => {
                               e.stopPropagation();
                               setFilterFingerprint(null);
+                            }}
+                          >
+                            <RestartAltIcon sx={{ width: '18px' }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+
+                      {/* Дополнительные элементы (например, Tooltips, Buttons) */}
+                      {column.dataKey === 'MotionDataRaw' && filterMotionDataRaw && (
+                        <Tooltip title="Сбросить фильтр по MotionDataRaw" arrow placement="top">
+                          <IconButton
+                            sx={{ padding: '5px 0', marginLeft: '0' }}
+                            color="success"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFilterMotionDataRaw(null);
                             }}
                           >
                             <RestartAltIcon sx={{ width: '18px' }} />

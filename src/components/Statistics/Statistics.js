@@ -170,6 +170,7 @@ export default function ReactVirtualizedTable() {
   const [filterAccountID, setFilterAccountID] = useLocalStorageDataKeys('filterAccountID', null); // Состояние для фильтрации по AccountID
   const [filterKeyword, setFilterKeyword] = useLocalStorageDataKeys('filterKeyword', null); // Состояние для фильтрации по filterKeyword
   const [filterFingerprint, setFilterFingerprint] = useLocalStorageDataKeys('filterFingerprint', null); // Состояние для фильтрации по filterFingerprint
+  const [filterMotionDataRaw, setFilterMotionDataRaw] = useLocalStorageDataKeys('filterMotionDataRaw', null); // Состояние для фильтрации по MotionDataRaw
 
   // Данные CompanyID
   const [companyIDData, setCompanyIDData] = useState([]);
@@ -292,7 +293,7 @@ export default function ReactVirtualizedTable() {
     // Предварительно подготавливаем значения фильтров для оптимизации
     const hasSearchQuery = Boolean(debouncedSearchQuery);
     const searchQueryLower = hasSearchQuery ? debouncedSearchQuery.toLowerCase() : '';
-    const hasFilters = Boolean(filterByDomain || filterCompanyID || filterAccountID || filterKeyword || filterFingerprint);
+    const hasFilters = Boolean(filterByDomain || filterCompanyID || filterAccountID || filterKeyword || filterFingerprint || filterMotionDataRaw);
 
     // Если нет фильтров и поискового запроса, возвращаем исходный массив
     if (!hasSearchQuery && !hasFilters) {
@@ -323,6 +324,37 @@ export default function ReactVirtualizedTable() {
       if (filterAccountID && item.AccountID !== filterAccountID) return false;
       if (filterKeyword && item.Keyword !== filterKeyword) return false;
       if (filterFingerprint && item.Fingerprint !== filterFingerprint) return false;
+      if (filterMotionDataRaw) {
+        try {
+          const motionData = typeof item.MotionDataRaw === 'string' ? JSON.parse(item.MotionDataRaw) : item.MotionDataRaw;
+          const deltaSum = motionData?.deltaSum || 0;
+          const status = motionData?.status || 'unknown';
+          
+          let shortLabel = '❓ Неизвестно';
+          
+          if (status === 'no-data') {
+            shortLabel = '⚠️ Нет данных';
+          } else if (status === 'no-sensor') {
+            shortLabel = '🖥 Нет сенсоров';
+          } else if (status === 'success' || status === 'ok') {
+            if (deltaSum > 5) {
+              shortLabel = '✅ Движение';
+            } else {
+              shortLabel = '🚨 Нет движения';
+            }
+          } else if (status === 'not-enough') {
+            shortLabel = '⚠️ Недостаточно';
+          } else if (status === 'no-permission') {
+            shortLabel = '📵 Нет доступа';
+          } else if (status === 'unknown') {
+            shortLabel = '❓ Неизвестно';
+          }
+          
+          if (shortLabel !== filterMotionDataRaw) return false;
+        } catch (e) {
+          if (filterMotionDataRaw !== 'Ошибка') return false;
+        }
+      }
 
       return true;
     });
@@ -335,6 +367,7 @@ export default function ReactVirtualizedTable() {
     filterAccountID,
     filterKeyword,
     filterFingerprint,
+    filterMotionDataRaw,
   ]);
 
   const processedData = useMemo(() => {
@@ -448,6 +481,7 @@ export default function ReactVirtualizedTable() {
         setFilterKeyword={setFilterKeyword}
         setFilterByDomain={setFilterByDomain}
         setFilterFingerprint={setFilterFingerprint}
+        setFilterMotionDataRaw={setFilterMotionDataRaw}
         setFilterAccountID={setFilterAccountID}
         fixedHeaderContent={() => (
           <MemoizedTableHeader
@@ -469,6 +503,8 @@ export default function ReactVirtualizedTable() {
             setFilterKeyword={setFilterKeyword}
             filterFingerprint={filterFingerprint}
             setFilterFingerprint={setFilterFingerprint}
+            filterMotionDataRaw={filterMotionDataRaw}
+            setFilterMotionDataRaw={setFilterMotionDataRaw}
             allColumns={allColumns}
             processedData={processedData}
             loadMoreRows={loadMoreRows}
@@ -496,6 +532,7 @@ export default function ReactVirtualizedTable() {
             setFilterAccountID={setFilterAccountID}
             setFilterKeyword={setFilterKeyword}
             setFilterFingerprint={setFilterFingerprint}
+            setFilterMotionDataRaw={setFilterMotionDataRaw}
             doubleOutput={doubleOutput}
             companyIDData={companyIDData}
             dataGoogleAccounts={dataGoogleAccounts}
