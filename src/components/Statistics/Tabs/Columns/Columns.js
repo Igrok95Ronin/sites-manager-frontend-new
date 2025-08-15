@@ -57,6 +57,7 @@ import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
 import DataThresholdingIcon from '@mui/icons-material/DataThresholding';
 import GTranslateIcon from '@mui/icons-material/GTranslate';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
 
 // =========================================
 // 2) "Эталонный" список столбцов (allColumns) с иконками и т.п.
@@ -70,6 +71,16 @@ export const allColumns = [
     ),
     dataKey: 'ID',
     width: 70,
+  },
+  {
+    label: (
+      <Tooltip title="Эталонная запись (IsReference)" arrow placement="top">
+        <BookmarkIcon />
+      </Tooltip>
+    ),
+    dataKey: 'IsReference',
+    width: 50,
+    isCheckbox: true, // Специальный флаг для обозначения чекбокса
   },
   {
     label: (

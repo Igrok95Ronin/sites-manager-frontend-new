@@ -20,6 +20,7 @@ import IPInfo from '../IPInfo/IPInfo.js';
 import AlertDialog from '../../HeadersJS/AlertDialog/AlertDialog.js';
 import IncognitoIcon from '@mui/icons-material/Visibility'; // или любой другой иконкой инкогнито
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import axiosInstance from '../../../../axiosInstance'; // Для API запросов
 
 export default function TableRowRender({
   row,
@@ -42,6 +43,28 @@ export default function TableRowRender({
   companyIDData,
   dataGoogleAccounts,
 }) {
+  // Состояние для отслеживания is_reference
+  const [isReference, setIsReference] = React.useState(row.IsReference || false);
+  
+  // Обработчик изменения IsReference
+  const handleReferenceChange = async (clickId, newValue) => {
+    try {
+      const response = await axiosInstance.post('/reference/update', {
+        id: parseInt(clickId, 10), // Преобразуем в число
+        isReference: newValue
+      });
+      
+      if (response.status === 200) {
+        setIsReference(newValue);
+        // Обновляем значение в row для синхронизации
+        row.IsReference = newValue;
+      }
+    } catch (error) {
+      console.error('Ошибка при обновлении reference статуса:', error);
+      // Откатываем изменение при ошибке
+      setIsReference(!newValue);
+    }
+  };
   // valueRenderer для JSONTree (ссылки и т.д.)
   function valueRenderer(valueAsString, value) {
     if (typeof value === 'string' && /^https?:\/\//i.test(value)) {
@@ -257,6 +280,25 @@ export default function TableRowRender({
       {visibleColumns.map((column) => {
         const cellKey = column.dataKey;
         const cellValue = row[cellKey];
+
+        // Логика для IsReference чекбокса
+        if (cellKey === 'IsReference') {
+          return (
+            <TableCell
+              className="statistics__padding"
+              key={cellKey}
+              align="center"
+              style={{ backgroundColor: rowBackgroundColor }}
+            >
+              <Checkbox
+                checked={isReference}
+                onChange={(e) => handleReferenceChange(row.ID, e.target.checked)}
+                color="primary"
+                size="small"
+              />
+            </TableCell>
+          );
+        }
 
         // Логика для windowSize
         if (cellKey === 'windowSize') {

@@ -1,0 +1,118 @@
+.reference-headers {
+  padding: 20px;
+  
+  /* Карточки */
+  .MuiAccordion-root {
+    border-radius: 8px !important;
+    margin-bottom: 12px;
+    
+    &:before {
+      display: none;
+    }
+    
+    &.Mui-expanded {
+      margin: 12px 0 !important;
+    }
+  }
+  
+  /* Заголовок аккордеона */
+  .MuiAccordionSummary-root {
+    min-height: 64px !important;
+    
+    &.Mui-expanded {
+      min-height: 64px !important;
+    }
+    
+    .MuiAccordionSummary-content {
+      margin: 12px 0 !important;
+      
+      &.Mui-expanded {
+        margin: 12px 0 !important;
+      }
+    }
+  }
+  
+  /* JSON Tree стили */
+  .MuiCardContent-root {
+    ul {
+      background: transparent !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    
+    li {
+      list-style: none !important;
+      padding: 2px 0;
+    }
+  }
+  
+  /* Чипы */
+  .MuiChip-root {
+    font-size: 0.75rem;
+    height: 24px;
+    
+    .MuiChip-icon {
+      font-size: 16px;
+    }
+  }
+  
+  /* Карточки с информацией */
+  .MuiCard-root {
+    &.MuiCard-outlined {
+      border-color: rgba(0, 0, 0, 0.12);
+    }
+  }
+  
+  /* Скролл для JSON */
+  .MuiBox-root {
+    &::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+      
+      &:hover {
+        background: #555;
+      }
+    }
+  }
+  
+  /* Типография */
+  .MuiTypography-caption {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  
+  .MuiTypography-body2 {
+    color: rgba(0, 0, 0, 0.87);
+  }
+  
+  /* Поле поиска */
+  .MuiTextField-root {
+    .MuiOutlinedInput-root {
+      &:hover fieldset {
+        border-color: #1976d2;
+      }
+    }
+  }
+  
+  /* Кнопка удаления */
+  .MuiIconButton-root {
+    &:hover {
+      background-color: rgba(211, 47, 47, 0.04);
+      
+      .MuiSvgIcon-root {
+        color: #d32f2f;
+      }
+    }
+  }
+}

@@ -13,6 +13,7 @@ import Spinner from '../../../Spinner/Spinner';
 import MarkedLogs from '../MarkedLogs/MarkedLogs';
 import Company from '../Company/Company';
 import BotAnalysis from '../BotAnalysis/BotAnalysis';
+import ReferenceHeaders from '../ReferenceHeaders/ReferenceHeaders';
 
 import './TabPanelProps.scss';
 
@@ -135,6 +136,7 @@ export default function FullWidthTabs({
           <Tab label="Отмеченные логи" {...a11yProps(1)} />
           <Tab label="Компания" {...a11yProps(2)} />
           <Tab label="Анализ ботов" {...a11yProps(3)} />
+          <Tab label="Эталонные записи" {...a11yProps(4)} />
         </Tabs>
       </AppBar>
       <Box sx={{ flex: 1, overflow: 'auto' }}>
@@ -202,6 +204,10 @@ export default function FullWidthTabs({
         {/* Четвертый таб Анализ ботов*/}
         <TabPanel value={value} index={3} dir={theme.direction}>
           <BotAnalysis />
+        </TabPanel>
+        {/* Пятый таб Эталонные записи*/}
+        <TabPanel value={value} index={4} dir={theme.direction}>
+          <ReferenceHeaders />
         </TabPanel>
       </Box>
     </Box>
