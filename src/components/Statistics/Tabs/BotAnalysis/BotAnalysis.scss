@@ -1,0 +1,229 @@
+.bot-analysis {
+  padding: 20px;
+  
+  &__controls {
+    background: #fff;
+    border-radius: 8px;
+  }
+  
+  &__stats {
+    background: #fff;
+    border-radius: 8px;
+  }
+  
+  &__results {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow: visible; /* Позволяем содержимому отображаться полностью */
+  }
+  
+  &__item {
+    background: #fff;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+    
+    &:before {
+      display: none;
+    }
+    
+    /* При раскрытии увеличиваем z-index для правильного отображения */
+    &.Mui-expanded {
+      z-index: 2;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .MuiAccordionSummary-root {
+      min-height: 64px;
+      
+      &:hover {
+        background: rgba(0, 0, 0, 0.02);
+      }
+    }
+    
+    .MuiAccordionDetails-root {
+      background: #fafafa;
+      border-top: 1px solid #e0e0e0;
+      overflow: visible; /* Позволяем содержимому отображаться полностью */
+    }
+  }
+  
+  /* Статус-специфичные стили */
+  &__item--bot {
+    border-left: 4px solid #f44336;
+  }
+  
+  &__item--probable {
+    border-left: 4px solid #ff9800;
+  }
+  
+  &__item--suspicious {
+    border-left: 4px solid #2196f3;
+  }
+  
+  &__item--human {
+    border-left: 4px solid #4caf50;
+  }
+  
+  /* Адаптивность */
+  @media (max-width: 768px) {
+    padding: 10px;
+    
+    &__controls {
+      padding: 16px !important;
+    }
+    
+    .MuiGrid-item {
+      padding-top: 8px !important;
+    }
+  }
+  
+  /* Анимации */
+  .MuiAccordion-root {
+    transition: all 0.3s ease;
+    margin-bottom: 12px !important; /* Постоянный отступ между элементами */
+    
+    &.Mui-expanded {
+      margin: 12px 0 !important; /* Сохраняем тот же отступ при раскрытии */
+      
+      &:first-of-type {
+        margin-top: 0 !important;
+      }
+      
+      &:last-of-type {
+        margin-bottom: 12px !important;
+      }
+    }
+  }
+  
+  /* Прогресс бар */
+  .MuiLinearProgress-root {
+    height: 8px;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.08);
+  }
+  
+  /* Чипы статусов */
+  .MuiChip-root {
+    font-weight: 500;
+    
+    &.MuiChip-colorError {
+      background-color: #f44336;
+      color: white;
+    }
+    
+    &.MuiChip-colorWarning {
+      background-color: #ff9800;
+      color: white;
+    }
+    
+    &.MuiChip-colorInfo {
+      background-color: #2196f3;
+      color: white;
+    }
+    
+    &.MuiChip-colorSuccess {
+      background-color: #4caf50;
+      color: white;
+    }
+  }
+  
+  /* Карточки статистики */
+  .MuiCard-root {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+    
+    .MuiCardContent-root {
+      padding: 12px !important;
+      
+      &:last-child {
+        padding-bottom: 12px !important;
+      }
+    }
+    
+    .MuiTypography-h4 {
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+  }
+  
+  /* Алерты индикаторов */
+  .MuiAlert-root {
+    &.MuiAlert-standardError {
+      background-color: #ffebee;
+      color: #c62828;
+    }
+    
+    &.MuiAlert-standardWarning {
+      background-color: #fff3e0;
+      color: #e65100;
+    }
+    
+    &.MuiAlert-standardInfo {
+      background-color: #e3f2fd;
+      color: #0277bd;
+    }
+    
+    &.MuiAlert-standardSuccess {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+    }
+  }
+  
+  /* Детальный отчет */
+  pre {
+    font-family: 'Courier New', monospace;
+    line-height: 1.4;
+    max-height: 400px;
+  }
+  
+  /* Модальное окно с объяснениями */
+  .MuiDialog-paper {
+    .MuiDialogTitle-root {
+      font-weight: 500;
+    }
+    
+    .MuiDialogContent-root {
+      padding-top: 20px !important;
+    }
+    
+    /* Форматированный текст объяснений */
+    .explanation-text {
+      white-space: pre-wrap;
+      line-height: 1.8;
+      
+      strong {
+        color: #1976d2;
+        display: block;
+        margin-top: 16px;
+        margin-bottom: 8px;
+        font-size: 1.1rem;
+      }
+      
+      ul, li {
+        margin: 4px 0;
+      }
+    }
+  }
+  
+  /* Кнопка помощи в алертах */
+  .MuiAlert-action {
+    padding: 0;
+    align-items: flex-start;
+    
+    .MuiIconButton-root {
+      padding: 4px;
+      margin-top: -4px;
+      
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+      }
+    }
+  }
+}

@@ -1,0 +1,248 @@
+# BotAnalysis Component - Development Memory
+Last updated: 2025-08-15
+
+## Overview
+This is a React component for analyzing bot traffic in the sites-manager-frontend project.
+Located in: D:/projects/react/sites-manager-frontend/src/components/Statistics/Tabs/BotAnalysis/
+
+## Component Architecture
+
+### Main Files:
+1. **BotAnalysis.js** - Main component with filtering controls and data display
+2. **BotAnalysisItem.js** - Individual bot analysis item with accordion display
+3. **BotAnalysisList.js** - List container with pagination (50 items per page)
+4. **BotAnalysis.scss** - Styles for all bot analysis components
+
+### Backend Integration:
+- Backend file: D:/projects/react/sites-manager-frontend/botanalysis.go
+- API endpoint: POST /botanalysis
+- Request params: domain, startDate, endDate, limit, offset
+- Returns: bot analysis data with indicators and detailed explanations
+
+## Key Features Implemented
+
+### 1. Domain Selection
+- Dropdown with all available domains
+- Fetches from /viewdomains and /viewsubdomains endpoints
+- Default: "All domains" (empty string value)
+- Combines domains and subdomains into single list
+
+### 2. Date Range Selection
+- Start and End date pickers with Russian locale
+- Uses date-fns for date manipulation
+- Sends dates as ISO strings with startOfDay/endOfDay
+
+### 3. Bot Analysis Display
+- Shows bot status (BOT, PROBABLE_BOT, SUSPICIOUS, HUMAN)
+- Color-coded chips and icons for each status
+- Bot probability percentage display
+- Expandable accordions for detailed information
+
+### 4. Statistics Cards
+- Total records count
+- Breakdown by bot status (Bots, Probable, Suspicious, Humans)
+- Percentage calculations for each category
+- Color-coded cards matching status colors
+
+### 5. Detailed Bot Indicators
+- Shows triggered bot detection rules
+- Severity levels (CRITICAL, HIGH, MEDIUM, LOW)
+- Score contribution for each indicator
+- Help icons with detailed explanations in modal dialogs
+
+### 6. Load More Functionality
+- Initial limit: 100 records per request
+- "Load More" button for pagination
+- Offset tracking for sequential loading
+- hasMore flag based on returned data length
+
+### 7. Export to CSV Functionality (Added 2025-08-15)
+- Export button appears when data is loaded
+- Configurable export dialog with options:
+  - Filter by bot status (BOT, PROBABLE_BOT, SUSPICIOUS, HUMAN)
+  - Choose fields to export (Original fields, Bot analysis, Indicators)
+  - Option to export only triggered indicators
+- Endpoint: POST /bot-analysis/export
+- Downloads CSV file with BOM for Excel compatibility
+- Exports exactly the same data as shown in analysis (synchronized queries)
+- Auto-generated filename with date/time and record count
+- Proper error handling for empty results after filtering
+- Sends offset parameter to sync with analysis results
+
+## Performance Optimizations Applied
+
+### 1. Component Memoization
+- All components wrapped with React.memo
+- BotAnalysisItem - prevents re-renders of unchanged items
+- BotAnalysisList - optimizes list rendering
+- BotIndicatorItem - sub-component for indicators
+
+### 2. Hook Optimizations
+- useCallback for all event handlers
+- useMemo for computed values (hasMore, displayedData)
+- Prevents unnecessary function recreations
+
+### 3. Pagination Strategy
+- Shows 50 items initially
+- "Show more" button loads next 50
+- Better than virtualization for accordions
+- Avoids height calculation issues
+
+### 4. Lazy Loading
+- BotAnalysisList loaded with React.lazy()
+- Suspense fallback shows loading spinner
+- Conditional rendering for accordion details (only when expanded)
+
+### 5. CSS Optimizations
+- overflow: visible for proper accordion display
+- z-index management for expanded items
+- Consistent margins to prevent layout jumps
+- Hardware acceleration with transform transitions
+
+## Known Issues & Solutions
+
+### Problem 1: Performance with 1000+ logs
+**Symptom**: Lag when opening accordions with large datasets
+**Solution**: Implemented pagination instead of virtualization
+- Shows 50 items at a time
+- "Show more" button for loading additional items
+- Memoized components prevent unnecessary re-renders
+
+### Problem 2: Accordion content cut off
+**Symptom**: Expanded accordion content not fully visible
+**Solution**: CSS fixes applied
+- Added overflow: visible to containers
+- z-index: 2 for expanded accordions
+- Removed height restrictions
+
+### Problem 3: ESLint Warnings
+**Fixed issues**:
+- Removed unused variables (domains, subDomains, total)
+- Added default case to switch statements
+- Removed unused imports (Paper, etc.)
+
+### Problem 4: Sass Deprecation Warning
+**Warning**: Legacy JS API deprecated
+**Solution**: Converted // comments to /* */ in SCSS
+
+## Dependencies Used
+- React 18.3.1 (functional components with hooks)
+- Material-UI v5 (UI components)
+- @mui/x-date-pickers (date selection)
+- date-fns (date manipulation)
+- axios (HTTP requests via axiosInstance)
+- sass (styling)
+
+## API Response Structure
+```javascript
+{
+  data: [{
+    ID: number,
+    Domain: string,
+    IP: string,
+    CreatedAt: string,
+    TimeSpent: string,
+    Device: string, // 'c' for computer, 'm' for mobile
+    Keyword: string,
+    AccountID: string,
+    CompanyID: string,
+    Fingerprint: string,
+    bot_status: string, // 'BOT', 'PROBABLE_BOT', 'SUSPICIOUS', 'HUMAN'
+    bot_probability: number, // 0-100
+    bot_score: number,
+    total_checks: number,
+    triggered_checks: number,
+    bot_indicators: [{
+      name: string,
+      description: string,
+      category: string, // 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'
+      score: number,
+      value: string,
+      expected: string,
+      detailed_explanation: string // Added for modal display
+    }],
+    analysis_report: string // Detailed text report
+  }]
+}
+```
+
+## State Management
+```javascript
+// Main component state
+const [domain, setDomain] = useState('');
+const [startDate, setStartDate] = useState(new Date());
+const [endDate, setEndDate] = useState(new Date());
+const [limit, setLimit] = useState(100);
+const [offset, setOffset] = useState(0);
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState(null);
+const [analysisData, setAnalysisData] = useState([]);
+const [hasMore, setHasMore] = useState(true);
+const [availableDomains, setAvailableDomains] = useState([]);
+const [stats, setStats] = useState({
+  total: 0,
+  bots: 0,
+  probable: 0,
+  suspicious: 0,
+  humans: 0
+});
+const [explanationDialog, setExplanationDialog] = useState({
+  open: false,
+  indicator: null
+});
+// Export dialog state (Added 2025-08-15)
+const [exportDialog, setExportDialog] = useState(false);
+const [exportSettings, setExportSettings] = useState({
+  includeBots: true,
+  includeProbableBots: true,
+  includeSuspicious: true,
+  includeHumans: false,
+  includeOriginalFields: true,
+  includeBotAnalysis: true,
+  includeIndicators: true,
+  onlyTriggeredIndicators: true
+});
+const [exportLoading, setExportLoading] = useState(false);
+```
+
+## Testing Scenarios
+1. Load component - should fetch domains automatically
+2. Select domain, dates, click "Анализ" - should load data
+3. Expand accordion - should show full details without cutoff
+4. Click help icon - should open modal with detailed explanation
+5. Click "Load More" - should append next batch of data
+6. Test with 1000+ records - should remain responsive
+7. Export functionality (Added 2025-08-15):
+   - Click "Экспорт в CSV" - should open settings dialog
+   - Select/deselect bot status filters
+   - Choose fields to export
+   - Click export - should download CSV file
+
+## Future Improvements (if needed)
+1. ~~Add export functionality (CSV)~~ ✅ Implemented 2025-08-15
+2. Implement real-time updates via WebSocket
+3. Add filtering by bot status in UI (already available in export)
+4. Implement search within results
+5. Add date range presets (Today, Yesterday, Last 7 days, etc.)
+6. Consider virtual scrolling for extremely large datasets (10k+ items)
+7. Add JSON export format option
+
+## Important Notes
+- Always use absolute paths for file operations
+- Domain parameter is optional (empty = all domains)
+- Dates are converted to UTC ISO strings
+- Bot status colors are consistent throughout the UI
+- Performance tested with up to 1000 records
+- Uses Russian locale for date formatting
+- All text in Russian as per user requirement
+
+## Commands
+- Start development: `npm start` (port 3000)
+- Check ESLint: `npx eslint src/components/Statistics/Tabs/BotAnalysis/`
+- The component is integrated as the 4th tab in Statistics component
+
+## File Integration
+The component is integrated into the Statistics component via:
+- src/components/Statistics/Tabs/TabPanelProps/TabPanelProps.js (Tab 4: "Анализ ботов")
+
+This memory file should help reconstruct the entire context of the BotAnalysis component development and all optimizations applied.

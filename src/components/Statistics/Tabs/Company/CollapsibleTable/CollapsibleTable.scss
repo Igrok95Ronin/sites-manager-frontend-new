@@ -5,60 +5,6 @@
   &__paddingtd > th {
     padding: 10px !important;
   }
-}
-.collapsibleTable__headerRow {
-  background-color: #2a3e59; /* Синий фон */
-}
-
-.collapsibleTable__headerCell {
-  color: #ffffff !important; /* Белый текст */
-  font-weight: bold !important; /* Жирный текст */
-  font-size: 16px !important; /* Размер шрифта */
-  padding: 8px !important; /* Отступы внутри ячейки */
-  background-color: inherit !important;
-}
-
-.collapsibleTable__row {
-  cursor: pointer !important; /* Указатель при наведении */
-  &:hover {
-    background-color: #f5f5f5 !important; /* Лёгкий серый цвет при наведении */
-  }
-}
-
-.collapsibleTable__cell {
-  padding: 12px 16px !important; /* Общие отступы внутри ячеек */
-  font-size: 14px !important; /* Размер шрифта */
-  vertical-align: middle !important; /* Выравнивание содержимого по центру */
-  border-bottom: 1px solid #e0e0e0 !important; /* Граница снизу для разделения строк */
-}
-
-.collapsibleTable__companyCell {
-  font-weight: bold !important; /* Жирный текст для названия компании */
-  text-align: left !important; /* Текст выравнен влево */
-}
-
-.collapsibleTable__numericCell {
-  font-family: 'Roboto Mono', monospace !important; /* Моноширинный шрифт для чисел */
-  color: #555555 !important; /* Нейтральный тёмно-серый цвет */
-  text-align: right !important; /* Выравнивание чисел по правому краю */
-}
-
-.collapsibleTable__link {
-  cursor: pointer !important; /* Указатель при наведении */
-  color: #1976d2 !important; /* Синий цвет ссылки */
-  text-decoration: none !important; /* Убираем подчёркивание */
-  &:hover {
-    text-decoration: underline !important; /* Подчёркивание при наведении */
-  }
-}
-
-.collapsibleTable {
-  &__paddingtd > td {
-    padding: 5px 10px !important;
-  }
-  &__paddingtd > th {
-    padding: 10px !important;
-  }
 
   &__headerRow {
     background-color: #2a3e59; /* Синий фон */

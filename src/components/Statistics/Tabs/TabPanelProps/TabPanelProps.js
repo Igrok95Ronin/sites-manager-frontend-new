@@ -12,6 +12,7 @@ import Search from '../Search/Search';
 import Spinner from '../../../Spinner/Spinner';
 import MarkedLogs from '../MarkedLogs/MarkedLogs';
 import Company from '../Company/Company';
+import BotAnalysis from '../BotAnalysis/BotAnalysis';
 
 import './TabPanelProps.scss';
 
@@ -133,7 +134,7 @@ export default function FullWidthTabs({
           <Tab label="Логи ADS" {...a11yProps(0)} />
           <Tab label="Отмеченные логи" {...a11yProps(1)} />
           <Tab label="Компания" {...a11yProps(2)} />
-          <Tab label="Item Three" {...a11yProps(3)} />
+          <Tab label="Анализ ботов" {...a11yProps(3)} />
         </Tabs>
       </AppBar>
       <Box sx={{ flex: 1, overflow: 'auto' }}>
@@ -198,23 +199,9 @@ export default function FullWidthTabs({
             setFilterAccountID={setFilterAccountID}
           />
         </TabPanel>
+        {/* Четвертый таб Анализ ботов*/}
         <TabPanel value={value} index={3} dir={theme.direction}>
-          <div>
-            <p>Успокойся, уходиd</p>
-            <button
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#4caf50',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer',
-              }}
-              onClick={() => setValue(0)}
-            >
-              Перейти на первый таб
-            </button>
-          </div>
+          <BotAnalysis />
         </TabPanel>
       </Box>
     </Box>
