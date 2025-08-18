@@ -1160,6 +1160,60 @@ export default function TableRowRender({
           );
         }
 
+        // Логика для новых полей из JsData
+        if (cellKey === 'hardwareConcurrency') {
+          const value = cellValue !== null && cellValue !== undefined && !isNaN(cellValue) ? cellValue : null;
+          return (
+            <TableCell className="statistics__padding" key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+              {value !== null ? value : '-'}
+            </TableCell>
+          );
+        }
+
+        if (cellKey === 'deviceMemory') {
+          const value = cellValue !== null && cellValue !== undefined && !isNaN(cellValue) ? cellValue : null;
+          return (
+            <TableCell className="statistics__padding" key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+              {value !== null ? `${value} GB` : '-'}
+            </TableCell>
+          );
+        }
+
+        if (cellKey === 'clickCount') {
+          const value = cellValue !== null && cellValue !== undefined && !isNaN(cellValue) ? cellValue : 0;
+          return (
+            <TableCell className="statistics__padding" key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+              {value}
+            </TableCell>
+          );
+        }
+
+        if (cellKey === 'maxScrollY') {
+          const value = cellValue !== null && cellValue !== undefined && !isNaN(cellValue) ? Math.round(cellValue) : 0;
+          return (
+            <TableCell className="statistics__padding" key={cellKey} align="left" style={{ backgroundColor: rowBackgroundColor }}>
+              {`${value}px`}
+            </TableCell>
+          );
+        }
+
+        if (cellKey === 'hadMouse' || cellKey === 'hadTouch' || 
+            cellKey === 'hasConnection' || cellKey === 'hasMemory' || 
+            cellKey === 'hasPlugins' || cellKey === 'hasDeviceOrientationEvent' || 
+            cellKey === 'isTouchCapable') {
+          return (
+            <TableCell className="statistics__padding" key={cellKey} align="center" style={{ backgroundColor: rowBackgroundColor }}>
+              {cellValue === true ? (
+                <CheckIcon style={{ color: '#4caf50' }} />
+              ) : cellValue === false ? (
+                <CloseIcon style={{ color: '#f44336' }} />
+              ) : (
+                '-'
+              )}
+            </TableCell>
+          );
+        }
+
         // По умолчанию просто отрисовать значение
         return (
           <TableCell

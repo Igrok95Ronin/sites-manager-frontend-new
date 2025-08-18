@@ -1,248 +1,248 @@
-# BotAnalysis Component - Development Memory
-Last updated: 2025-08-15
+# Память сессии - Разработка функционала эталонных записей и анализа ботов
 
-## Overview
-This is a React component for analyzing bot traffic in the sites-manager-frontend project.
-Located in: D:/projects/react/sites-manager-frontend/src/components/Statistics/Tabs/BotAnalysis/
+## Дата: 2025-08-15
 
-## Component Architecture
+## Основные реализованные функции:
 
-### Main Files:
-1. **BotAnalysis.js** - Main component with filtering controls and data display
-2. **BotAnalysisItem.js** - Individual bot analysis item with accordion display
-3. **BotAnalysisList.js** - List container with pagination (50 items per page)
-4. **BotAnalysis.scss** - Styles for all bot analysis components
+### 1. BotAnalysis - Экспорт в CSV
+- Добавлен функционал экспорта данных анализа ботов в CSV
+- Endpoint: `/bot-analysis/export`
+- Реализован диалог с настройками экспорта (выбор типов: боты, вероятные боты, подозрительные, люди)
+- Правильная передача параметров включая limit (количество загруженных записей)
+- Обработка ошибок при пустых результатах фильтрации
 
-### Backend Integration:
-- Backend file: D:/projects/react/sites-manager-frontend/botanalysis.go
-- API endpoint: POST /botanalysis
-- Request params: domain, startDate, endDate, limit, offset
-- Returns: bot analysis data with indicators and detailed explanations
+### 2. ReferenceHeaders - Новый компонент для эталонных записей
+**Путь:** `src/components/Statistics/Tabs/ReferenceHeaders/ReferenceHeaders.js`
 
-## Key Features Implemented
+#### Основные возможности:
+- Отображение эталонных записей в виде аккордеонов
+- Расширенный поиск по полям (домен, IP, ключевое слово, устройство)
+- Модальное окно для просмотра Headers и JS Data
+- Отображение новых полей устройства:
+  - DeviceName (название устройства)
+  - DeviceModel (модель)
+  - OS и OSVersion
+  - Browser и BrowserVersion
+  - DeviceCategory (mobile/tablet/desktop)
+  - ScreenResolution
+  - IsEmulator (флаг эмулятора)
+  - Notes (примечания)
 
-### 1. Domain Selection
-- Dropdown with all available domains
-- Fetches from /viewdomains and /viewsubdomains endpoints
-- Default: "All domains" (empty string value)
-- Combines domains and subdomains into single list
-
-### 2. Date Range Selection
-- Start and End date pickers with Russian locale
-- Uses date-fns for date manipulation
-- Sends dates as ISO strings with startOfDay/endOfDay
-
-### 3. Bot Analysis Display
-- Shows bot status (BOT, PROBABLE_BOT, SUSPICIOUS, HUMAN)
-- Color-coded chips and icons for each status
-- Bot probability percentage display
-- Expandable accordions for detailed information
-
-### 4. Statistics Cards
-- Total records count
-- Breakdown by bot status (Bots, Probable, Suspicious, Humans)
-- Percentage calculations for each category
-- Color-coded cards matching status colors
-
-### 5. Detailed Bot Indicators
-- Shows triggered bot detection rules
-- Severity levels (CRITICAL, HIGH, MEDIUM, LOW)
-- Score contribution for each indicator
-- Help icons with detailed explanations in modal dialogs
-
-### 6. Load More Functionality
-- Initial limit: 100 records per request
-- "Load More" button for pagination
-- Offset tracking for sequential loading
-- hasMore flag based on returned data length
-
-### 7. Export to CSV Functionality (Added 2025-08-15)
-- Export button appears when data is loaded
-- Configurable export dialog with options:
-  - Filter by bot status (BOT, PROBABLE_BOT, SUSPICIOUS, HUMAN)
-  - Choose fields to export (Original fields, Bot analysis, Indicators)
-  - Option to export only triggered indicators
-- Endpoint: POST /bot-analysis/export
-- Downloads CSV file with BOM for Excel compatibility
-- Exports exactly the same data as shown in analysis (synchronized queries)
-- Auto-generated filename with date/time and record count
-- Proper error handling for empty results after filtering
-- Sends offset parameter to sync with analysis results
-
-## Performance Optimizations Applied
-
-### 1. Component Memoization
-- All components wrapped with React.memo
-- BotAnalysisItem - prevents re-renders of unchanged items
-- BotAnalysisList - optimizes list rendering
-- BotIndicatorItem - sub-component for indicators
-
-### 2. Hook Optimizations
-- useCallback for all event handlers
-- useMemo for computed values (hasMore, displayedData)
-- Prevents unnecessary function recreations
-
-### 3. Pagination Strategy
-- Shows 50 items initially
-- "Show more" button loads next 50
-- Better than virtualization for accordions
-- Avoids height calculation issues
-
-### 4. Lazy Loading
-- BotAnalysisList loaded with React.lazy()
-- Suspense fallback shows loading spinner
-- Conditional rendering for accordion details (only when expanded)
-
-### 5. CSS Optimizations
-- overflow: visible for proper accordion display
-- z-index management for expanded items
-- Consistent margins to prevent layout jumps
-- Hardware acceleration with transform transitions
-
-## Known Issues & Solutions
-
-### Problem 1: Performance with 1000+ logs
-**Symptom**: Lag when opening accordions with large datasets
-**Solution**: Implemented pagination instead of virtualization
-- Shows 50 items at a time
-- "Show more" button for loading additional items
-- Memoized components prevent unnecessary re-renders
-
-### Problem 2: Accordion content cut off
-**Symptom**: Expanded accordion content not fully visible
-**Solution**: CSS fixes applied
-- Added overflow: visible to containers
-- z-index: 2 for expanded accordions
-- Removed height restrictions
-
-### Problem 3: ESLint Warnings
-**Fixed issues**:
-- Removed unused variables (domains, subDomains, total)
-- Added default case to switch statements
-- Removed unused imports (Paper, etc.)
-
-### Problem 4: Sass Deprecation Warning
-**Warning**: Legacy JS API deprecated
-**Solution**: Converted // comments to /* */ in SCSS
-
-## Dependencies Used
-- React 18.3.1 (functional components with hooks)
-- Material-UI v5 (UI components)
-- @mui/x-date-pickers (date selection)
-- date-fns (date manipulation)
-- axios (HTTP requests via axiosInstance)
-- sass (styling)
-
-## API Response Structure
-```javascript
+#### Редактирование эталонных записей:
+- Endpoint: `PATCH /reference/details`
+- Формат запроса:
+```json
 {
-  data: [{
-    ID: number,
-    Domain: string,
-    IP: string,
-    CreatedAt: string,
-    TimeSpent: string,
-    Device: string, // 'c' for computer, 'm' for mobile
-    Keyword: string,
-    AccountID: string,
-    CompanyID: string,
-    Fingerprint: string,
-    bot_status: string, // 'BOT', 'PROBABLE_BOT', 'SUSPICIOUS', 'HUMAN'
-    bot_probability: number, // 0-100
-    bot_score: number,
-    total_checks: number,
-    triggered_checks: number,
-    bot_indicators: [{
-      name: string,
-      description: string,
-      category: string, // 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'
-      score: number,
-      value: string,
-      expected: string,
-      detailed_explanation: string // Added for modal display
-    }],
-    analysis_report: string // Detailed text report
-  }]
+  "originalClickId": 150196,
+  "deviceName": "iPhone 15 Pro",
+  "deviceModel": "A3102",
+  "os": "iOS",
+  "osVersion": "17.2.1",
+  "browser": "Safari",
+  "browserVersion": "17.2",
+  "deviceCategory": "mobile",
+  "screenResolution": "1170x2532",
+  "isEmulator": false,
+  "notes": "Реальное устройство, тест от 15.08.2025"
 }
 ```
+- Все поля опциональны
+- Обновление локального состояния после сохранения
+- Визуальная обратная связь (сообщения об успехе/ошибке)
 
-## State Management
-```javascript
-// Main component state
-const [domain, setDomain] = useState('');
-const [startDate, setStartDate] = useState(new Date());
-const [endDate, setEndDate] = useState(new Date());
-const [limit, setLimit] = useState(100);
-const [offset, setOffset] = useState(0);
-const [loading, setLoading] = useState(false);
-const [error, setError] = useState(null);
-const [analysisData, setAnalysisData] = useState([]);
-const [hasMore, setHasMore] = useState(true);
-const [availableDomains, setAvailableDomains] = useState([]);
-const [stats, setStats] = useState({
-  total: 0,
-  bots: 0,
-  probable: 0,
-  suspicious: 0,
-  humans: 0
-});
-const [explanationDialog, setExplanationDialog] = useState({
-  open: false,
-  indicator: null
-});
-// Export dialog state (Added 2025-08-15)
-const [exportDialog, setExportDialog] = useState(false);
-const [exportSettings, setExportSettings] = useState({
-  includeBots: true,
-  includeProbableBots: true,
-  includeSuspicious: true,
-  includeHumans: false,
-  includeOriginalFields: true,
-  includeBotAnalysis: true,
-  includeIndicators: true,
-  onlyTriggeredIndicators: true
-});
-const [exportLoading, setExportLoading] = useState(false);
+#### Управление статусом эталонной записи:
+- Добавлен чекбокс "Эталонная запись" в форму редактирования
+- По умолчанию включен (true)
+- При снятии галочки:
+  - Показывается предупреждение
+  - Кнопка меняется на "Удалить из эталонных"
+  - Запись удаляется через `/reference/update` с `isReference: false`
+  - Запись исчезает из таблицы
+
+### 3. Интеграция с основной таблицей
+- Добавлена колонка IsReference с BookmarkIcon
+- Чекбокс для отметки записей как эталонных
+- Endpoint: `POST /reference/update`
+- Формат: `{ id: number, isReference: boolean }`
+
+### 4. Добавлен новый таб "Эталонные записи"
+- 5-й таб в TabPanelProps
+- Интегрирован компонент ReferenceHeaders
+
+## Исправленные проблемы:
+
+### 1. Sass deprecation warnings
+- Проблема с Legacy JS API в sass-loader
+- Частично решено добавлением sass-loader в devDependencies
+- Полное решение требует обновления webpack конфигурации
+
+### 2. Export endpoint 404
+- Исправлена передача параметров limit
+- Добавлена обработка пустых результатов фильтрации
+- Backend возвращает 404 при отсутствии данных после фильтрации
+
+### 3. React validateDOMNesting warnings
+- Исправлено: h6 не может быть внутри h2
+- Заменено на Typography variant="subtitle1" с fontWeight: 'bold'
+
+### 4. ESLint warnings
+- Удалены неиспользуемые импорты (DeleteIcon, FilterIcon, PhoneAndroidIcon)
+- Закомментирована неиспользуемая функция handleRemoveReference
+
+## API Endpoints используемые в проекте:
+
+### Reference (Эталонные записи):
+- `GET /reference/list` - получить список эталонных записей
+- `POST /reference/update` - обновить статус IsReference
+- `PATCH /reference/details` - обновить детали эталонной записи
+
+### Bot Analysis:
+- `GET /bot-analysis` - получить данные анализа
+- `GET /bot-analysis/export` - экспортировать в CSV
+
+## Структура файлов:
+```
+src/components/Statistics/Tabs/
+├── BotAnalysis/
+│   ├── BotAnalysis.js (экспорт CSV)
+│   └── memory.txt (этот файл)
+├── ReferenceHeaders/
+│   ├── ReferenceHeaders.js (компонент эталонных записей)
+│   └── ReferenceHeaders.scss (стили)
+├── TableRowRender/
+│   └── TableRowRender.js (чекбокс IsReference)
+├── Columns/
+│   └── Columns.js (колонка IsReference)
+└── TabPanelProps/
+    └── TabPanelProps.js (интеграция табов)
 ```
 
-## Testing Scenarios
-1. Load component - should fetch domains automatically
-2. Select domain, dates, click "Анализ" - should load data
-3. Expand accordion - should show full details without cutoff
-4. Click help icon - should open modal with detailed explanation
-5. Click "Load More" - should append next batch of data
-6. Test with 1000+ records - should remain responsive
-7. Export functionality (Added 2025-08-15):
-   - Click "Экспорт в CSV" - should open settings dialog
-   - Select/deselect bot status filters
-   - Choose fields to export
-   - Click export - should download CSV file
+## Ключевые особенности реализации:
+1. Использование Material-UI компонентов
+2. React hooks (useState, useEffect, useCallback)
+3. Axios для API запросов
+4. JSONTree для отображения JSON данных
+5. Локальное обновление состояния для мгновенной обратной связи
+6. Обработка ошибок с информативными сообщениями
 
-## Future Improvements (if needed)
-1. ~~Add export functionality (CSV)~~ ✅ Implemented 2025-08-15
-2. Implement real-time updates via WebSocket
-3. Add filtering by bot status in UI (already available in export)
-4. Implement search within results
-5. Add date range presets (Today, Yesterday, Last 7 days, etc.)
-6. Consider virtual scrolling for extremely large datasets (10k+ items)
-7. Add JSON export format option
+## Что осталось сделать:
+- Полное решение Sass deprecation warnings (требует изменения webpack config)
+- Backend пока не готов для некоторых функций (отмечено в коде)
 
-## Important Notes
-- Always use absolute paths for file operations
-- Domain parameter is optional (empty = all domains)
-- Dates are converted to UTC ISO strings
-- Bot status colors are consistent throughout the UI
-- Performance tested with up to 1000 records
-- Uses Russian locale for date formatting
-- All text in Russian as per user requirement
+## Изменения (16.08.2025, продолжение) - Исправления и улучшения эталонного анализа:
 
-## Commands
-- Start development: `npm start` (port 3000)
-- Check ESLint: `npx eslint src/components/Statistics/Tabs/BotAnalysis/`
-- The component is integrated as the 4th tab in Statistics component
+### Исправленные ошибки:
+1. **TypeError с toFixed() на undefined:**
+   - Добавлена проверка на undefined/null в formatProbability
+   - Возвращает 'N/A' вместо ошибки
 
-## File Integration
-The component is integrated into the Statistics component via:
-- src/components/Statistics/Tabs/TabPanelProps/TabPanelProps.js (Tab 4: "Анализ ботов")
+2. **Ошибка LinearProgress с цветом 'default':**
+   - LinearProgress не отображается для NO_REFERENCE статуса
+   - Добавлен fallback на 'primary' цвет
 
-This memory file should help reconstruct the entire context of the BotAnalysis component development and all optimizations applied.
+3. **Проблема отображения "N/A" вместо данных эталона:**
+   - Реализована функция extractReferenceInfo для парсинга analysis_report
+   - Извлекает ID эталона, название устройства, количество совпадений/расхождений
+
+### Улучшения интерфейса:
+1. **Вынесена информация об эталоне в заголовок аккордеона:**
+   - Chip с названием эталона (например: "TECHNO POVA 6 Pro 5G")
+   - Chip с процентом совпадения с цветовой индикацией:
+     - Зеленый: ≥85% (хорошее совпадение)
+     - Желтый: 60-84% (среднее совпадение)  
+     - Красный: <60% (плохое совпадение)
+
+2. **Поддержка разных форматов полей от backend:**
+   - CamelCase: Domain, IP, CreatedAt
+   - snake_case: domain, ip, created_at
+   - Автоматическое определение формата
+
+3. **Отображение специфичных данных эталонного анализа:**
+   - Списки совпадений (зеленые алерты)
+   - Списки расхождений (красные алерты)
+   - Все проверенные параметры с весами
+   - Информация о релевантных эталонах
+
+4. **Обработка статуса NO_REFERENCE:**
+   - Специальная иконка (HelpOutlineIcon)
+   - Сообщение "Нет подходящих эталонов"
+   - Отдельная карточка в статистике
+
+### Функция extractReferenceInfo:
+```javascript
+// Парсит analysis_report и извлекает:
+// - ID эталона (из паттерна "#150842")
+// - Название устройства (из скобок)
+// - Количество совпадений/расхождений
+const extractReferenceInfo = (report) => {
+  const refMatch = report.match(/эталоном #(\d+)\s*\(([^)]+)\)/);
+  const statsMatch = report.match(/Расхождений:\s*(\d+),\s*Совпадений:\s*(\d+)/);
+  return {
+    id: refMatch?.[1],
+    name: refMatch?.[2],
+    differences: statsMatch?.[1],
+    matches: statsMatch?.[2]
+  };
+};
+```
+
+### Статистика для эталонного анализа:
+- Добавлено поле noReference в stats
+- Показывается отдельная карточка "Без эталона" только при эталонном анализе
+- Правильный подсчет всех статусов включая NO_REFERENCE
+
+## Изменения (16.08.2025) - Анализ по эталонам:
+1. **Добавлена кнопка "Анализ Эталон":**
+   - Расположена рядом с кнопкой обычного анализа
+   - Использует endpoint `/bot-analysis-reference`
+   - Цвет secondary (фиолетовый) для визуального отличия
+
+2. **Поддержка двух типов анализа:**
+   - Эвристический (28 проверок) - обычная кнопка "Анализ"
+   - По эталонам (сравнение с реальными устройствами) - кнопка "Анализ Эталон"
+   - Состояние `analysisType` отслеживает текущий тип
+
+3. **Обновлен экспорт:**
+   - Автоматически выбирает правильный endpoint для экспорта
+   - `/bot-analysis/export` для эвристического
+   - `/bot-analysis-reference/export` для эталонного
+
+4. **Индикация типа анализа:**
+   - Chip с названием типа анализа в блоке статистики
+   - Разные иконки для каждого типа
+   - Цветовая дифференциация
+
+5. **Endpoints эталонного анализа:**
+   - `POST /bot-analysis-reference` - анализ
+   - `POST /bot-analysis-reference/export` - экспорт в CSV
+
+## Последние изменения (15.08.2025):
+1. Реализовано полное редактирование эталонных записей
+2. Добавлен чекбокс для управления статусом эталонной записи
+3. Исправлены все ESLint и React warnings
+4. Добавлена визуальная обратная связь при сохранении/удалении
+
+## Изменения (16.08.2025) - Группировка по устройствам:
+1. **Добавлена двухуровневая структура аккордеонов:**
+   - Первый уровень - группы устройств (по DeviceName)
+   - Второй уровень - отдельные записи внутри каждого устройства
+   
+2. **Новая функция группировки `groupDataByDevice`:**
+   - Группирует записи по полю DeviceName
+   - Если DeviceName отсутствует, создает имя из OS + Browser + Device
+   - Сортирует группы по времени последнего добавления (новые сверху)
+   
+3. **Улучшенная визуализация:**
+   - Группы устройств имеют увеличенную иконку и выделенный фон
+   - Счетчик записей для каждого устройства
+   - Отображение характеристик устройства (OS, Browser, разрешение)
+   - Специальные иконки для TECHNO POVA (смартфон) и PC (компьютер)
+   
+4. **Новые состояния:**
+   - `expandedDevices` - отслеживает развернутые группы устройств
+   - `handleDeviceExpandChange` - обработчик для групп устройств
+   
+5. **Обновленные стили (ReferenceHeaders.scss):**
+   - `.device-group-accordion` - стили для групп устройств с градиентом и тенью
+   - `.device-item-accordion` - стили для вложенных записей
+   - Визуальная иерархия через отступы и цвета

@@ -395,13 +395,107 @@ export default function ReactVirtualizedTable() {
         formattedDate = createdAt.toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' });
       }
 
+      // Извлекаем данные из JsData для новых полей
+      let hardwareConcurrency = null;
+      let deviceMemory = null;
+      let clickCount = null;
+      let maxScrollY = null;
+      let hadMouse = null;
+      let hadTouch = null;
+      let hasConnection = null;
+      let hasMemory = null;
+      let hasPlugins = null;
+      let hasDeviceOrientationEvent = null;
+      let isTouchCapable = null;
+
+      try {
+        // Проверяем, что JsData не пустая строка
+        if (!row.JsData || row.JsData === '') {
+          // Для пустых JsData оставляем все null
+        } else {
+          const jsData = typeof row.JsData === 'string' ? JSON.parse(row.JsData) : row.JsData;
+          
+          // Извлекаем поля напрямую из JsData - они на верхнем уровне
+          hardwareConcurrency = jsData?.hardwareConcurrency ?? null;
+          deviceMemory = jsData?.deviceMemory ?? null;
+          
+          // Для старых записей проверяем также прямо в row
+          if (hardwareConcurrency === null && row.hardwareConcurrency !== undefined) {
+            hardwareConcurrency = row.hardwareConcurrency;
+          }
+          if (deviceMemory === null && row.deviceMemory !== undefined) {
+            deviceMemory = row.deviceMemory;
+          }
+          
+          // Извлекаем поля из behavior (если есть объект behavior)
+          if (jsData?.behavior) {
+            clickCount = jsData.behavior.clickCount ?? null;
+            maxScrollY = jsData.behavior.maxScrollY ?? null;
+            hadMouse = jsData.behavior.hadMouse ?? null;
+            hadTouch = jsData.behavior.hadTouch ?? null;
+          }
+          
+          // Теперь эти поля также могут быть прямо в jsData (новый формат)
+          if (clickCount === null && jsData?.clickCount !== undefined) {
+            clickCount = jsData.clickCount;
+          }
+          if (maxScrollY === null && jsData?.maxScrollY !== undefined) {
+            maxScrollY = jsData.maxScrollY;
+          }
+          if (hadMouse === null && jsData?.hadMouse !== undefined) {
+            hadMouse = jsData.hadMouse;
+          }
+          if (hadTouch === null && jsData?.hadTouch !== undefined) {
+            hadTouch = jsData.hadTouch;
+          }
+          
+          // Извлекаем API флаги
+          if (jsData?.hasConnection !== undefined) {
+            hasConnection = jsData.hasConnection;
+          }
+          if (jsData?.hasMemory !== undefined) {
+            hasMemory = jsData.hasMemory;
+          }
+          if (jsData?.hasPlugins !== undefined) {
+            hasPlugins = jsData.hasPlugins;
+          }
+          if (jsData?.hasDeviceOrientationEvent !== undefined) {
+            hasDeviceOrientationEvent = jsData.hasDeviceOrientationEvent;
+          }
+          if (jsData?.isTouchCapable !== undefined) {
+            isTouchCapable = jsData.isTouchCapable;
+          }
+        }
+      } catch (e) {
+        // Тихо обрабатываем ошибки парсинга - не выводим в консоль
+        // Если JsData вообще не парсится, пробуем взять из row напрямую
+        hardwareConcurrency = row.hardwareConcurrency ?? null;
+        deviceMemory = row.deviceMemory ?? null;
+        clickCount = row.clickCount ?? null;
+        maxScrollY = row.maxScrollY ?? null;
+        hadMouse = row.hadMouse ?? null;
+        hadTouch = row.hadTouch ?? null;
+      }
+
       return {
         ...row,
         windowSize: `${row.innerWidth || 'N/A'} x ${row.innerHeight || 'N/A'}`,
         outerWindowSize: `${row.outerWidth || 'N/A'} x ${row.outerHeight || 'N/A'}`,
         screenSize: `${row.screenWidth || 'N/A'} x ${row.screenHeight || 'N/A'}`,
-        ClickOnNumber: row.ClickOnNumber ?? false, // Добавляем поле с значением true/false
-        formattedCreatedAt: formattedDate, // Добавляем отформатированную дату
+        ClickOnNumber: row.ClickOnNumber ?? false,
+        formattedCreatedAt: formattedDate,
+        // Новые поля
+        hardwareConcurrency,
+        deviceMemory,
+        clickCount,
+        maxScrollY,
+        hadMouse,
+        hadTouch,
+        hasConnection,
+        hasMemory,
+        hasPlugins,
+        hasDeviceOrientationEvent,
+        isTouchCapable,
       };
     });
   }, [filteredData]);
@@ -476,7 +570,7 @@ export default function ReactVirtualizedTable() {
   return (
     <>
       <Tabs
-        rows={filteredData} // передаём уже отфильтрованные и отсортированные
+        rows={processedData} // передаём обработанные данные с новыми полями
         VirtuosoTableComponents={VirtuosoTableComponents}
         companyIDData={companyIDData}
         dataGoogleAccounts={dataGoogleAccounts}
@@ -524,7 +618,7 @@ export default function ReactVirtualizedTable() {
         rowContent={(_index, row) => (
           <MemoizedTableRowRender
             row={row}
-            rows={rows}
+            rows={processedData}
             visibleColumns={visibleColumns}
             checkedRows={checkedRows}
             handleCheckboxChange={handleCheckboxChange}

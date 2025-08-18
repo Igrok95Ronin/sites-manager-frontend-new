@@ -52,6 +52,7 @@ const BotAnalysis = () => {
   const [analysisData, setAnalysisData] = useState([]);
   const [hasMore, setHasMore] = useState(true);
   const loadingRef = useRef(false);
+  const [analysisType, setAnalysisType] = useState('heuristic'); // 'heuristic' или 'reference'
   
   // Состояния для доменов
   const [loadingDomains, setLoadingDomains] = useState(false);
@@ -83,7 +84,8 @@ const BotAnalysis = () => {
     bots: 0,
     probable: 0,
     suspicious: 0,
-    humans: 0
+    humans: 0,
+    noReference: 0
   });
 
   // Загрузка доменов при монтировании компонента
@@ -115,7 +117,7 @@ const BotAnalysis = () => {
   }, []);
 
   // Функция для анализа
-  const handleAnalysis = useCallback(async (isLoadMore = false) => {
+  const handleAnalysis = useCallback(async (isLoadMore = false, isReference = false) => {
     if (loadingRef.current) return;
     
     loadingRef.current = true;
@@ -135,7 +137,9 @@ const BotAnalysis = () => {
         params.domain = domain.trim();
       }
 
-      const response = await axiosInstance.post('/botanalysis', params);
+      // Выбираем endpoint в зависимости от типа анализа
+      const endpoint = isReference ? '/bot-analysis-reference' : '/botanalysis';
+      const response = await axiosInstance.post(endpoint, params);
       const { data } = response.data;
 
       if (!isLoadMore) {
@@ -154,7 +158,8 @@ const BotAnalysis = () => {
         bots: 0,
         probable: 0,
         suspicious: 0,
-        humans: 0
+        humans: 0,
+        noReference: 0
       };
 
       const dataToProcess = isLoadMore ? [...analysisData, ...data] : data;
@@ -172,6 +177,9 @@ const BotAnalysis = () => {
           case 'HUMAN':
             newStats.humans++;
             break;
+          case 'NO_REFERENCE':
+            newStats.noReference++;
+            break;
           default:
             // Неизвестный статус, считаем как человека
             newStats.humans++;
@@ -180,6 +188,11 @@ const BotAnalysis = () => {
       });
 
       setStats(newStats);
+      
+      // Сохраняем тип анализа
+      if (!isLoadMore) {
+        setAnalysisType(isReference ? 'reference' : 'heuristic');
+      }
 
     } catch (err) {
       console.error('Ошибка анализа:', err);
@@ -192,7 +205,7 @@ const BotAnalysis = () => {
 
   // Функция для загрузки еще
   const loadMore = () => {
-    handleAnalysis(true);
+    handleAnalysis(true, analysisType === 'reference');
   };
   
   // Функции для управления модальным окном объяснений
@@ -255,7 +268,9 @@ const BotAnalysis = () => {
       // Логируем параметры для отладки
       console.log('Export params:', params);
       
-      const response = await axiosInstance.post('/bot-analysis/export', params, {
+      // Выбираем endpoint для экспорта в зависимости от типа анализа
+      const exportEndpoint = analysisType === 'reference' ? '/bot-analysis-reference/export' : '/bot-analysis/export';
+      const response = await axiosInstance.post(exportEndpoint, params, {
         responseType: 'blob'
       });
       
@@ -395,18 +410,31 @@ const BotAnalysis = () => {
             />
           </Grid>
           
-          <Grid item xs={12} md={1}>
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              onClick={() => handleAnalysis(false)}
-              disabled={loading}
-              sx={{ height: '56px' }}
-              startIcon={loading ? <CircularProgress size={20} /> : <RefreshIcon />}
-            >
-              {loading ? 'Анализ...' : 'Анализ'}
-            </Button>
+          <Grid item xs={12} md={2}>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                onClick={() => handleAnalysis(false, false)}
+                disabled={loading}
+                sx={{ height: '56px', flex: 1 }}
+                startIcon={loading && analysisType === 'heuristic' ? <CircularProgress size={20} /> : <RefreshIcon />}
+              >
+                {loading && analysisType === 'heuristic' ? 'Анализ...' : 'Анализ'}
+              </Button>
+              <Button
+                fullWidth
+                variant="contained"
+                color="secondary"
+                onClick={() => handleAnalysis(false, true)}
+                disabled={loading}
+                sx={{ height: '56px', flex: 1 }}
+                startIcon={loading && analysisType === 'reference' ? <CircularProgress size={20} /> : <SmartToyIcon />}
+              >
+                {loading && analysisType === 'reference' ? 'Анализ...' : 'Анализ Эталон'}
+              </Button>
+            </Box>
           </Grid>
         </Grid>
         
@@ -428,6 +456,17 @@ const BotAnalysis = () => {
       {/* Статистика */}
       {stats.total > 0 && (
         <Paper className="bot-analysis__stats" elevation={2} sx={{ p: 2, mb: 3 }}>
+          {/* Индикатор типа анализа */}
+          <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="h6">
+              Результаты анализа:
+            </Typography>
+            <Chip 
+              label={analysisType === 'reference' ? 'Эталонный анализ' : 'Эвристический анализ'}
+              color={analysisType === 'reference' ? 'secondary' : 'primary'}
+              icon={analysisType === 'reference' ? <SmartToyIcon /> : <RefreshIcon />}
+            />
+          </Box>
           <Grid container spacing={2}>
             <Grid item xs={6} md={2.4}>
               <Card>
@@ -481,6 +520,20 @@ const BotAnalysis = () => {
                 </CardContent>
               </Card>
             </Grid>
+            {/* Показываем NO_REFERENCE только для эталонного анализа */}
+            {analysisType === 'reference' && stats.noReference > 0 && (
+              <Grid item xs={6} md={2.4}>
+                <Card sx={{ backgroundColor: '#f5f5f5' }}>
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <Typography variant="h4" color="text.secondary">{stats.noReference}</Typography>
+                    <Typography variant="body2" color="text.secondary">Без эталона</Typography>
+                    <Typography variant="caption">
+                      {stats.total > 0 ? `${((stats.noReference / stats.total) * 100).toFixed(1)}%` : '0%'}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            )}
           </Grid>
         </Paper>
       )}

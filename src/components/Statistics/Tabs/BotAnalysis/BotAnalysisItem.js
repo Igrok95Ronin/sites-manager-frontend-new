@@ -66,6 +66,26 @@ const BotAnalysisItem = memo(({ item, index, onOpenExplanation }) => {
     setExpanded(isExpanded);
   }, []);
 
+  // Извлечение информации об эталоне из analysis_report
+  const extractReferenceInfo = useCallback((report) => {
+    if (!report) return { id: null, name: null, matches: 0, differences: 0 };
+    
+    // Ищем паттерн "эталоном #ID (название)"
+    const refMatch = report.match(/эталоном #(\d+)\s*\(([^)]+)\)/);
+    
+    // Ищем количество совпадений и расхождений
+    const statsMatch = report.match(/Расхождений:\s*(\d+),\s*Совпадений:\s*(\d+)/);
+    
+    return {
+      id: refMatch ? refMatch[1] : null,
+      name: refMatch ? refMatch[2] : null,
+      differences: statsMatch ? parseInt(statsMatch[1]) : 0,
+      matches: statsMatch ? parseInt(statsMatch[2]) : 0
+    };
+  }, []);
+
+  const referenceInfo = extractReferenceInfo(item.analysis_report);
+
   // Получение цвета статуса
   const getStatusColor = useCallback((status) => {
     switch(status) {
@@ -73,7 +93,8 @@ const BotAnalysisItem = memo(({ item, index, onOpenExplanation }) => {
       case 'PROBABLE_BOT': return 'warning';
       case 'SUSPICIOUS': return 'info';
       case 'HUMAN': return 'success';
-      default: return 'default';
+      case 'NO_REFERENCE': return 'default';
+      default: return 'primary';
     }
   }, []);
 
@@ -84,12 +105,16 @@ const BotAnalysisItem = memo(({ item, index, onOpenExplanation }) => {
       case 'PROBABLE_BOT': return <WarningIcon />;
       case 'SUSPICIOUS': return <SecurityIcon />;
       case 'HUMAN': return <PersonIcon />;
+      case 'NO_REFERENCE': return <HelpOutlineIcon />;
       default: return null;
     }
   }, []);
 
   // Форматирование процента
   const formatProbability = useCallback((probability) => {
+    if (probability === undefined || probability === null) {
+      return 'N/A';
+    }
     return `${probability.toFixed(1)}%`;
   }, []);
 
@@ -109,16 +134,58 @@ const BotAnalysisItem = memo(({ item, index, onOpenExplanation }) => {
             size="small"
           />
           <Typography variant="body2">
-            {item.Domain} | {item.IP} | {new Date(item.CreatedAt).toLocaleString('ru-RU')}
+            {item.Domain || item.domain} | {item.IP || item.ip} | {new Date(item.CreatedAt || item.created_at).toLocaleString('ru-RU')}
           </Typography>
-          <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="body2" color="text.secondary">
-              Вероятность бота:
-            </Typography>
-            <Typography variant="body1" fontWeight="bold">
-              {formatProbability(item.bot_probability)}
-            </Typography>
-          </Box>
+          
+          {/* Информация об эталоне для эталонного анализа */}
+          {(item.matched_reference || item.match_percentage !== undefined || referenceInfo.id) && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 2 }}>
+              <Chip 
+                label={`Эталон: ${
+                  referenceInfo.name || 
+                  item.matched_reference?.device_name || 
+                  (referenceInfo.id ? `#${referenceInfo.id}` : 'N/A')
+                }`}
+                size="small"
+                color="secondary"
+                variant="outlined"
+              />
+              {item.match_percentage !== undefined && (
+                <Chip 
+                  label={`Совпадение: ${formatProbability(item.match_percentage)}`}
+                  size="small"
+                  color={
+                    item.match_percentage >= 85 ? 'success' :
+                    item.match_percentage >= 60 ? 'warning' : 'error'
+                  }
+                />
+              )}
+            </Box>
+          )}
+          
+          {/* Для обычного анализа показываем вероятность бота */}
+          {item.bot_probability !== undefined && !item.matched_reference && (
+            <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" color="text.secondary">
+                Вероятность бота:
+              </Typography>
+              <Typography variant="body1" fontWeight="bold">
+                {formatProbability(item.bot_probability)}
+              </Typography>
+            </Box>
+          )}
+          
+          {/* Для NO_REFERENCE показываем специальное сообщение */}
+          {item.bot_status === 'NO_REFERENCE' && (
+            <Box sx={{ ml: 'auto' }}>
+              <Chip 
+                label="Нет подходящих эталонов"
+                size="small"
+                color="default"
+                variant="outlined"
+              />
+            </Box>
+          )}
         </Box>
       </AccordionSummary>
       
@@ -129,14 +196,14 @@ const BotAnalysisItem = memo(({ item, index, onOpenExplanation }) => {
             <Grid item xs={12} md={6}>
               <Typography variant="subtitle2" gutterBottom>Основная информация:</Typography>
               <Box sx={{ pl: 2 }}>
-                <Typography variant="body2">Домен: {item.Domain}</Typography>
-                <Typography variant="body2">IP: {item.IP}</Typography>
-                <Typography variant="body2">Время на сайте: {item.TimeSpent || '0'}</Typography>
-                <Typography variant="body2">Устройство: {item.Device === 'c' ? 'Компьютер' : item.Device === 'm' ? 'Мобильный' : item.Device}</Typography>
-                <Typography variant="body2">Keyword: {item.Keyword || '-'}</Typography>
-                <Typography variant="body2">Account ID: {item.AccountID || '-'}</Typography>
-                <Typography variant="body2">Company ID: {item.CompanyID || '-'}</Typography>
-                <Typography variant="body2">Fingerprint: {item.Fingerprint ? item.Fingerprint.substring(0, 10) + '...' : '-'}</Typography>
+                <Typography variant="body2">Домен: {item.Domain || item.domain}</Typography>
+                <Typography variant="body2">IP: {item.IP || item.ip}</Typography>
+                <Typography variant="body2">Время на сайте: {item.TimeSpent || item.time_spent || '0'}</Typography>
+                <Typography variant="body2">Устройство: {item.Device === 'c' ? 'Компьютер' : item.Device === 'm' ? 'Мобильный' : item.Device || item.device}</Typography>
+                <Typography variant="body2">Keyword: {item.Keyword || item.keyword || '-'}</Typography>
+                <Typography variant="body2">Account ID: {item.AccountID || item.account_id || '-'}</Typography>
+                <Typography variant="body2">Company ID: {item.CompanyID || item.company_id || '-'}</Typography>
+                <Typography variant="body2">Fingerprint: {(item.Fingerprint || item.fingerprint) ? (item.Fingerprint || item.fingerprint).substring(0, 10) + '...' : '-'}</Typography>
               </Box>
             </Grid>
 
@@ -144,17 +211,68 @@ const BotAnalysisItem = memo(({ item, index, onOpenExplanation }) => {
             <Grid item xs={12} md={6}>
               <Typography variant="subtitle2" gutterBottom>Результаты проверок:</Typography>
               <Box sx={{ pl: 2 }}>
-                <Typography variant="body2">Общий балл: {item.bot_score}</Typography>
-                <Typography variant="body2">Всего проверок: {item.total_checks}</Typography>
-                <Typography variant="body2">Провалено проверок: {item.triggered_checks}</Typography>
-                <LinearProgress 
-                  variant="determinate" 
-                  value={(item.triggered_checks / item.total_checks) * 100}
-                  color={getStatusColor(item.bot_status)}
-                  sx={{ mt: 1, mb: 1 }}
-                />
+                {/* Для эталонного анализа показываем информацию об эталоне */}
+                {(item.matched_reference || item.reference_device || referenceInfo.id || item.match_percentage !== undefined) ? (
+                  <>
+                    <Typography variant="body2">Эталон ID: {referenceInfo.id || item.matched_reference?.id || 'N/A'}</Typography>
+                    <Typography variant="body2">Эталонное устройство: {referenceInfo.name || item.matched_reference?.device_name || item.reference_device || 'N/A'}</Typography>
+                    <Typography variant="body2">Процент совпадения: {formatProbability(item.match_percentage)}</Typography>
+                    <Typography variant="body2">Совпадений: {item.matches?.length || referenceInfo.matches || item.matches_count || 0}</Typography>
+                    <Typography variant="body2">Расхождений: {item.discrepancies?.length || referenceInfo.differences || item.differences_count || 0}</Typography>
+                  </>
+                ) : item.bot_status === 'NO_REFERENCE' ? (
+                  <Typography variant="body2" color="text.secondary">
+                    Нет подходящих эталонов для сравнения
+                  </Typography>
+                ) : (
+                  <>
+                    <Typography variant="body2">Общий балл: {item.bot_score || 0}</Typography>
+                    <Typography variant="body2">Всего проверок: {item.total_checks || 0}</Typography>
+                    <Typography variant="body2">Провалено проверок: {item.triggered_checks || 0}</Typography>
+                  </>
+                )}
+                {item.total_checks > 0 && item.bot_status !== 'NO_REFERENCE' && (
+                  <LinearProgress 
+                    variant="determinate" 
+                    value={(item.triggered_checks / item.total_checks) * 100}
+                    color={getStatusColor(item.bot_status) === 'default' ? 'primary' : getStatusColor(item.bot_status)}
+                    sx={{ mt: 1, mb: 1 }}
+                  />
+                )}
               </Box>
             </Grid>
+
+            {/* Расхождения для эталонного анализа */}
+            {item.discrepancies && item.discrepancies.length > 0 && (
+              <Grid item xs={12} md={6}>
+                <Typography variant="subtitle2" gutterBottom color="error">
+                  Расхождения с эталоном ({item.discrepancies.length}):
+                </Typography>
+                <Box sx={{ pl: 2 }}>
+                  {item.discrepancies.map((discrepancy, idx) => (
+                    <Alert severity="error" sx={{ mb: 1 }} key={idx}>
+                      <Typography variant="body2">{discrepancy}</Typography>
+                    </Alert>
+                  ))}
+                </Box>
+              </Grid>
+            )}
+
+            {/* Совпадения для эталонного анализа */}
+            {item.matches && item.matches.length > 0 && (
+              <Grid item xs={12} md={6}>
+                <Typography variant="subtitle2" gutterBottom color="success.main">
+                  Совпадения с эталоном ({item.matches.length}):
+                </Typography>
+                <Box sx={{ pl: 2 }}>
+                  {item.matches.map((match, idx) => (
+                    <Alert severity="success" sx={{ mb: 1 }} key={idx}>
+                      <Typography variant="body2">{match}</Typography>
+                    </Alert>
+                  ))}
+                </Box>
+              </Grid>
+            )}
 
             {/* Индикаторы бота */}
             {item.bot_indicators && item.bot_indicators.length > 0 && (
@@ -171,6 +289,46 @@ const BotAnalysisItem = memo(({ item, index, onOpenExplanation }) => {
                     />
                   ))}
                 </Box>
+              </Grid>
+            )}
+
+            {/* Все проверенные параметры для эталонного анализа */}
+            {item.all_checked_params && item.all_checked_params.length > 0 && (
+              <Grid item xs={12}>
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Typography variant="subtitle2">
+                      Все проверенные параметры ({item.all_checked_params.length})
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Grid container spacing={2}>
+                      {item.all_checked_params.map((param, idx) => (
+                        <Grid item xs={12} sm={6} md={4} key={idx}>
+                          <Alert 
+                            severity={param.match ? 'success' : 'warning'}
+                            sx={{ mb: 1 }}
+                          >
+                            <Typography variant="caption" fontWeight="bold">
+                              {param.name}:
+                            </Typography>
+                            <Typography variant="caption" display="block">
+                              Значение: {param.value}
+                            </Typography>
+                            <Typography variant="caption" display="block">
+                              Эталон: {param.reference}
+                            </Typography>
+                            {param.weight && (
+                              <Typography variant="caption" display="block">
+                                Вес: {param.weight}%
+                              </Typography>
+                            )}
+                          </Alert>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </AccordionDetails>
+                </Accordion>
               </Grid>
             )}
 

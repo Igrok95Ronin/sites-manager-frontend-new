@@ -50,7 +50,8 @@ import {
   Computer as ComputerIcon,
   Tablet as TabletIcon,
   Warning as WarningIcon,
-  Notes as NotesIcon
+  Notes as NotesIcon,
+  Schedule as ScheduleIcon
 } from '@mui/icons-material';
 import axiosInstance from '../../../../axiosInstance';
 import { JSONTree } from 'react-json-tree';
@@ -63,6 +64,7 @@ const ReferenceHeaders = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchField, setSearchField] = useState('all'); // Поле для поиска
   const [expandedItems, setExpandedItems] = useState({});
+  const [expandedDevices, setExpandedDevices] = useState({}); // Развернутые группы устройств
   const [editingItem, setEditingItem] = useState(null); // ID редактируемой записи
   const [editedValues, setEditedValues] = useState({}); // Редактируемые значения
   const [successMessage, setSuccessMessage] = useState(null); // Сообщение об успехе
@@ -112,6 +114,14 @@ const ReferenceHeaders = () => {
     setExpandedItems(prev => ({
       ...prev,
       [id]: isExpanded
+    }));
+  };
+
+  // Обработчик разворачивания/сворачивания групп устройств
+  const handleDeviceExpandChange = (deviceName) => (event, isExpanded) => {
+    setExpandedDevices(prev => ({
+      ...prev,
+      [deviceName]: isExpanded
     }));
   };
 
@@ -300,6 +310,16 @@ const ReferenceHeaders = () => {
   // Получение иконки устройства
   const getDeviceIcon = (item) => {
     const category = item.DeviceCategory || item.Device;
+    const deviceName = item.DeviceName || '';
+    
+    // Специальные иконки для известных устройств
+    if (deviceName.toLowerCase().includes('techno') || deviceName.toLowerCase().includes('pova')) {
+      return <SmartphoneIcon />;
+    } else if (deviceName.toLowerCase() === 'pc' || deviceName.toLowerCase().includes('desktop')) {
+      return <ComputerIcon />;
+    }
+    
+    // Общие иконки по категории
     if (category === 'mobile' || category === 'm') {
       return <SmartphoneIcon />;
     } else if (category === 'tablet') {
@@ -308,6 +328,72 @@ const ReferenceHeaders = () => {
       return <ComputerIcon />;
     }
     return <DeviceIcon />;
+  };
+
+  // Группировка данных по устройствам
+  const groupDataByDevice = (data) => {
+    const grouped = {};
+    
+    data.forEach(item => {
+      // Используем DeviceName для группировки, если нет - создаем из других полей
+      const deviceKey = item.DeviceName || 
+                       `${item.OS || 'Unknown'} ${item.Browser || ''} ${item.Device === 'm' ? 'Mobile' : 'Desktop'}`.trim();
+      
+      if (!grouped[deviceKey]) {
+        grouped[deviceKey] = {
+          deviceName: deviceKey,
+          items: [],
+          // Берем характеристики первого устройства в группе
+          deviceInfo: {
+            DeviceCategory: item.DeviceCategory,
+            Device: item.Device,
+            OS: item.OS,
+            OSVersion: item.OSVersion,
+            Browser: item.Browser,
+            BrowserVersion: item.BrowserVersion,
+            DeviceModel: item.DeviceModel,
+            ScreenResolution: item.ScreenResolution,
+            IsEmulator: item.IsEmulator,
+            Notes: item.Notes
+          },
+          // Статистика по группе
+          stats: {
+            totalClicks: 0,
+            totalTimeSpent: 0,
+            domains: new Set(),
+            ips: new Set(),
+            hasEmulator: false
+          }
+        };
+      }
+      
+      grouped[deviceKey].items.push(item);
+      
+      // Обновляем статистику
+      if (item.ClickOnNumber) grouped[deviceKey].stats.totalClicks++;
+      if (item.TimeSpent) {
+        const time = parseInt(item.TimeSpent) || 0;
+        grouped[deviceKey].stats.totalTimeSpent += time;
+      }
+      if (item.Domain) grouped[deviceKey].stats.domains.add(item.Domain);
+      if (item.IP) grouped[deviceKey].stats.ips.add(item.IP);
+      if (item.IsEmulator) grouped[deviceKey].stats.hasEmulator = true;
+    });
+    
+    // Преобразуем в массив и сортируем по времени последнего добавления
+    return Object.values(grouped).map(group => ({
+      ...group,
+      stats: {
+        ...group.stats,
+        domains: Array.from(group.stats.domains),
+        ips: Array.from(group.stats.ips),
+        avgTimeSpent: group.items.length > 0 ? Math.round(group.stats.totalTimeSpent / group.items.length) : 0
+      }
+    })).sort((a, b) => {
+      const latestA = Math.max(...a.items.map(item => new Date(item.CreatedAt).getTime()));
+      const latestB = Math.max(...b.items.map(item => new Date(item.CreatedAt).getTime()));
+      return latestB - latestA; // Новые сверху
+    });
   };
 
   // Получение основных headers
@@ -440,135 +526,290 @@ const ReferenceHeaders = () => {
         </Paper>
       )}
 
-      {/* Карточки записей */}
+      {/* Группированные карточки записей */}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {filteredData.map((item) => {
-          const headers = parseJSON(item.Headers);
-          const jsData = parseJSON(item.JsData);
-          const mainHeaders = getMainHeaders(item.Headers);
+        {groupDataByDevice(filteredData).map((deviceGroup) => {
+          const isDeviceExpanded = expandedDevices[deviceGroup.deviceName] || false;
 
           return (
             <Accordion
-              key={item.OriginalClickID}
-              expanded={expandedItems[item.OriginalClickID] || false}
-              onChange={handleExpandChange(item.OriginalClickID)}
-              elevation={2}
+              key={deviceGroup.deviceName}
+              className="device-group-accordion"
+              expanded={isDeviceExpanded}
+              onChange={handleDeviceExpandChange(deviceGroup.deviceName)}
+              elevation={3}
+              sx={{ 
+                backgroundColor: isDeviceExpanded ? 'action.hover' : 'background.paper',
+                '&:before': {
+                  display: 'none',
+                }
+              }}
             >
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <AccordionSummary 
+                expandIcon={<ExpandMoreIcon />}
+                sx={{ 
+                  '& .MuiAccordionSummary-content': {
+                    alignItems: 'center'
+                  }
+                }}
+              >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
-                  {/* ID и домен */}
-                  <Box sx={{ minWidth: 80 }}>
-                    <Typography variant="caption" color="text.secondary">
-                      ID: {item.OriginalClickID}
-                    </Typography>
+                  {/* Иконка устройства */}
+                  <Box className="device-icon" sx={{ display: 'flex', alignItems: 'center', color: 'primary.main' }}>
+                    {getDeviceIcon(deviceGroup.deviceInfo)}
                   </Box>
                   
-                  {/* Домен */}
-                  <Chip
-                    icon={<LanguageIcon />}
-                    label={item.Domain}
+                  {/* Название устройства */}
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {deviceGroup.deviceName}
+                  </Typography>
+                  
+                  {/* Счетчик записей */}
+                  <Chip 
+                    label={`${deviceGroup.items.length} ${deviceGroup.items.length === 1 ? 'запись' : deviceGroup.items.length < 5 ? 'записи' : 'записей'}`}
                     color="primary"
-                    variant="outlined"
                     size="small"
                   />
-
-                  {/* IP */}
+                  
+                  {/* Тип устройства */}
                   <Chip
-                    icon={<LocationIcon />}
-                    label={item.IP}
+                    label={
+                      deviceGroup.deviceInfo.DeviceCategory === 'mobile' || deviceGroup.deviceInfo.Device === 'm' ? 'Mobile' :
+                      deviceGroup.deviceInfo.DeviceCategory === 'tablet' ? 'Tablet' :
+                      deviceGroup.deviceInfo.DeviceCategory === 'desktop' || deviceGroup.deviceInfo.Device === 'c' ? 'Desktop' :
+                      'Unknown'
+                    }
+                    color={
+                      deviceGroup.deviceInfo.DeviceCategory === 'mobile' || deviceGroup.deviceInfo.Device === 'm' ? 'warning' :
+                      deviceGroup.deviceInfo.DeviceCategory === 'tablet' ? 'info' :
+                      deviceGroup.deviceInfo.DeviceCategory === 'desktop' || deviceGroup.deviceInfo.Device === 'c' ? 'success' :
+                      'default'
+                    }
                     size="small"
                     variant="outlined"
                   />
-
-                  {/* Устройство */}
-                  <Chip
-                    icon={getDeviceIcon(item)}
-                    label={getDeviceInfo(item)}
-                    size="small"
-                    color={item.Device === 'm' ? 'warning' : 'info'}
-                    variant="outlined"
-                  />
-
-                  {/* Браузер */}
-                  {item.Browser && (
+                  
+                  {/* Информация об устройстве */}
+                  {deviceGroup.deviceInfo.OS && (
                     <Chip
-                      label={`${item.Browser} ${item.BrowserVersion || ''}`}
+                      label={`${deviceGroup.deviceInfo.OS} ${deviceGroup.deviceInfo.OSVersion || ''}`}
                       size="small"
                       variant="outlined"
                     />
                   )}
-
-                  {/* ОС */}
-                  {item.OS && (
+                  
+                  {deviceGroup.deviceInfo.ScreenResolution && (
                     <Chip
-                      label={`${item.OS} ${item.OSVersion || ''}`}
+                      label={deviceGroup.deviceInfo.ScreenResolution}
                       size="small"
                       variant="outlined"
                     />
                   )}
-
-                  {/* Время */}
-                  <Chip
-                    icon={<TimerIcon />}
-                    label={item.TimeSpent}
-                    size="small"
-                    variant="outlined"
-                  />
-
-                  {/* Эмулятор */}
-                  {item.IsEmulator && (
-                    <Chip
-                      icon={<WarningIcon />}
-                      label="Эмулятор"
-                      size="small"
-                      color="error"
-                    />
-                  )}
-
-                  {/* Клик */}
-                  {item.ClickOnNumber && (
+                  
+                  {/* Статистика по группе */}
+                  {deviceGroup.stats.totalClicks > 0 && (
                     <Chip
                       icon={<TouchIcon />}
-                      label="Клик"
+                      label={`${deviceGroup.stats.totalClicks} ${deviceGroup.stats.totalClicks === 1 ? 'клик' : 'кликов'}`}
                       size="small"
                       color="success"
+                      variant="outlined"
                     />
                   )}
-
-                  {/* Действия */}
-                  <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
-                    {/* Кнопка просмотра Headers/JS */}
-                    <Tooltip title="Просмотр Headers и JS Data">
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleOpenDetails(item);
-                        }}
-                        color="primary"
-                      >
-                        <CodeIcon />
-                      </IconButton>
-                    </Tooltip>
-                    
-                    {/* Кнопка редактирования */}
-                    <Tooltip title="Редактировать информацию об устройстве">
-                      <IconButton
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleStartEdit(item.OriginalClickID);
-                        }}
-                        color="secondary"
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
+                  
+                  {deviceGroup.stats.avgTimeSpent > 0 && (
+                    <Chip
+                      icon={<TimerIcon />}
+                      label={`~${deviceGroup.stats.avgTimeSpent}с`}
+                      size="small"
+                      variant="outlined"
+                    />
+                  )}
+                  
+                  {deviceGroup.stats.domains.length > 0 && (
+                    <Chip
+                      icon={<LanguageIcon />}
+                      label={`${deviceGroup.stats.domains.length} ${deviceGroup.stats.domains.length === 1 ? 'домен' : deviceGroup.stats.domains.length < 5 ? 'домена' : 'доменов'}`}
+                      size="small"
+                      variant="outlined"
+                    />
+                  )}
+                  
+                  {deviceGroup.stats.ips.length > 0 && (
+                    <Chip
+                      icon={<LocationIcon />}
+                      label={`${deviceGroup.stats.ips.length} IP`}
+                      size="small"
+                      variant="outlined"
+                    />
+                  )}
+                  
+                  {deviceGroup.stats.hasEmulator && (
+                    <Chip
+                      icon={<WarningIcon />}
+                      label="Есть эмулятор"
+                      size="small"
+                      color="error"
+                      variant="outlined"
+                    />
+                  )}
                 </Box>
               </AccordionSummary>
 
-              <AccordionDetails>
+              <AccordionDetails sx={{ p: 0 }}>
+                {/* Вложенные аккордеоны для каждой записи устройства */}
+                <Box sx={{ pl: 2, pr: 2, pb: 2 }}>
+                  {deviceGroup.items.map((item) => {
+                    const headers = parseJSON(item.Headers);
+                    const jsData = parseJSON(item.JsData);
+                    const mainHeaders = getMainHeaders(item.Headers);
+                    
+                    return (
+                      <Accordion
+                        key={item.OriginalClickID}
+                        className="device-item-accordion"
+                        expanded={expandedItems[item.OriginalClickID] || false}
+                        onChange={handleExpandChange(item.OriginalClickID)}
+                        elevation={1}
+                        sx={{ 
+                          mt: 1,
+                          '&:before': {
+                            display: 'none',
+                          }
+                        }}
+                      >
+                        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+                            {/* ID */}
+                            <Box sx={{ minWidth: 80 }}>
+                              <Typography variant="caption" color="text.secondary">
+                                ID: {item.OriginalClickID}
+                              </Typography>
+                            </Box>
+                            
+                            {/* Домен */}
+                            <Chip
+                              icon={<LanguageIcon />}
+                              label={item.Domain}
+                              color="primary"
+                              variant="outlined"
+                              size="small"
+                            />
+
+                            {/* IP */}
+                            <Chip
+                              icon={<LocationIcon />}
+                              label={item.IP}
+                              size="small"
+                              variant="outlined"
+                            />
+                            
+                            {/* Браузер */}
+                            {(item.Browser || item.BrowserVersion) && (
+                              <Chip
+                                label={`${item.Browser || ''} ${item.BrowserVersion || ''}`}
+                                size="small"
+                                variant="outlined"
+                              />
+                            )}
+
+                            {/* Время */}
+                            <Chip
+                              icon={<TimerIcon />}
+                              label={item.TimeSpent}
+                              size="small"
+                              variant="outlined"
+                            />
+
+                            {/* Эмулятор */}
+                            {item.IsEmulator && (
+                              <Chip
+                                icon={<WarningIcon />}
+                                label="Эмулятор"
+                                size="small"
+                                color="error"
+                              />
+                            )}
+
+                            {/* Клик */}
+                            {item.ClickOnNumber && (
+                              <Chip
+                                icon={<TouchIcon />}
+                                label="Клик"
+                                size="small"
+                                color="success"
+                              />
+                            )}
+                            
+                            {/* Ключевое слово */}
+                            {item.Keyword && (
+                              <Chip
+                                label={item.Keyword}
+                                size="small"
+                                variant="outlined"
+                              />
+                            )}
+                            
+                            {/* Дата создания */}
+                            <Chip
+                              icon={<ScheduleIcon />}
+                              label={new Date(item.CreatedAt).toLocaleString('ru-RU', { 
+                                day: '2-digit',
+                                month: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                              size="small"
+                              variant="outlined"
+                            />
+                            
+                            {/* Заметки */}
+                            {item.Notes && (
+                              <Tooltip title={item.Notes}>
+                                <Chip
+                                  icon={<NotesIcon />}
+                                  label="Заметки"
+                                  size="small"
+                                  color="secondary"
+                                  variant="outlined"
+                                />
+                              </Tooltip>
+                            )}
+
+                            {/* Действия */}
+                            <Box sx={{ ml: 'auto', display: 'flex', gap: 1 }}>
+                              {/* Кнопка просмотра Headers/JS */}
+                              <Tooltip title="Просмотр Headers и JS Data">
+                                <IconButton
+                                  size="small"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenDetails(item);
+                                  }}
+                                  color="primary"
+                                >
+                                  <CodeIcon />
+                                </IconButton>
+                              </Tooltip>
+                              
+                              {/* Кнопка редактирования */}
+                              <Tooltip title="Редактировать информацию об устройстве">
+                                <IconButton
+                                  size="small"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleStartEdit(item.OriginalClickID);
+                                  }}
+                                  color="secondary"
+                                >
+                                  <EditIcon />
+                                </IconButton>
+                              </Tooltip>
+                            </Box>
+                          </Box>
+                        </AccordionSummary>
+
+                        <AccordionDetails>
                 {editingItem === item.OriginalClickID ? (
                   /* Режим редактирования */
                   <Card variant="outlined">
@@ -1006,8 +1247,13 @@ const ReferenceHeaders = () => {
                       </Card>
                     </Grid>
                   )}
-                </Grid>
-                )}
+                        </Grid>
+                        )}
+                      </AccordionDetails>
+                    </Accordion>
+                    );
+                  })}
+                </Box>
               </AccordionDetails>
             </Accordion>
           );

@@ -1,6 +1,64 @@
 .reference-headers {
   padding: 20px;
   
+  /* Основные группы устройств */
+  .device-group-accordion {
+    border-radius: 12px !important;
+    margin-bottom: 16px;
+    background: linear-gradient(145deg, #ffffff, #f5f5f5);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    
+    &:before {
+      display: none;
+    }
+    
+    &.Mui-expanded {
+      margin: 16px 0 !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Заголовок группы устройств */
+    > .MuiAccordionSummary-root {
+      background: rgba(25, 118, 210, 0.03);
+      border-bottom: 2px solid rgba(25, 118, 210, 0.1);
+      
+      &:hover {
+        background: rgba(25, 118, 210, 0.05);
+      }
+      
+      .device-icon {
+        font-size: 28px;
+        color: #1976d2;
+      }
+    }
+  }
+  
+  /* Вложенные записи устройств */
+  .device-item-accordion {
+    border-radius: 8px !important;
+    margin: 8px 16px !important;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    
+    &:before {
+      display: none;
+    }
+    
+    &.Mui-expanded {
+      margin: 8px 16px !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    > .MuiAccordionSummary-root {
+      min-height: 56px !important;
+      background: rgba(255, 255, 255, 0.9);
+      
+      &:hover {
+        background: rgba(0, 0, 0, 0.02);
+      }
+    }
+  }
+  
   /* Карточки */
   .MuiAccordion-root {
     border-radius: 8px !important;

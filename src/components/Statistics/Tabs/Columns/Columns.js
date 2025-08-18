@@ -549,6 +549,94 @@ export const allColumns = [
     ),
     dataKey: 'jsHeapSizeLimit',
   },
+  {
+    label: (
+      <Tooltip title="Количество логических процессоров (HardwareConcurrency)" arrow placement="top">
+        <MemoryIcon />
+      </Tooltip>
+    ),
+    dataKey: 'hardwareConcurrency',
+  },
+  {
+    label: (
+      <Tooltip title="Объем памяти устройства в ГБ (DeviceMemory)" arrow placement="top">
+        <DataUsageIcon />
+      </Tooltip>
+    ),
+    dataKey: 'deviceMemory',
+  },
+  {
+    label: (
+      <Tooltip title="Количество кликов (ClickCount)" arrow placement="top">
+        <MouseIcon />
+      </Tooltip>
+    ),
+    dataKey: 'clickCount',
+  },
+  {
+    label: (
+      <Tooltip title="Максимальная глубина скролла (MaxScrollY)" arrow placement="top">
+        <CompareArrowsIcon />
+      </Tooltip>
+    ),
+    dataKey: 'maxScrollY',
+  },
+  {
+    label: (
+      <Tooltip title="Была ли мышь до скролла (HadMouse)" arrow placement="top">
+        <MouseIcon />
+      </Tooltip>
+    ),
+    dataKey: 'hadMouse',
+  },
+  {
+    label: (
+      <Tooltip title="Было ли касание до скролла (HadTouch)" arrow placement="top">
+        <TouchAppIcon />
+      </Tooltip>
+    ),
+    dataKey: 'hadTouch',
+  },
+  {
+    label: (
+      <Tooltip title="Есть ли Network API (HasConnection)" arrow placement="top">
+        <NetworkCheckIcon />
+      </Tooltip>
+    ),
+    dataKey: 'hasConnection',
+  },
+  {
+    label: (
+      <Tooltip title="Есть ли Memory API (HasMemory)" arrow placement="top">
+        <MemoryIcon />
+      </Tooltip>
+    ),
+    dataKey: 'hasMemory',
+  },
+  {
+    label: (
+      <Tooltip title="Есть ли плагины (HasPlugins)" arrow placement="top">
+        <ExtensionIcon />
+      </Tooltip>
+    ),
+    dataKey: 'hasPlugins',
+  },
+  {
+    label: (
+      <Tooltip title="Есть ли гироскоп (HasDeviceOrientation)" arrow placement="top">
+        <SensorsIcon />
+      </Tooltip>
+    ),
+    dataKey: 'hasDeviceOrientationEvent',
+  },
+  {
+    label: (
+      <Tooltip title="Поддержка тач-событий (IsTouchCapable)" arrow placement="top">
+        <TouchAppIcon />
+      </Tooltip>
+    ),
+    dataKey: 'isTouchCapable',
+  },
 ];
 
 // =========================================
@@ -590,6 +678,17 @@ export const jsDataFieldsDataKeys = [
   'totalJSHeapSize',
   'usedJSHeapSize',
   'jsHeapSizeLimit',
+  'hardwareConcurrency',
+  'deviceMemory',
+  'clickCount',
+  'maxScrollY',
+  'hadMouse',
+  'hadTouch',
+  'hasConnection',
+  'hasMemory',
+  'hasPlugins',
+  'hasDeviceOrientationEvent',
+  'isTouchCapable',
   'windowSize',
   'outerWindowSize',
   'screenSize',
@@ -616,4 +715,11 @@ export const defaultVisibleDataKeys = [
   'Accept',
   'Accept-Language',
   'language',
+  // Новые поля
+  'hardwareConcurrency',
+  'deviceMemory',
+  'clickCount',
+  'maxScrollY',
+  'hadMouse',
+  'hadTouch',
 ];
