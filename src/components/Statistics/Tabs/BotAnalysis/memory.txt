@@ -1,6 +1,6 @@
 # Память сессии - Разработка функционала эталонных записей и анализа ботов
 
-## Дата: 2025-08-15
+## Дата: 2025-08-18
 
 ## Основные реализованные функции:
 
@@ -246,3 +246,84 @@ const extractReferenceInfo = (report) => {
    - `.device-group-accordion` - стили для групп устройств с градиентом и тенью
    - `.device-item-accordion` - стили для вложенных записей
    - Визуальная иерархия через отступы и цвета
+
+## Изменения (18.08.2025) - Добавление новых полей из main.js в таблицу Statistics:
+
+### 1. Новые поля в main.js:
+- **hardwareConcurrency** - количество логических процессоров
+- **deviceMemory** - объем памяти устройства (максимум 8 ГБ из-за ограничений браузера)
+- **clickCount** - количество кликов пользователя на странице
+- **maxScrollY** - максимальная глубина скролла в пикселях
+- **hadMouse** - использовалась ли мышь до скролла
+- **hadTouch** - было ли касание до скролла
+- **hasConnection** - есть ли Network Information API
+- **hasMemory** - есть ли Performance Memory API
+- **hasPlugins** - есть ли плагины в браузере
+- **hasDeviceOrientationEvent** - есть ли поддержка гироскопа
+- **isTouchCapable** - поддержка тач-событий
+
+### 2. Решение проблемы с сохранением в БД:
+**Проблема:** Backend не сохранял новое поле `behavior` в БД.
+
+**Решение:** Вместо отдельного поля `behavior`, все данные теперь сохраняются в существующее поле `browserData` (JsData в БД):
+```javascript
+// В main.js данные добавляются в browserDataObj:
+const browserDataWithBehavior = {
+  ...browserDataObj,
+  clickCount: clickCount,
+  maxScrollY: maxScrollY,
+  hadMouse: !!wasMouseBeforeScroll,
+  hadTouch: !!wasTouchedBeforeScroll,
+  hasConnection: !!navigator.connection,
+  hasMemory: !!performance.memory,
+  // и т.д.
+};
+```
+
+### 3. Исправлена проблема отображения:
+**Проблема:** Данные извлекались в `processedData`, но не доходили до TableRowRender.
+
+**Решение:** 
+- Строка 546: `rows={processedData}` вместо `rows={filteredData}`
+- Строка 594: `rows={processedData}` вместо `rows={rows}`
+
+### 4. Добавлены новые колонки в таблицу:
+#### Поведенческие метрики:
+- **hardwareConcurrency** - число (количество ядер)
+- **deviceMemory** - число с "GB" (например, "8 GB")
+- **clickCount** - количество кликов
+- **maxScrollY** - глубина скролла с "px"
+- **hadMouse/hadTouch** - галочка ✓ / крестик ✗
+
+#### API флаги (для определения ботов):
+- **hasConnection** ✓/✗
+- **hasMemory** ✓/✗
+- **hasPlugins** ✓/✗
+- **hasDeviceOrientationEvent** ✓/✗
+- **isTouchCapable** ✓/✗
+
+### 5. Обновленные файлы:
+- `main.js` - добавлены новые поля в browserData
+- `Statistics.js` - извлечение новых полей из JsData
+- `Columns.js` - добавлены новые колонки
+- `TableRowRender.js` - обработка отображения новых полей
+
+### 6. Важные замечания:
+- **deviceMemory** всегда показывает максимум 8 ГБ (ограничение браузера для защиты приватности)
+- Поля `clickCount`, `maxScrollY`, `hadMouse`, `hadTouch` будут заполнены только для НОВЫХ записей после обновления main.js на сайтах
+- API флаги помогают определить ботов по подозрительным комбинациям (например, iPhone с hasPlugins=true)
+
+### 7. Как определять ботов с помощью новых полей:
+- **Подозрительные комбинации:**
+  - iPhone/iPad с `hasPlugins = true` (на iOS нет плагинов)
+  - Desktop с `isTouchCapable = true`, но `hadTouch = false`
+  - Mobile с `hasDeviceOrientationEvent = false`
+  - `clickCount = 0` при длительном `timeSpent`
+  - `maxScrollY = 0` при просмотре длинной страницы
+
+## Backend (Go) - эталонный анализ:
+Файл `botanalysis_reference.go` содержит реализацию эталонного анализа:
+- Сравнение по 8 параметрам с весами
+- Определение статуса: HUMAN (≥85%), SUSPICIOUS (60-84%), BOT (<60%)
+- Экспорт результатов в CSV
+- Детальные отчеты о совпадениях/расхождениях
