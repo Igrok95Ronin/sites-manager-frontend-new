@@ -31,6 +31,7 @@ const Tabs = ({
   setStartDate,
   endDate,
   setEndDate,
+  visibleTabs,
 }) => {
   return (
     <section className="tabs">
@@ -65,6 +66,7 @@ const Tabs = ({
             setStartDate={setStartDate}
             endDate={endDate}
             setEndDate={setEndDate}
+            visibleTabs={visibleTabs}
           />
         </div>
       </div>

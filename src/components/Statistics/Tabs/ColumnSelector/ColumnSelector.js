@@ -34,6 +34,8 @@ const ColumnSelector = ({
   defaultVisibleColumns, // Важный проп: массив объектов {label, dataKey} по умолчанию
   doubleOutput,
   setDoubleOutput,
+  visibleTabs,
+  setVisibleTabs,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -223,13 +225,41 @@ const ColumnSelector = ({
           <Box sx={{ my: 2 }}>
             <hr />
           </Box>
+          
+          {/* Управление видимостью вкладок */}
+          <Typography variant="subtitle1" gutterBottom>
+            Видимость вкладок
+          </Typography>
+          <FormControlLabel
+            control={
+              <Checkbox 
+                checked={visibleTabs?.showBotAnalysis || false} 
+                onChange={(e) => setVisibleTabs({...visibleTabs, showBotAnalysis: e.target.checked})} 
+              />
+            }
+            label="Показать вкладку 'Анализ ботов'"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox 
+                checked={visibleTabs?.showReferenceHeaders || false} 
+                onChange={(e) => setVisibleTabs({...visibleTabs, showReferenceHeaders: e.target.checked})} 
+              />
+            }
+            label="Показать вкладку 'Эталонные записи'"
+          />
+          
+          {/* Разделитель */}
+          <Box sx={{ my: 2 }}>
+            <hr />
+          </Box>
 
           {/* Средняя часть: Выбор столбцов */}
           <Typography variant="subtitle1" gutterBottom>
             Выберите столбцы
           </Typography>
           <Grid container spacing={1}>
-            {columns.map((column) => {
+            {columns.map((column, index) => {
               const isChecked = visibleDataKeys.includes(column.dataKey);
               const isDisabled = visibleDataKeys.length === 1 && isChecked;
 
@@ -241,6 +271,14 @@ const ColumnSelector = ({
                     }
                     label={
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ 
+                          minWidth: '24px', 
+                          color: '#666', 
+                          fontWeight: 'bold',
+                          fontSize: '0.9em'
+                        }}>
+                          {index + 1}.
+                        </span>
                         {column.label}
                         <span>{column.dataKey}</span>
                       </div>

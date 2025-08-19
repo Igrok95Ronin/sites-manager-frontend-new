@@ -92,6 +92,23 @@ export default function ReactVirtualizedTable() {
 
   // «Расширенный» набор dataKeys (если нужно)
   const [expandedCell, setExpandedCell] = useState(null);
+  
+  // Состояние для управления видимостью вкладок (с сохранением в localStorage)
+  const [visibleTabs, setVisibleTabs] = useState(() => {
+    const savedTabs = localStorage.getItem('visibleTabs');
+    if (savedTabs) {
+      return JSON.parse(savedTabs);
+    }
+    return {
+      showBotAnalysis: false, // По умолчанию скрыт
+      showReferenceHeaders: false, // По умолчанию скрыт
+    };
+  });
+  
+  // Сохраняем изменения видимости вкладок в localStorage
+  useEffect(() => {
+    localStorage.setItem('visibleTabs', JSON.stringify(visibleTabs));
+  }, [visibleTabs]);
 
   // -----------------------------------
   // (B) Прочие состояния
@@ -661,6 +678,8 @@ export default function ReactVirtualizedTable() {
             setVisibleDataKeys={setVisibleDataKeys}
             doubleOutput={doubleOutput}
             setDoubleOutput={setDoubleOutput} // Чек для показа двойных данные в модальном окне
+            visibleTabs={visibleTabs}
+            setVisibleTabs={setVisibleTabs}
           />
         }
         searchQuery={searchQuery}
@@ -669,6 +688,7 @@ export default function ReactVirtualizedTable() {
         setStartDate={setStartDate}
         endDate={endDate}
         setEndDate={setEndDate}
+        visibleTabs={visibleTabs}
       />
       <CompanyNames setCompanyIDData={setCompanyIDData} />
       <GoogleAccounts setDataGoogleAccounts={setDataGoogleAccounts} />

@@ -78,12 +78,32 @@ export default function FullWidthTabs({
   setStartDate,
   endDate,
   setEndDate,
+  visibleTabs,
 }) {
   const theme = useTheme();
   const [value, setValue] = React.useState(0);
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+  
+  // Создаем динамическую карту индексов для вкладок
+  const tabConfig = React.useMemo(() => {
+    const tabs = [
+      { label: "Логи ADS", id: "logs", alwaysVisible: true },
+      { label: "Отмеченные логи", id: "marked", alwaysVisible: true },
+      { label: "Компания", id: "company", alwaysVisible: true },
+      { label: "Анализ ботов", id: "botAnalysis", visible: visibleTabs?.showBotAnalysis !== false },
+      { label: "Эталонные записи", id: "reference", visible: visibleTabs?.showReferenceHeaders !== false },
+    ];
+    
+    const visibleTabsConfig = tabs.filter(tab => tab.alwaysVisible || tab.visible);
+    const indexMap = {};
+    visibleTabsConfig.forEach((tab, index) => {
+      indexMap[tab.id] = index;
+    });
+    
+    return { tabs: visibleTabsConfig, indexMap };
+  }, [visibleTabs]);
 
   // const endReachedHandler = React.useCallback(() => {
   //   if (!loadingRef.current && hasMore) {
@@ -132,16 +152,14 @@ export default function FullWidthTabs({
           variant="fullWidth"
           aria-label="full width tabs example"
         >
-          <Tab label="Логи ADS" {...a11yProps(0)} />
-          <Tab label="Отмеченные логи" {...a11yProps(1)} />
-          <Tab label="Компания" {...a11yProps(2)} />
-          <Tab label="Анализ ботов" {...a11yProps(3)} />
-          <Tab label="Эталонные записи" {...a11yProps(4)} />
+          {tabConfig.tabs.map((tab, index) => (
+            <Tab key={tab.id} label={tab.label} {...a11yProps(index)} />
+          ))}
         </Tabs>
       </AppBar>
       <Box sx={{ flex: 1, overflow: 'auto' }}>
         {/* Первый таб Логи ADS*/}
-        <TabPanel className="tabPanelProps__tabPanel" value={value} index={0} dir={theme.direction}>
+        <TabPanel className="tabPanelProps__tabPanel" value={value} index={tabConfig.indexMap.logs} dir={theme.direction}>
           <div className="tabPanelProps__wrapper">
             <Search
               onSearch={setSearchQuery}
@@ -182,12 +200,12 @@ export default function FullWidthTabs({
         </TabPanel>
 
         {/* Второй таб Отмеченные логи*/}
-        <TabPanel value={value} index={1} dir={theme.direction}>
+        <TabPanel value={value} index={tabConfig.indexMap.marked} dir={theme.direction}>
           <MarkedLogs />
         </TabPanel>
 
         {/* Третий таб Компаний*/}
-        <TabPanel className="tabPanelProps__tabPanel tabPanelProps__tabPanelPadding" value={value} index={2} dir={theme.direction}>
+        <TabPanel className="tabPanelProps__tabPanel tabPanelProps__tabPanelPadding" value={value} index={tabConfig.indexMap.company} dir={theme.direction}>
           <Company
             rows={rows}
             companyIDData={companyIDData}
@@ -202,13 +220,17 @@ export default function FullWidthTabs({
           />
         </TabPanel>
         {/* Четвертый таб Анализ ботов*/}
-        <TabPanel value={value} index={3} dir={theme.direction}>
-          <BotAnalysis />
-        </TabPanel>
+        {visibleTabs?.showBotAnalysis !== false && (
+          <TabPanel value={value} index={tabConfig.indexMap.botAnalysis} dir={theme.direction}>
+            <BotAnalysis />
+          </TabPanel>
+        )}
         {/* Пятый таб Эталонные записи*/}
-        <TabPanel value={value} index={4} dir={theme.direction}>
-          <ReferenceHeaders />
-        </TabPanel>
+        {visibleTabs?.showReferenceHeaders !== false && (
+          <TabPanel value={value} index={tabConfig.indexMap.reference} dir={theme.direction}>
+            <ReferenceHeaders />
+          </TabPanel>
+        )}
       </Box>
     </Box>
   );
