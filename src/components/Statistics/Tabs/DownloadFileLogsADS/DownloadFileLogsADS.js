@@ -110,7 +110,6 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
       companyID: 'ID кампании',
       keyword: 'Ключевое слово',
       device: 'Устройство',
-      isChecked: 'Антифрод',
       storageQuota: 'Хранилище',
       fingerprint: 'Отпечаток',
       isFirstVisit: 'Первый визит',
@@ -118,6 +117,7 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
       hadTouchBeforeScroll: 'Тач-скролл',
       motionDataRaw: 'Движение',
       isReference: 'Реферал',
+      isChecked: 'Антифрод',
     };
     return labels[key] || key;
   };
@@ -171,6 +171,22 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
       return;
     }
 
+    // Создаём объект с полями в правильном порядке
+    const orderedFields = {};
+    const fieldOrder = [
+      'id', 'createdAt', 'gclid', 'host', 'IP', 'headers', 'jsData',
+      'timeSpent', 'clickCoordinates', 'scrollCoordinates', 'clickOnNumber',
+      'clickOnInvisibleNumber', 'accountID', 'companyID', 'keyword', 'device',
+      'storageQuota', 'fingerprint', 'isFirstVisit', 'clickCallType',
+      'hadTouchBeforeScroll', 'motionDataRaw', 'isReference', 'isChecked'
+    ];
+    
+    fieldOrder.forEach(key => {
+      if (fields[key] !== undefined) {
+        orderedFields[key] = fields[key];
+      }
+    });
+
     const data = {
       startDate: startOfDay(startDate).toISOString(),
       endDate: endOfDay(endDate).toISOString(),
@@ -178,7 +194,7 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
       limit,
       format: exportFormat,
       streamingThreshold,
-      ...Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, value]))
+      ...orderedFields
     };
 
     const getFileExtension = () => {
