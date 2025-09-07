@@ -45,7 +45,7 @@ export default function FormAddGA({
     // Проверяем валидность всех полей
     const isAddAccountIDValid = addAccountID.trim().length >= 12;
     const isAddEmailGAValid = addEmailGA.trim().length >= 12;
-    const isAddGTAGIDValid = addGTAGID.trim().length >= 14;
+    const isAddGTAGIDValid = addGTAGID.trim().length >= 12;
     const isAddGTAGKEYValid = addGTAGKEY.trim().length >= 14;
 
     if (
@@ -141,10 +141,10 @@ export default function FormAddGA({
                 value={addGTAGID.trim()}
                 onChange={(e) => setAddGTAGID(e.target.value)}
                 helperText={
-                  addGTAGID.trim().length < 14 && 'Пример: AW-1234567890'
+                  addGTAGID.trim().length < 12 && 'Пример: AW-1234567890'
                 }
                 required
-                error={addGTAGID.trim().length < 14}
+                error={addGTAGID.trim().length < 12}
               />
             </FormControl>
             {/* GTAG_KEY аккаунта рекламы */}
