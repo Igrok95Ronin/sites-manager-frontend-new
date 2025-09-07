@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import {
   Button,
   Checkbox,
-  FormControlLabel,
   Grid,
   Box,
   Typography,
@@ -14,8 +13,6 @@ import {
   Snackbar,
   Alert,
   CircularProgress,
-  DialogContentText,
-  Divider,
   Paper,
   Tooltip,
   Autocomplete,
@@ -23,60 +20,71 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Chip,
+  IconButton,
+  Card,
+  CardContent,
+  Fade,
+  LinearProgress,
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SettingsIcon from '@mui/icons-material/Settings';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import DomainIcon from '@mui/icons-material/Domain';
+import NumbersIcon from '@mui/icons-material/Numbers';
+import DataObjectIcon from '@mui/icons-material/DataObject';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import StorageIcon from '@mui/icons-material/Storage';
+import TodayIcon from '@mui/icons-material/Today';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import TableChartIcon from '@mui/icons-material/TableChart';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
+import CloseIcon from '@mui/icons-material/Close';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import ruLocale from 'date-fns/locale/ru';
 import axios from 'axios';
 import { startOfDay, endOfDay } from 'date-fns';
 import axiosInstance from '../../../../axiosInstance';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'; // Иконка для подсказки
 
 const APIURL = process.env.REACT_APP_APIURL;
 
 // Описание каждого чекбокса
 const fieldDescriptions = {
-  id: 'Уникальный идентификатор записи в базе данных. Используется для однозначной идентификации каждого визита',
-  createdAt: 'Точная дата и время посещения сайта пользователем (формат: ГГГГ-ММ-ДД ЧЧ:ММ:СС)',
-  gclid: 'Google Click Identifier — уникальный параметр Google Ads для отслеживания эффективности рекламных кампаний и конверсий',
-  host: 'Полное доменное имя сайта, который посетил пользователь (например: example.com)',
-  IP: 'IP-адрес пользователя — сетевой адрес устройства, с которого был совершен визит',
-  headers: 'HTTP-заголовки браузера пользователя, включая User-Agent, язык, реферер и другую техническую информацию',
-  jsData: 'Данные JavaScript о браузере: язык системы, разрешение экрана, установленные плагины, часовой пояс и другие параметры',
-  timeSpent: 'Общее время в секундах, которое пользователь провел на сайте во время данного визита',
-  clickCoordinates: 'Точные координаты (X, Y) всех кликов пользователя на странице для анализа поведения',
-  scrollCoordinates: 'Данные о прокрутке страницы: глубина скролла, скорость, паттерны прокрутки',
-  clickOnNumber: 'Индикатор того, кликнул ли пользователь на видимый номер телефона на странице (true/false)',
-  clickOnInvisibleNumber: 'Индикатор клика на скрытый/невидимый номер телефона, используемый для отслеживания (true/false)',
-  accountID: 'Идентификатор Google Ads аккаунта, с которого пришел пользователь (если применимо)',
-  companyID: 'Идентификатор рекламной кампании в Google Ads, откуда пришел пользователь',
-  keyword: 'Ключевое слово или поисковый запрос, по которому пользователь нашел и перешел на сайт',
-  device: 'Тип устройства пользователя: Desktop (компьютер), Mobile (мобильный), Tablet (планшет)',
-  storageQuota: 'Доступная квота локального хранилища браузера в байтах — может указывать на режим инкогнито',
-  fingerprint: 'Уникальный цифровой отпечаток браузера на основе множества параметров для идентификации устройства',
-  isFirstVisit: 'Первый визит пользователя на сайт с данного устройства/браузера (true/false)',
-  clickCallType: 'Тип действия при клике на телефон: tel (звонок), copy (копирование), none (без действия)',
-  hadTouchBeforeScroll: 'Было ли сенсорное касание экрана перед началом прокрутки — индикатор мобильного устройства',
-  motionDataRaw: 'Необработанные данные гироскопа и акселерометра устройства для анализа подлинности визита',
-  isReference: 'Реферальный визит — пользователь пришел по ссылке с другого сайта (true) или напрямую/через поиск (false)',
-  isChecked: '⚠️ ВАЖНО: Отметка системы антифрода о подозрительной активности. TRUE = подозрительный/ботовый трафик, FALSE = легитимный пользователь',
+  id: 'Уникальный идентификатор записи в базе данных',
+  createdAt: 'Дата и время посещения сайта',
+  gclid: 'Google Click ID для отслеживания рекламы',
+  host: 'Доменное имя посещенного сайта',
+  IP: 'IP-адрес посетителя',
+  headers: 'HTTP-заголовки браузера',
+  jsData: 'JavaScript данные о браузере и устройстве',
+  timeSpent: 'Время проведенное на сайте (сек)',
+  clickCoordinates: 'Координаты кликов на странице',
+  scrollCoordinates: 'Данные о прокрутке страницы',
+  clickOnNumber: 'Клик на видимый номер телефона',
+  clickOnInvisibleNumber: 'Клик на скрытый номер телефона',
+  accountID: 'ID рекламного аккаунта Google Ads',
+  companyID: 'ID рекламной кампании',
+  keyword: 'Ключевое слово для перехода',
+  device: 'Тип устройства (Desktop/Mobile/Tablet)',
+  storageQuota: 'Квота локального хранилища',
+  fingerprint: 'Цифровой отпечаток браузера',
+  isFirstVisit: 'Первое посещение сайта',
+  clickCallType: 'Тип действия при клике на телефон',
+  hadTouchBeforeScroll: 'Касание экрана перед прокруткой',
+  motionDataRaw: 'Данные гироскопа и акселерометра',
+  isReference: 'Реферальный переход',
+  isChecked: '⚠️ Подозрительная активность (антифрод)',
 };
 
 const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsADS }) => {
-  // Устанавливаем сегодняшнюю дату по умолчанию
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [domain, setDomain] = useState('');
   const [limit, setLimit] = useState('');
   const [exportFormat, setExportFormat] = useState('csv');
-  const [streamingThreshold, setStreamingThreshold] = useState(10000);
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  const streamingThreshold = 10000;
   const [fields, setFields] = useState(Object.fromEntries(Object.keys(fieldDescriptions).map((key) => [key, true])));
   const [domains, setDomains] = useState([]);
   const [subDomains, setSubDomains] = useState([]);
@@ -90,49 +98,57 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
       createdAt: 'Дата создания',
       gclid: 'GCLID',
       host: 'Хост',
-      IP: 'IP',
+      IP: 'IP адрес',
       headers: 'Заголовки',
       jsData: 'JS данные',
       timeSpent: 'Время на сайте',
-      clickCoordinates: 'Координаты кликов',
-      scrollCoordinates: 'Координаты скролла',
+      clickCoordinates: 'Клики',
+      scrollCoordinates: 'Скролл',
       clickOnNumber: 'Клик по номеру',
-      clickOnInvisibleNumber: 'Клик по скрытому номеру',
+      clickOnInvisibleNumber: 'Скрытый номер',
       accountID: 'ID аккаунта',
-      companyID: 'ID компании',
+      companyID: 'ID кампании',
       keyword: 'Ключевое слово',
       device: 'Устройство',
-      isChecked: 'Подозрительный трафик',
-      storageQuota: 'Квота хранилища',
-      fingerprint: 'Отпечаток браузера',
+      isChecked: 'Антифрод',
+      storageQuota: 'Хранилище',
+      fingerprint: 'Отпечаток',
       isFirstVisit: 'Первый визит',
       clickCallType: 'Тип звонка',
-      hadTouchBeforeScroll: 'Касание до скролла',
-      motionDataRaw: 'Данные движения',
-      isReference: 'Реферальный визит',
+      hadTouchBeforeScroll: 'Тач-скролл',
+      motionDataRaw: 'Движение',
+      isReference: 'Реферал',
     };
     return labels[key] || key;
   };
 
-  // Получение доменов и поддоменов
+  // Получение доменов
   const fetchDomains = async () => {
     try {
       setLoading(true);
-      const [domainsResponse, subDomainsResponse] = await Promise.all([
+      const [domainsRes, subDomainsRes] = await Promise.all([
         axiosInstance.get('/viewdomains'),
-        axiosInstance.get('/viewsubdomains'),
+        axiosInstance.get('/viewsubdomains')
       ]);
-      setDomains(domainsResponse.data);
-      setSubDomains(subDomainsResponse.data);
+      setDomains(domainsRes.data);
+      setSubDomains(subDomainsRes.data);
     } catch (error) {
-      console.error(error);
+      console.error('Ошибка получения доменов:', error);
+      // Если не удалось загрузить домены, всё равно разрешим ввод
+      setSnackbar({ 
+        open: true, 
+        message: 'Не удалось загрузить список доменов, введите вручную', 
+        severity: 'info' 
+      });
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (showDownloadFileLogsADS) fetchDomains();
+    if (showDownloadFileLogsADS) {
+      fetchDomains();
+    }
   }, [showDownloadFileLogsADS]);
 
   const domainsSubDomains = [...domains.map((d) => d.domain), ...subDomains.map((s) => s.subDomain)];
@@ -145,19 +161,14 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
     setFields({ ...fields, [event.target.name]: event.target.checked });
   };
 
-
-  const handleSnackbarClose = (_, reason) => {
-    if (reason === 'clickaway') return;
+  const handleSnackbarClose = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
   const handleDownload = () => {
-    if (!startDate || !endDate || !domain) {
-      return setSnackbar({ open: true, message: 'Заполните все обязательные поля.', severity: 'warning' });
-    }
-
-    if (startDate > endDate) {
-      return setSnackbar({ open: true, message: 'Начальная дата позже конечной.', severity: 'warning' });
+    if (!domain) {
+      setSnackbar({ open: true, message: '⚠️ Выберите домен', severity: 'warning' });
+      return;
     }
 
     const data = {
@@ -167,30 +178,7 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
       limit,
       format: exportFormat,
       streamingThreshold,
-      id: fields.id,
-      createdAt: fields.createdAt,
-      gclid: fields.gclid,
-      host: fields.host,
-      IP: fields.IP,
-      headers: fields.headers,
-      jsData: fields.jsData,
-      timeSpent: fields.timeSpent,
-      clickCoordinates: fields.clickCoordinates,
-      scrollCoordinates: fields.scrollCoordinates,
-      clickOnNumber: fields.clickOnNumber,
-      clickOnInvisibleNumber: fields.clickOnInvisibleNumber,
-      accountID: fields.accountID,
-      companyID: fields.companyID,
-      keyword: fields.keyword,
-      device: fields.device,
-      isChecked: fields.isChecked,
-      storageQuota: fields.storageQuota,
-      fingerprint: fields.fingerprint,
-      isFirstVisit: fields.isFirstVisit,
-      clickCallType: fields.clickCallType,
-      hadTouchBeforeScroll: fields.hadTouchBeforeScroll,
-      motionDataRaw: fields.motionDataRaw,
-      isReference: fields.isReference,
+      ...Object.fromEntries(Object.entries(fields).map(([key, value]) => [key, value]))
     };
 
     const getFileExtension = () => {
@@ -227,296 +215,447 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
         document.body.appendChild(link);
         link.click();
         link.remove();
-        window.URL.revokeObjectURL(url);
-
-        setSnackbar({ open: true, message: `Файл успешно скачан в формате ${exportFormat.toUpperCase()}.`, severity: 'success' });
+        setLoading(false);
+        setSnackbar({ open: true, message: '✅ Файл успешно скачан!', severity: 'success' });
         handleClose();
       })
       .catch((error) => {
-        console.error('Полная ошибка:', error);
-        
-        // Детальная информация об ошибке
-        if (error.response) {
-          console.error('Ответ сервера:', {
-            status: error.response.status,
-            statusText: error.response.statusText,
-            data: error.response.data,
-            headers: error.response.headers
-          });
-          
-          // Попытка прочитать текст ошибки из blob
-          if (error.response.data instanceof Blob) {
-            error.response.data.text().then(text => {
-              console.error('Текст ошибки от сервера:', text);
-              setSnackbar({ 
-                open: true, 
-                message: `Ошибка от сервера: ${text || 'Неизвестная ошибка'}`, 
-                severity: 'error' 
-              });
-            });
-          } else {
-            setSnackbar({ 
-              open: true, 
-              message: `Ошибка ${error.response.status}: ${error.response.statusText}`, 
-              severity: 'error' 
-            });
-          }
-        } else {
-          setSnackbar({ open: true, message: 'Ошибка при скачивании файла.', severity: 'error' });
-        }
-      })
-      .finally(() => setLoading(false));
+        setLoading(false);
+        console.error('Ошибка при скачивании:', error);
+        setSnackbar({ open: true, message: '❌ Ошибка при скачивании файла', severity: 'error' });
+      });
   };
+
+  // Подсчет выбранных полей
+  const selectedFieldsCount = Object.values(fields).filter(v => v).length;
+  const totalFieldsCount = Object.keys(fields).length;
 
   return (
     <Box>
-      <Dialog open={showDownloadFileLogsADS} onClose={handleClose} maxWidth="md" fullWidth>
-        <DialogTitle sx={{ backgroundColor: '#f5f5f5', fontWeight: 600 }}>📄 Скачать CSV с логами ADS</DialogTitle>
+      <Dialog 
+        open={showDownloadFileLogsADS} 
+        onClose={handleClose} 
+        maxWidth="lg" 
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+            overflow: 'hidden'
+          }
+        }}
+      >
+        {/* Заголовок с градиентом */}
+        <DialogTitle sx={{ 
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          color: 'white',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          py: 2.5
+        }}>
+          <Box display="flex" alignItems="center" gap={1.5}>
+            <CloudDownloadIcon sx={{ fontSize: 28 }} />
+            <Box>
+              <Typography variant="h6" fontWeight={600}>
+                Экспорт данных ADS
+              </Typography>
+              <Typography variant="caption" sx={{ opacity: 0.9 }}>
+                Настройте параметры экспорта логов
+              </Typography>
+            </Box>
+          </Box>
+          <IconButton 
+            onClick={handleClose} 
+            sx={{ color: 'white', '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' }}}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
 
-        <DialogContent sx={{ backgroundColor: '#fafafa' }}>
-          <Paper elevation={1} sx={{ padding: 4, borderRadius: 3 }}>
-            <Grid container spacing={4}>
-              {/* Быстрый выбор периода */}
-              <Grid item xs={12}>
-                <Box display="flex" gap={1} flexWrap="wrap">
-                  <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
-                    Быстрый выбор:
-                  </Typography>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() => {
-                      setStartDate(new Date());
-                      setEndDate(new Date());
-                    }}
-                  >
-                    Сегодня
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() => {
-                      const date = new Date();
-                      date.setDate(date.getDate() - 7);
-                      setStartDate(date);
-                      setEndDate(new Date());
-                    }}
-                  >
-                    7 дней
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() => {
-                      const date = new Date();
-                      date.setDate(date.getDate() - 30);
-                      setStartDate(date);
-                      setEndDate(new Date());
-                    }}
-                  >
-                    30 дней
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() => {
-                      const date = new Date();
-                      date.setMonth(date.getMonth() - 3);
-                      setStartDate(date);
-                      setEndDate(new Date());
-                    }}
-                  >
-                    3 месяца
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    color="secondary"
-                    onClick={() => {
-                      const date = new Date();
-                      date.setFullYear(date.getFullYear() - 1);
-                      setStartDate(date);
-                      setEndDate(new Date());
-                    }}
-                  >
-                    Весь год
-                  </Button>
-                </Box>
-                <Divider sx={{ mt: 2 }} />
-              </Grid>
+        {/* Прогресс бар при загрузке */}
+        {loading && <LinearProgress />}
 
-              {/* Дата начала / конца */}
-              <Grid item xs={12} sm={6}>
-                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ruLocale}>
-                  <DatePicker
-                    label="📅 Начальная дата"
-                    value={startDate}
-                    onChange={setStartDate}
-                    renderInput={(params) => <TextField variant="outlined" fullWidth {...params} />}
-                  />
-                </LocalizationProvider>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ruLocale}>
-                  <DatePicker
-                    label="📅 Конечная дата"
-                    value={endDate}
-                    onChange={setEndDate}
-                    renderInput={(params) => <TextField variant="outlined" fullWidth {...params} />}
-                  />
-                </LocalizationProvider>
-              </Grid>
-
-              {/* Домен и лимит */}
-              <Grid item xs={12} sm={6}>
-                <Autocomplete
-                  freeSolo
-                  value={domain}
-                  onChange={(event, newValue) => {
-                    setDomain(newValue || '');
-                  }}
-                  onInputChange={(event, newInputValue) => {
-                    setDomain(newInputValue);
-                  }}
-                  options={domainsSubDomains}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="🌐 Домен"
-                      variant="outlined"
-                      fullWidth
-                      placeholder="Введите или выберите домен"
-                    />
-                  )}
-                />
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  label="🔢 Кол-во логов"
-                  type="number"
-                  value={limit}
-                  onChange={(e) => setLimit(e.target.value)}
-                  fullWidth
-                  InputProps={{ inputProps: { min: 1 } }}
-                />
-                <DialogContentText sx={{ fontSize: '0.9rem', mt: 1 }}>
-                  Оставьте пустым, чтобы скачать все логи
-                </DialogContentText>
-              </Grid>
-
-              {/* Формат экспорта */}
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel>📁 Формат экспорта</InputLabel>
-                  <Select
-                    value={exportFormat}
-                    onChange={(e) => setExportFormat(e.target.value)}
-                    label="📁 Формат экспорта"
-                  >
-                    <MenuItem value="csv">
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <Chip label="CSV" size="small" color="primary" />
-                        <Typography variant="body2">Таблица (рекомендуется)</Typography>
-                      </Box>
-                    </MenuItem>
-                    <MenuItem value="xlsx">
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <Chip label="Excel" size="small" color="success" />
-                        <Typography variant="body2">Microsoft Excel</Typography>
-                      </Box>
-                    </MenuItem>
-                    <MenuItem value="json">
-                      <Box display="flex" alignItems="center" gap={1}>
-                        <Chip label="JSON" size="small" color="warning" />
-                        <Typography variant="body2">Для разработчиков</Typography>
-                      </Box>
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              {/* Расширенные настройки */}
-              <Grid item xs={12} sm={6}>
-                <Accordion expanded={showAdvanced} onChange={() => setShowAdvanced(!showAdvanced)}>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <SettingsIcon fontSize="small" />
-                      <Typography>Расширенные настройки</Typography>
-                    </Box>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <TextField
-                      label="⚡ Порог стриминга"
-                      type="number"
-                      value={streamingThreshold}
-                      onChange={(e) => setStreamingThreshold(Number(e.target.value))}
-                      fullWidth
-                      InputProps={{ inputProps: { min: 1000, step: 1000 } }}
-                      helperText="Количество записей для включения потоковой передачи (по умолчанию: 10000)"
-                    />
-                  </AccordionDetails>
-                </Accordion>
-              </Grid>
-
-              {/* Чекбоксы */}
-              <Grid item xs={12}>
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: 500 }}>
-                  🧩 Выберите поля для CSV
-                </Typography>
-                <Grid container spacing={2}>
-                  {Object.entries(fields).map(([key, value]) => (
-                    <Grid item xs={12} sm={6} md={4} key={key}>
-                      <Tooltip title={fieldDescriptions[key]} placement="top" arrow>
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={value}
-                              onChange={handleCheckboxChange}
-                              name={key}
-                              color="primary"
-                              sx={{ '&.Mui-checked': { color: '#1976d2' } }}
-                            />
-                          }
-                          label={
-                            <Box display="flex" alignItems="center" gap={0.5}>
-                              {getFieldLabel(key)}
-                              <InfoOutlinedIcon fontSize="small" color="action" />
-                            </Box>
-                          }
+        <DialogContent sx={{ backgroundColor: '#f8f9fa', p: 0 }}>
+          <Box sx={{ p: 3 }}>
+            {/* Секция 1: Период времени */}
+            <Fade in={true} timeout={500}>
+              <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+                <CardContent>
+                  <Box display="flex" alignItems="center" gap={1} mb={2}>
+                    <DateRangeIcon color="primary" />
+                    <Typography variant="h6" fontWeight={500}>
+                      Период данных
+                    </Typography>
+                  </Box>
+                  
+                  {/* Быстрый выбор периода */}
+                  <Box sx={{ mb: 3, p: 2, backgroundColor: '#f0f4ff', borderRadius: 2 }}>
+                    <Typography variant="body2" color="text.secondary" mb={1.5}>
+                      Быстрый выбор периода:
+                    </Typography>
+                    <Box display="flex" gap={1} flexWrap="wrap">
+                      {[
+                        { label: 'Сегодня', icon: <TodayIcon fontSize="small" />, days: 0 },
+                        { label: 'Неделя', days: 7 },
+                        { label: 'Месяц', days: 30 },
+                        { label: '3 месяца', days: 90 },
+                        { label: 'Год', days: 365 },
+                      ].map((period) => (
+                        <Chip
+                          key={period.label}
+                          label={period.label}
+                          icon={period.icon}
+                          onClick={() => {
+                            if (period.days === 0) {
+                              setStartDate(new Date());
+                              setEndDate(new Date());
+                            } else {
+                              const date = new Date();
+                              date.setDate(date.getDate() - period.days);
+                              setStartDate(date);
+                              setEndDate(new Date());
+                            }
+                          }}
+                          variant={period.days === 0 ? "filled" : "outlined"}
+                          color="primary"
+                          sx={{ 
+                            '&:hover': { 
+                              transform: 'translateY(-2px)',
+                              boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                            },
+                            transition: 'all 0.2s'
+                          }}
                         />
-                      </Tooltip>
+                      ))}
+                    </Box>
+                  </Box>
+
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                      <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ruLocale}>
+                        <DatePicker
+                          label="Начальная дата"
+                          value={startDate}
+                          onChange={setStartDate}
+                          renderInput={(params) => (
+                            <TextField 
+                              {...params} 
+                              fullWidth 
+                              InputProps={{
+                                ...params.InputProps,
+                                startAdornment: <CalendarTodayIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
+                              }}
+                            />
+                          )}
+                        />
+                      </LocalizationProvider>
                     </Grid>
-                  ))}
-                </Grid>
-              </Grid>
-            </Grid>
-          </Paper>
+                    <Grid item xs={12} sm={6}>
+                      <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ruLocale}>
+                        <DatePicker
+                          label="Конечная дата"
+                          value={endDate}
+                          onChange={setEndDate}
+                          renderInput={(params) => (
+                            <TextField 
+                              {...params} 
+                              fullWidth
+                              InputProps={{
+                                ...params.InputProps,
+                                startAdornment: <CalendarTodayIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
+                              }}
+                            />
+                          )}
+                        />
+                      </LocalizationProvider>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Fade>
+
+            {/* Секция 2: Основные параметры */}
+            <Fade in={true} timeout={700}>
+              <Card sx={{ mb: 3, borderRadius: 2, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+                <CardContent>
+                  <Box display="flex" alignItems="center" gap={1} mb={2}>
+                    <SettingsIcon color="primary" />
+                    <Typography variant="h6" fontWeight={500}>
+                      Основные параметры
+                    </Typography>
+                  </Box>
+
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} md={4}>
+                      <Autocomplete
+                        freeSolo
+                        value={domain}
+                        onChange={(event, newValue) => setDomain(newValue || '')}
+                        onInputChange={(event, newInputValue) => {
+                          setDomain(newInputValue);
+                        }}
+                        options={domainsSubDomains}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Домен *"
+                            variant="outlined"
+                            fullWidth
+                            required
+                            error={!domain && snackbar.open}
+                            InputProps={{
+                              ...params.InputProps,
+                              startAdornment: (
+                                <>
+                                  <DomainIcon fontSize="small" sx={{ mr: 1, color: domain ? 'primary.main' : 'text.secondary' }} />
+                                  {params.InputProps.startAdornment}
+                                </>
+                              )
+                            }}
+                            helperText={
+                              <Box component="span" sx={{ color: domain ? 'success.main' : 'text.secondary' }}>
+                                {domain ? '✓ Домен выбран' : 'Выберите или введите домен'}
+                              </Box>
+                            }
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                '&.Mui-focused': {
+                                  '& .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: domain ? 'success.main' : 'primary.main',
+                                    borderWidth: 2
+                                  }
+                                }
+                              }
+                            }}
+                          />
+                        )}
+                        sx={{
+                          '& .MuiAutocomplete-popupIndicator': {
+                            color: domain ? 'success.main' : 'action.active'
+                          }
+                        }}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12} md={4}>
+                      <TextField
+                        label="Лимит записей"
+                        type="number"
+                        value={limit}
+                        onChange={(e) => setLimit(e.target.value)}
+                        fullWidth
+                        InputProps={{
+                          inputProps: { min: 1 },
+                          startAdornment: <NumbersIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
+                        }}
+                        helperText="Оставьте пустым для всех записей"
+                      />
+                    </Grid>
+
+                    <Grid item xs={12} md={4}>
+                      <FormControl fullWidth>
+                        <InputLabel>Формат экспорта</InputLabel>
+                        <Select
+                          value={exportFormat}
+                          onChange={(e) => setExportFormat(e.target.value)}
+                          label="Формат экспорта"
+                          startAdornment={<InsertDriveFileIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />}
+                        >
+                          <MenuItem value="csv">
+                            <Box display="flex" alignItems="center" gap={1}>
+                              <TableChartIcon fontSize="small" color="primary" />
+                              <Box>
+                                <Typography variant="body2">CSV</Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  Универсальный формат
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </MenuItem>
+                          <MenuItem value="xlsx">
+                            <Box display="flex" alignItems="center" gap={1}>
+                              <InsertDriveFileIcon fontSize="small" color="success" />
+                              <Box>
+                                <Typography variant="body2">Excel</Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  Microsoft Excel
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </MenuItem>
+                          <MenuItem value="json">
+                            <Box display="flex" alignItems="center" gap={1}>
+                              <DataObjectIcon fontSize="small" color="warning" />
+                              <Box>
+                                <Typography variant="body2">JSON</Typography>
+                                <Typography variant="caption" color="text.secondary">
+                                  Для разработчиков
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Fade>
+
+            {/* Секция 3: Выбор полей */}
+            <Fade in={true} timeout={900}>
+              <Card sx={{ borderRadius: 2, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+                <CardContent>
+                  <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <CheckBoxIcon color="primary" />
+                      <Typography variant="h6" fontWeight={500}>
+                        Поля для экспорта
+                      </Typography>
+                      <Chip 
+                        label={`${selectedFieldsCount} / ${totalFieldsCount}`}
+                        size="small"
+                        color={selectedFieldsCount === totalFieldsCount ? "success" : "default"}
+                      />
+                    </Box>
+                    <Box display="flex" gap={1}>
+                      <Button
+                        size="small"
+                        startIcon={<CheckBoxIcon />}
+                        onClick={() => setFields(Object.fromEntries(Object.keys(fields).map(key => [key, true])))}
+                      >
+                        Выбрать все
+                      </Button>
+                      <Button
+                        size="small"
+                        startIcon={<CheckBoxOutlineBlankIcon />}
+                        onClick={() => setFields(Object.fromEntries(Object.keys(fields).map(key => [key, false])))}
+                      >
+                        Снять все
+                      </Button>
+                    </Box>
+                  </Box>
+
+                  <Grid container spacing={1.5}>
+                    {Object.entries(fields).map(([key, value]) => (
+                      <Grid item xs={12} sm={6} md={4} key={key}>
+                        <Tooltip title={fieldDescriptions[key]} placement="top" arrow>
+                          <Paper
+                            sx={{
+                              p: 1.5,
+                              cursor: 'pointer',
+                              backgroundColor: value ? '#e3f2fd' : 'transparent',
+                              border: '1px solid',
+                              borderColor: value ? '#1976d2' : '#e0e0e0',
+                              transition: 'all 0.2s',
+                              '&:hover': {
+                                transform: 'translateY(-2px)',
+                                boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                              }
+                            }}
+                            onClick={() => handleCheckboxChange({ target: { name: key, checked: !value }})}
+                          >
+                            <Box display="flex" alignItems="center" gap={1}>
+                              <Checkbox
+                                checked={value}
+                                onChange={handleCheckboxChange}
+                                name={key}
+                                size="small"
+                                sx={{ p: 0 }}
+                              />
+                              <Typography variant="body2" sx={{ flexGrow: 1 }}>
+                                {getFieldLabel(key)}
+                              </Typography>
+                              {key === 'isChecked' && (
+                                <Chip label="Важно" size="small" color="error" sx={{ height: 20 }} />
+                              )}
+                            </Box>
+                          </Paper>
+                        </Tooltip>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </CardContent>
+              </Card>
+            </Fade>
+          </Box>
         </DialogContent>
 
-        {/* Кнопки */}
-        <DialogActions sx={{ px: 4, pb: 3, backgroundColor: '#f5f5f5' }}>
+        {/* Кнопки действий */}
+        <DialogActions sx={{ 
+          background: 'linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%)',
+          borderTop: '2px solid #e3e4e6',
+          px: 4,
+          py: 2.5,
+          gap: 2
+        }}>
           <Button
-            variant="outlined"
-            color="warning"
+            variant="text"
+            color="inherit"
             href="https://drive.google.com/drive/u/0/home"
             target="_blank"
-            rel="noopener noreferrer"
+            startIcon={<StorageIcon />}
+            sx={{ 
+              mr: 'auto',
+              color: '#666',
+              '&:hover': { 
+                backgroundColor: 'rgba(0,0,0,0.04)',
+                color: '#333'
+              }
+            }}
           >
-            Google Диск
+            Google Drive
           </Button>
-          <Button onClick={handleClose} color="secondary" disabled={loading}>
+          
+          <Button 
+            onClick={handleClose} 
+            variant="outlined"
+            color="inherit"
+            size="large"
+            disabled={loading}
+            sx={{ 
+              borderColor: '#ddd',
+              color: '#666',
+              px: 3,
+              '&:hover': { 
+                borderColor: '#999',
+                backgroundColor: 'rgba(0,0,0,0.02)'
+              }
+            }}
+          >
             Отмена
           </Button>
+          
           <Button
             variant="contained"
-            color="primary"
             onClick={handleDownload}
-            disabled={loading}
-            startIcon={loading && <CircularProgress size={20} />}
+            disabled={loading || !domain}
+            size="large"
+            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <CloudDownloadIcon />}
+            sx={{
+              background: loading 
+                ? 'linear-gradient(135deg, #a0a0a0 0%, #808080 100%)'
+                : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              px: 4,
+              py: 1.2,
+              fontSize: '1rem',
+              fontWeight: 600,
+              boxShadow: '0 4px 14px rgba(102, 126, 234, 0.4)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5a67d8 0%, #6b4299 100%)',
+                boxShadow: '0 6px 20px rgba(102, 126, 234, 0.5)',
+                transform: 'translateY(-1px)'
+              },
+              '&:disabled': {
+                background: 'linear-gradient(135deg, #a0a0a0 0%, #808080 100%)',
+                color: 'rgba(255,255,255,0.7)'
+              },
+              transition: 'all 0.3s ease'
+            }}
           >
-            {loading ? 'Скачивание...' : 'Скачать'}
+            {loading ? 'Загрузка...' : 'Скачать данные'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -527,7 +666,12 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+        <Alert 
+          onClose={handleSnackbarClose} 
+          severity={snackbar.severity} 
+          sx={{ width: '100%' }}
+          variant="filled"
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
