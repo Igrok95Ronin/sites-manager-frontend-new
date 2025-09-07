@@ -20,6 +20,7 @@ import IPInfo from '../IPInfo/IPInfo.js';
 import AlertDialog from '../../HeadersJS/AlertDialog/AlertDialog.js';
 import IncognitoIcon from '@mui/icons-material/Visibility'; // или любой другой иконкой инкогнито
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import axiosInstance from '../../../../axiosInstance'; // Для API запросов
 
 export default function TableRowRender({
@@ -39,12 +40,15 @@ export default function TableRowRender({
   setFilterFingerprint,
   setFilterMotionDataRaw,
   setFilterIP,
+  setFilterTimeSpent,
   doubleOutput,
   companyIDData,
   dataGoogleAccounts,
 }) {
   // Состояние для отслеживания is_reference
   const [isReference, setIsReference] = React.useState(row.IsReference || false);
+  const [hoveredDomain, setHoveredDomain] = React.useState(false);
+  const [copySuccess, setCopySuccess] = React.useState(false);
   
   // Обработчик изменения IsReference
   const handleReferenceChange = async (clickId, newValue) => {
@@ -474,6 +478,114 @@ export default function TableRowRender({
 
         // Логика для Domain (фильтр по домену)
         if (cellKey === 'Domain') {
+          const handleCopyUrl = () => {
+            const url = `https://${cellValue}`;
+            navigator.clipboard.writeText(url).then(() => {
+              setCopySuccess(true);
+              setTimeout(() => setCopySuccess(false), 2000);
+            });
+          };
+
+          return (
+            <TableCell
+              className="statistics__padding"
+              key={cellKey}
+              align="left"
+              style={{ 
+                backgroundColor: rowBackgroundColor,
+                position: 'relative'
+              }}
+              onMouseEnter={() => setHoveredDomain(true)}
+              onMouseLeave={() => setHoveredDomain(false)}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Button
+                  variant="text"
+                  size="small"
+                  color="secondary"
+                  onClick={() => setFilterByDomain(cellValue)}
+                  sx={{
+                    textTransform: 'none',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {cellValue}
+                </Button>
+                
+                {/* Кнопки показываются только при наведении */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '2px',
+                  opacity: hoveredDomain ? 1 : 0,
+                  visibility: hoveredDomain ? 'visible' : 'hidden',
+                  transition: 'opacity 0.2s ease, visibility 0.2s ease',
+                }}>
+                  {/* Кнопка-ссылка на сайт */}
+                  <Tooltip title="Открыть сайт">
+                    <a
+                      href={`https://${cellValue}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
+                        color: '#1976d2',
+                        padding: '4px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        cursor: 'pointer',
+                        borderRadius: '4px',
+                        transition: 'background-color 0.2s',
+                      }}
+                      onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(25, 118, 210, 0.08)'}
+                      onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                    >
+                      <OpenInNewIcon fontSize="small" />
+                    </a>
+                  </Tooltip>
+                  
+                  {/* Кнопка копирования URL */}
+                  <Tooltip title={copySuccess ? "Скопировано!" : "Копировать URL"}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCopyUrl();
+                      }}
+                      style={{
+                        color: copySuccess ? '#4caf50' : '#666',
+                        padding: '4px',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        cursor: 'pointer',
+                        border: 'none',
+                        background: 'transparent',
+                        borderRadius: '4px',
+                        transition: 'all 0.2s',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!copySuccess) {
+                          e.target.style.backgroundColor = 'rgba(0, 0, 0, 0.04)';
+                          e.target.style.color = '#333';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'transparent';
+                        if (!copySuccess) {
+                          e.target.style.color = '#666';
+                        }
+                      }}
+                    >
+                      <ContentCopyIcon fontSize="small" />
+                    </button>
+                  </Tooltip>
+                </div>
+              </div>
+            </TableCell>
+          );
+        }
+
+        // Логика для TimeSpent (фильтр по времени)
+        if (cellKey === 'TimeSpent') {
           return (
             <TableCell
               className="statistics__padding"
@@ -485,7 +597,7 @@ export default function TableRowRender({
                 variant="text"
                 size="small"
                 color="secondary"
-                onClick={() => setFilterByDomain(cellValue)}
+                onClick={() => setFilterTimeSpent(cellValue)}
                 sx={{
                   textTransform: 'none',
                   whiteSpace: 'nowrap',
@@ -493,21 +605,6 @@ export default function TableRowRender({
               >
                 {cellValue}
               </Button>
-              {/* Кнопка-ссылка на сайт */}
-              <a
-                href={`https://${cellValue}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()} // чтобы не ломала сортировку при клике на текст
-                style={{
-                  color: '#1976d2',
-                  padding: '2px',
-                  display: 'inline-flex',
-                  alignItems: 'center'
-                }}
-              >
-                <OpenInNewIcon fontSize="small" />
-              </a>
             </TableCell>
           );
         }

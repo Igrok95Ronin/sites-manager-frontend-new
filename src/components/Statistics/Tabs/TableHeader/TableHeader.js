@@ -36,6 +36,8 @@ export default function TableHeader({
   setFilterMotionDataRaw,
   filterIP,
   setFilterIP,
+  filterTimeSpent,
+  setFilterTimeSpent,
   allColumns,
   processedData,
   loadMoreRows,
@@ -223,6 +225,21 @@ export default function TableHeader({
                             onClick={(e) => {
                               e.stopPropagation();
                               setFilterIP(null);
+                            }}
+                          >
+                            <RestartAltIcon sx={{ width: '18px' }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {/* Дополнительные элементы (например, Tooltips, Buttons) */}
+                      {column.dataKey === 'TimeSpent' && filterTimeSpent && (
+                        <Tooltip title="Сбросить фильтр по времени" arrow placement="top">
+                          <IconButton
+                            sx={{ padding: '5px 0', marginLeft: '0' }}
+                            color="success"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFilterTimeSpent(null);
                             }}
                           >
                             <RestartAltIcon sx={{ width: '18px' }} />

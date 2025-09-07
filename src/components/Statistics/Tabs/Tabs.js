@@ -13,6 +13,9 @@ const Tabs = ({
   setFilterFingerprint,
   setFilterMotionDataRaw,
   setFilterAccountID,
+  setFilterIP,
+  setFilterTimeSpent,
+  filterTimeSpent,
   fixedHeaderContent,
   rowContent,
   loadMoreRows,
@@ -48,6 +51,9 @@ const Tabs = ({
             setFilterMotionDataRaw={setFilterMotionDataRaw}
             setFilterByDomain={setFilterByDomain}
             setFilterAccountID={setFilterAccountID}
+            setFilterIP={setFilterIP}
+            setFilterTimeSpent={setFilterTimeSpent}
+            filterTimeSpent={filterTimeSpent}
             fixedHeaderContent={fixedHeaderContent}
             rowContent={rowContent}
             loadMoreRows={loadMoreRows}

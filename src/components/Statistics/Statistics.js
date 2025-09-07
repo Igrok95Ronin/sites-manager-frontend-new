@@ -189,6 +189,7 @@ export default function ReactVirtualizedTable() {
   const [filterFingerprint, setFilterFingerprint] = useLocalStorageDataKeys('filterFingerprint', null); // Состояние для фильтрации по filterFingerprint
   const [filterMotionDataRaw, setFilterMotionDataRaw] = useLocalStorageDataKeys('filterMotionDataRaw', null); // Состояние для фильтрации по MotionDataRaw
   const [filterIP, setFilterIP] = useLocalStorageDataKeys('filterIP', null); // Состояние для фильтрации по IP
+  const [filterTimeSpent, setFilterTimeSpent] = useLocalStorageDataKeys('filterTimeSpent', null); // Состояние для фильтрации по TimeSpent
 
   // Данные CompanyID
   const [companyIDData, setCompanyIDData] = useState([]);
@@ -311,7 +312,7 @@ export default function ReactVirtualizedTable() {
     // Предварительно подготавливаем значения фильтров для оптимизации
     const hasSearchQuery = Boolean(debouncedSearchQuery);
     const searchQueryLower = hasSearchQuery ? debouncedSearchQuery.toLowerCase() : '';
-    const hasFilters = Boolean(filterByDomain || filterCompanyID || filterAccountID || filterKeyword || filterFingerprint || filterMotionDataRaw || filterIP);
+    const hasFilters = Boolean(filterByDomain || filterCompanyID || filterAccountID || filterKeyword || filterFingerprint || filterMotionDataRaw || filterIP || filterTimeSpent);
 
     // Если нет фильтров и поискового запроса, возвращаем исходный массив
     if (!hasSearchQuery && !hasFilters) {
@@ -343,6 +344,7 @@ export default function ReactVirtualizedTable() {
       if (filterKeyword && item.Keyword !== filterKeyword) return false;
       if (filterFingerprint && item.Fingerprint !== filterFingerprint) return false;
       if (filterIP && item.IP !== filterIP) return false;
+      if (filterTimeSpent && item.TimeSpent !== filterTimeSpent) return false;
       if (filterMotionDataRaw) {
         try {
           const motionData = typeof item.MotionDataRaw === 'string' ? JSON.parse(item.MotionDataRaw) : item.MotionDataRaw;
@@ -388,6 +390,7 @@ export default function ReactVirtualizedTable() {
     filterFingerprint,
     filterMotionDataRaw,
     filterIP,
+    filterTimeSpent,
   ]);
 
   const processedData = useMemo(() => {
@@ -621,6 +624,8 @@ export default function ReactVirtualizedTable() {
             setFilterMotionDataRaw={setFilterMotionDataRaw}
             filterIP={filterIP}
             setFilterIP={setFilterIP}
+            filterTimeSpent={filterTimeSpent}
+            setFilterTimeSpent={setFilterTimeSpent}
             allColumns={allColumns}
             processedData={processedData}
             loadMoreRows={loadMoreRows}
@@ -650,6 +655,7 @@ export default function ReactVirtualizedTable() {
             setFilterFingerprint={setFilterFingerprint}
             setFilterMotionDataRaw={setFilterMotionDataRaw}
             setFilterIP={setFilterIP}
+            setFilterTimeSpent={setFilterTimeSpent}
             doubleOutput={doubleOutput}
             companyIDData={companyIDData}
             dataGoogleAccounts={dataGoogleAccounts}
