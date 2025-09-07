@@ -19,12 +19,22 @@ import {
   Paper,
   Tooltip,
   Autocomplete,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Chip,
 } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import ruLocale from 'date-fns/locale/ru';
 import axios from 'axios';
-import { format } from 'date-fns';
+import { startOfDay, endOfDay } from 'date-fns';
 import axiosInstance from '../../../../axiosInstance';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'; // Иконка для подсказки
 
@@ -59,10 +69,14 @@ const fieldDescriptions = {
 };
 
 const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsADS }) => {
+  // Устанавливаем сегодняшнюю дату по умолчанию
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [domain, setDomain] = useState('');
   const [limit, setLimit] = useState('');
+  const [exportFormat, setExportFormat] = useState('csv');
+  const [streamingThreshold, setStreamingThreshold] = useState(10000);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [fields, setFields] = useState(Object.fromEntries(Object.keys(fieldDescriptions).map((key) => [key, true])));
   const [domains, setDomains] = useState([]);
   const [subDomains, setSubDomains] = useState([]);
@@ -123,11 +137,14 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
 
   const domainsSubDomains = [...domains.map((d) => d.domain), ...subDomains.map((s) => s.subDomain)];
 
-  const handleClose = () => setShowDownloadFileLogsADS(false);
+  const handleClose = () => {
+    setShowDownloadFileLogsADS(false);
+  };
 
   const handleCheckboxChange = (event) => {
     setFields({ ...fields, [event.target.name]: event.target.checked });
   };
+
 
   const handleSnackbarClose = (_, reason) => {
     if (reason === 'clickaway') return;
@@ -144,10 +161,12 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
     }
 
     const data = {
-      startDate: format(startDate, 'yyyy-MM-dd'),
-      endDate: format(endDate, 'yyyy-MM-dd'),
+      startDate: startOfDay(startDate).toISOString(),
+      endDate: endOfDay(endDate).toISOString(),
       domain,
       limit,
+      format: exportFormat,
+      streamingThreshold,
       id: fields.id,
       createdAt: fields.createdAt,
       gclid: fields.gclid,
@@ -174,31 +193,77 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
       isReference: fields.isReference,
     };
 
+    const getFileExtension = () => {
+      switch (exportFormat) {
+        case 'xlsx': return 'xlsx';
+        case 'json': return 'json';
+        default: return 'csv';
+      }
+    };
+
+    const getMimeType = () => {
+      switch (exportFormat) {
+        case 'xlsx': return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        case 'json': return 'application/json';
+        default: return 'text/csv';
+      }
+    };
+
     const fileName = () => {
       const now = new Date();
-      return `${domain}-${now.toISOString().replace(/[:.]/g, '-')}`;
+      return `${domain}-${now.toISOString().replace(/[:.]/g, '-')}.${getFileExtension()}`;
     };
 
     setLoading(true);
+    
     axios
       .post(`${APIURL}/downloadfilelogsads`, data, { responseType: 'blob' })
       .then((response) => {
-        const blob = new Blob([response.data], { type: 'text/csv' });
+        const blob = new Blob([response.data], { type: getMimeType() });
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${fileName()}.csv`;
+        link.download = fileName();
         document.body.appendChild(link);
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
 
-        setSnackbar({ open: true, message: 'Файл успешно скачан.', severity: 'success' });
+        setSnackbar({ open: true, message: `Файл успешно скачан в формате ${exportFormat.toUpperCase()}.`, severity: 'success' });
         handleClose();
       })
       .catch((error) => {
-        console.error(error);
-        setSnackbar({ open: true, message: 'Ошибка при скачивании файла.', severity: 'error' });
+        console.error('Полная ошибка:', error);
+        
+        // Детальная информация об ошибке
+        if (error.response) {
+          console.error('Ответ сервера:', {
+            status: error.response.status,
+            statusText: error.response.statusText,
+            data: error.response.data,
+            headers: error.response.headers
+          });
+          
+          // Попытка прочитать текст ошибки из blob
+          if (error.response.data instanceof Blob) {
+            error.response.data.text().then(text => {
+              console.error('Текст ошибки от сервера:', text);
+              setSnackbar({ 
+                open: true, 
+                message: `Ошибка от сервера: ${text || 'Неизвестная ошибка'}`, 
+                severity: 'error' 
+              });
+            });
+          } else {
+            setSnackbar({ 
+              open: true, 
+              message: `Ошибка ${error.response.status}: ${error.response.statusText}`, 
+              severity: 'error' 
+            });
+          }
+        } else {
+          setSnackbar({ open: true, message: 'Ошибка при скачивании файла.', severity: 'error' });
+        }
       })
       .finally(() => setLoading(false));
   };
@@ -211,6 +276,75 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
         <DialogContent sx={{ backgroundColor: '#fafafa' }}>
           <Paper elevation={1} sx={{ padding: 4, borderRadius: 3 }}>
             <Grid container spacing={4}>
+              {/* Быстрый выбор периода */}
+              <Grid item xs={12}>
+                <Box display="flex" gap={1} flexWrap="wrap">
+                  <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center', mr: 1 }}>
+                    Быстрый выбор:
+                  </Typography>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => {
+                      setStartDate(new Date());
+                      setEndDate(new Date());
+                    }}
+                  >
+                    Сегодня
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => {
+                      const date = new Date();
+                      date.setDate(date.getDate() - 7);
+                      setStartDate(date);
+                      setEndDate(new Date());
+                    }}
+                  >
+                    7 дней
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => {
+                      const date = new Date();
+                      date.setDate(date.getDate() - 30);
+                      setStartDate(date);
+                      setEndDate(new Date());
+                    }}
+                  >
+                    30 дней
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => {
+                      const date = new Date();
+                      date.setMonth(date.getMonth() - 3);
+                      setStartDate(date);
+                      setEndDate(new Date());
+                    }}
+                  >
+                    3 месяца
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    color="secondary"
+                    onClick={() => {
+                      const date = new Date();
+                      date.setFullYear(date.getFullYear() - 1);
+                      setStartDate(date);
+                      setEndDate(new Date());
+                    }}
+                  >
+                    Весь год
+                  </Button>
+                </Box>
+                <Divider sx={{ mt: 2 }} />
+              </Grid>
+
               {/* Дата начала / конца */}
               <Grid item xs={12} sm={6}>
                 <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={ruLocale}>
@@ -269,6 +403,60 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
                 <DialogContentText sx={{ fontSize: '0.9rem', mt: 1 }}>
                   Оставьте пустым, чтобы скачать все логи
                 </DialogContentText>
+              </Grid>
+
+              {/* Формат экспорта */}
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>📁 Формат экспорта</InputLabel>
+                  <Select
+                    value={exportFormat}
+                    onChange={(e) => setExportFormat(e.target.value)}
+                    label="📁 Формат экспорта"
+                  >
+                    <MenuItem value="csv">
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Chip label="CSV" size="small" color="primary" />
+                        <Typography variant="body2">Таблица (рекомендуется)</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="xlsx">
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Chip label="Excel" size="small" color="success" />
+                        <Typography variant="body2">Microsoft Excel</Typography>
+                      </Box>
+                    </MenuItem>
+                    <MenuItem value="json">
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Chip label="JSON" size="small" color="warning" />
+                        <Typography variant="body2">Для разработчиков</Typography>
+                      </Box>
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* Расширенные настройки */}
+              <Grid item xs={12} sm={6}>
+                <Accordion expanded={showAdvanced} onChange={() => setShowAdvanced(!showAdvanced)}>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <SettingsIcon fontSize="small" />
+                      <Typography>Расширенные настройки</Typography>
+                    </Box>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <TextField
+                      label="⚡ Порог стриминга"
+                      type="number"
+                      value={streamingThreshold}
+                      onChange={(e) => setStreamingThreshold(Number(e.target.value))}
+                      fullWidth
+                      InputProps={{ inputProps: { min: 1000, step: 1000 } }}
+                      helperText="Количество записей для включения потоковой передачи (по умолчанию: 10000)"
+                    />
+                  </AccordionDetails>
+                </Accordion>
               </Grid>
 
               {/* Чекбоксы */}
