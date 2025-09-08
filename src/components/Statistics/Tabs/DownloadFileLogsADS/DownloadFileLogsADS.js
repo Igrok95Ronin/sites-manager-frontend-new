@@ -90,6 +90,9 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
   const [subDomains, setSubDomains] = useState([]);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [loading, setLoading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [downloadStatus, setDownloadStatus] = useState('');
+  const [selectedPeriod, setSelectedPeriod] = useState(0); // Для отслеживания выбранного периода
 
   // Функция для получения читаемой метки поля
   const getFieldLabel = (key) => {
@@ -166,9 +169,22 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
   };
 
   const handleDownload = () => {
-    if (!domain) {
-      setSnackbar({ open: true, message: '⚠️ Выберите домен', severity: 'warning' });
-      return;
+    // Предупреждение при скачивании без домена
+    if (!domain && !limit) {
+      const confirmed = window.confirm(
+        '⚠️ ВНИМАНИЕ!\n\n' +
+        'Вы собираетесь скачать ВСЕ данные за выбранный период без ограничений.\n\n' +
+        'Это может привести к:\n' +
+        '• Очень большому размеру файла (сотни MB или GB)\n' +
+        '• Длительному времени загрузки (несколько минут)\n' +
+        '• Высокой нагрузке на сервер\n\n' +
+        'Рекомендуется установить лимит записей или выбрать конкретный домен.\n\n' +
+        'Продолжить загрузку?'
+      );
+      
+      if (!confirmed) {
+        return;
+      }
     }
 
     // Создаём объект с полями в правильном порядке
@@ -190,7 +206,7 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
     const data = {
       startDate: startOfDay(startDate).toISOString(),
       endDate: endOfDay(endDate).toISOString(),
-      domain,
+      domain: domain || '', // Если домен пустой, отправляем пустую строку
       limit,
       format: exportFormat,
       streamingThreshold,
@@ -215,14 +231,53 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
 
     const fileName = () => {
       const now = new Date();
-      return `${domain}-${now.toISOString().replace(/[:.]/g, '-')}.${getFileExtension()}`;
+      const domainPart = domain || 'all-domains';
+      return `${domainPart}-${now.toISOString().replace(/[:.]/g, '-')}.${getFileExtension()}`;
     };
 
     setLoading(true);
+    setDownloadProgress(0);
+    setDownloadStatus('Подготовка к загрузке...');
+    
+    // Определяем, используется ли потоковая загрузка
+    const isStreaming = !limit || parseInt(limit) > streamingThreshold;
     
     axios
-      .post(`${APIURL}/downloadfilelogsads`, data, { responseType: 'blob' })
+      .post(`${APIURL}/downloadfilelogsads`, data, { 
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            setDownloadProgress(percentCompleted);
+            
+            // Обновляем статус в зависимости от прогресса
+            if (percentCompleted < 30) {
+              setDownloadStatus('Получение данных с сервера...');
+            } else if (percentCompleted < 60) {
+              setDownloadStatus('Обработка записей...');
+            } else if (percentCompleted < 90) {
+              setDownloadStatus('Формирование файла...');
+            } else {
+              setDownloadStatus('Завершение загрузки...');
+            }
+          } else if (isStreaming) {
+            // Для потоковой загрузки без известного размера
+            setDownloadStatus(`Загружено: ${(progressEvent.loaded / 1024 / 1024).toFixed(2)} MB`);
+          }
+        }
+      })
       .then((response) => {
+        // Проверяем заголовки ответа для получения информации о методе экспорта
+        const totalRecords = response.headers['x-total-records'];
+        const exportMethod = response.headers['x-export-method'];
+        
+        if (totalRecords) {
+          console.log(`Экспортировано записей: ${totalRecords}`);
+        }
+        if (exportMethod === 'streaming') {
+          console.log('Использован потоковый метод экспорта');
+        }
+        
         const blob = new Blob([response.data], { type: getMimeType() });
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -231,14 +286,47 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
         document.body.appendChild(link);
         link.click();
         link.remove();
+        
+        // Очищаем память
+        window.URL.revokeObjectURL(url);
+        
         setLoading(false);
-        setSnackbar({ open: true, message: '✅ Файл успешно скачан!', severity: 'success' });
-        handleClose();
+        setDownloadProgress(100);
+        setDownloadStatus('');
+        
+        const successMessage = totalRecords 
+          ? `✅ Файл успешно скачан! (${totalRecords} записей)`
+          : '✅ Файл успешно скачан!';
+        
+        setSnackbar({ open: true, message: successMessage, severity: 'success' });
+        
+        // Закрываем диалог с небольшой задержкой
+        setTimeout(() => {
+          handleClose();
+          setDownloadProgress(0);
+        }, 1000);
       })
       .catch((error) => {
         setLoading(false);
+        setDownloadProgress(0);
+        setDownloadStatus('');
+        
+        let errorMessage = '❌ Ошибка при скачивании файла';
+        
+        if (error.response) {
+          if (error.response.status === 404) {
+            errorMessage = '❌ Нет данных для экспорта за указанный период';
+          } else if (error.response.status === 400) {
+            errorMessage = '❌ Некорректные параметры запроса';
+          } else if (error.response.status === 500) {
+            errorMessage = '❌ Ошибка сервера. Попробуйте позже';
+          }
+        } else if (error.request) {
+          errorMessage = '❌ Нет ответа от сервера. Проверьте соединение';
+        }
+        
         console.error('Ошибка при скачивании:', error);
-        setSnackbar({ open: true, message: '❌ Ошибка при скачивании файла', severity: 'error' });
+        setSnackbar({ open: true, message: errorMessage, severity: 'error' });
       });
   };
 
@@ -290,7 +378,31 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
         </DialogTitle>
 
         {/* Прогресс бар при загрузке */}
-        {loading && <LinearProgress />}
+        {loading && (
+          <Box sx={{ position: 'relative' }}>
+            <LinearProgress 
+              variant={downloadProgress > 0 ? "determinate" : "indeterminate"} 
+              value={downloadProgress}
+              sx={{ height: 6 }}
+            />
+            {downloadStatus && (
+              <Box sx={{ 
+                position: 'absolute', 
+                top: '50%', 
+                left: '50%', 
+                transform: 'translate(-50%, -50%)',
+                backgroundColor: 'rgba(255,255,255,0.9)',
+                padding: '2px 8px',
+                borderRadius: 1,
+                fontSize: '0.75rem',
+                fontWeight: 500,
+                color: 'primary.main'
+              }}>
+                {downloadStatus}
+              </Box>
+            )}
+          </Box>
+        )}
 
         <DialogContent sx={{ backgroundColor: '#f8f9fa', p: 0 }}>
           <Box sx={{ p: 3 }}>
@@ -323,6 +435,7 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
                           label={period.label}
                           icon={period.icon}
                           onClick={() => {
+                            setSelectedPeriod(period.days);
                             if (period.days === 0) {
                               setStartDate(new Date());
                               setEndDate(new Date());
@@ -333,12 +446,16 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
                               setEndDate(new Date());
                             }
                           }}
-                          variant={period.days === 0 ? "filled" : "outlined"}
-                          color="primary"
+                          variant={selectedPeriod === period.days ? "filled" : "outlined"}
+                          color={selectedPeriod === period.days ? "primary" : "default"}
                           sx={{ 
+                            backgroundColor: selectedPeriod === period.days ? 'primary.main' : 'transparent',
+                            color: selectedPeriod === period.days ? 'white' : 'text.primary',
+                            borderColor: selectedPeriod === period.days ? 'primary.main' : 'divider',
                             '&:hover': { 
                               transform: 'translateY(-2px)',
-                              boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                              boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                              backgroundColor: selectedPeriod === period.days ? 'primary.dark' : 'action.hover'
                             },
                             transition: 'all 0.2s'
                           }}
@@ -353,7 +470,10 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
                         <DatePicker
                           label="Начальная дата"
                           value={startDate}
-                          onChange={setStartDate}
+                          onChange={(newDate) => {
+                            setStartDate(newDate);
+                            setSelectedPeriod(-1); // Сбрасываем выбор периода при ручном изменении
+                          }}
                           renderInput={(params) => (
                             <TextField 
                               {...params} 
@@ -372,7 +492,10 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
                         <DatePicker
                           label="Конечная дата"
                           value={endDate}
-                          onChange={setEndDate}
+                          onChange={(newDate) => {
+                            setEndDate(newDate);
+                            setSelectedPeriod(-1); // Сбрасываем выбор периода при ручном изменении
+                          }}
                           renderInput={(params) => (
                             <TextField 
                               {...params} 
@@ -415,11 +538,9 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
                         renderInput={(params) => (
                           <TextField
                             {...params}
-                            label="Домен *"
+                            label="Домен (необязательно)"
                             variant="outlined"
                             fullWidth
-                            required
-                            error={!domain && snackbar.open}
                             InputProps={{
                               ...params.InputProps,
                               startAdornment: (
@@ -429,11 +550,7 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
                                 </>
                               )
                             }}
-                            helperText={
-                              <Box component="span" sx={{ color: domain ? 'success.main' : 'text.secondary' }}>
-                                {domain ? '✓ Домен выбран' : 'Выберите или введите домен'}
-                              </Box>
-                            }
+                            helperText={domain ? '✓ Домен выбран' : 'Оставьте пустым для экспорта всех доменов'}
                             sx={{
                               '& .MuiOutlinedInput-root': {
                                 '&.Mui-focused': {
@@ -465,7 +582,11 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
                           inputProps: { min: 1 },
                           startAdornment: <NumbersIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
                         }}
-                        helperText="Оставьте пустым для всех записей"
+                        helperText={
+                          (!limit || parseInt(limit) > streamingThreshold) 
+                            ? 'Оставьте пустым для всех записей. ℹ️ Будет использована потоковая загрузка'
+                            : 'Оставьте пустым для всех записей'
+                        }
                       />
                     </Grid>
 
@@ -515,6 +636,27 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
                       </FormControl>
                     </Grid>
                   </Grid>
+                  
+                  {/* Предупреждение о больших объёмах */}
+                  {!domain && (
+                    <Box sx={{ 
+                      mt: 2, 
+                      p: 2, 
+                      backgroundColor: '#fff3cd', 
+                      borderRadius: 1,
+                      border: '2px solid',
+                      borderColor: '#ffc107'
+                    }}>
+                      <Typography variant="body2" sx={{ color: '#856404', fontWeight: 600, mb: 0.5 }}>
+                        ⚠️ Внимание: экспорт без указания домена
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#856404', display: 'block' }}>
+                        Будут загружены данные по ВСЕМ доменам за период. 
+                        Это может занять длительное время и создать большой файл.
+                        {!limit && ' Рекомендуется установить лимит записей.'}
+                      </Typography>
+                    </Box>
+                  )}
                 </CardContent>
               </Card>
             </Fade>
@@ -646,7 +788,7 @@ const DownloadFileLogsADS = ({ showDownloadFileLogsADS, setShowDownloadFileLogsA
           <Button
             variant="contained"
             onClick={handleDownload}
-            disabled={loading || !domain}
+            disabled={loading}
             size="large"
             startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <CloudDownloadIcon />}
             sx={{
