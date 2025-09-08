@@ -16,6 +16,8 @@ const Tabs = ({
   setFilterIP,
   setFilterTimeSpent,
   filterTimeSpent,
+  setFilterScrollCoordinates,
+  filterScrollCoordinates,
   fixedHeaderContent,
   rowContent,
   loadMoreRows,
@@ -54,6 +56,8 @@ const Tabs = ({
             setFilterIP={setFilterIP}
             setFilterTimeSpent={setFilterTimeSpent}
             filterTimeSpent={filterTimeSpent}
+            setFilterScrollCoordinates={setFilterScrollCoordinates}
+            filterScrollCoordinates={filterScrollCoordinates}
             fixedHeaderContent={fixedHeaderContent}
             rowContent={rowContent}
             loadMoreRows={loadMoreRows}

@@ -38,6 +38,8 @@ export default function TableHeader({
   setFilterIP,
   filterTimeSpent,
   setFilterTimeSpent,
+  filterScrollCoordinates,
+  setFilterScrollCoordinates,
   allColumns,
   processedData,
   loadMoreRows,
@@ -240,6 +242,22 @@ export default function TableHeader({
                             onClick={(e) => {
                               e.stopPropagation();
                               setFilterTimeSpent(null);
+                            }}
+                          >
+                            <RestartAltIcon sx={{ width: '18px' }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+
+                      {/* Дополнительные элементы (например, Tooltips, Buttons) */}
+                      {column.dataKey === 'ScrollCoordinates' && filterScrollCoordinates && (
+                        <Tooltip title="Сбросить фильтр по скроллу" arrow placement="top">
+                          <IconButton
+                            sx={{ padding: '5px 0', marginLeft: '0' }}
+                            color="success"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFilterScrollCoordinates(null);
                             }}
                           >
                             <RestartAltIcon sx={{ width: '18px' }} />

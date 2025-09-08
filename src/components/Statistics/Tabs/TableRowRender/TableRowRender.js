@@ -41,6 +41,7 @@ export default function TableRowRender({
   setFilterMotionDataRaw,
   setFilterIP,
   setFilterTimeSpent,
+  setFilterScrollCoordinates,
   doubleOutput,
   companyIDData,
   dataGoogleAccounts,
@@ -416,6 +417,31 @@ export default function TableRowRender({
                 // Иначе показываем полную дату с годом
                 date.toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })
               )}
+            </TableCell>
+          );
+        }
+
+        // Логика для ScrollCoordinates (фильтр по координатам скролла)
+        if (cellKey === 'ScrollCoordinates') {
+          return (
+            <TableCell
+              className="statistics__padding"
+              key={cellKey}
+              align="left"
+              style={{ backgroundColor: rowBackgroundColor }}
+            >
+              <Button
+                variant="text"
+                size="small"
+                color="secondary"
+                onClick={() => setFilterScrollCoordinates(cellValue)}
+                sx={{
+                  textTransform: 'none',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {cellValue}
+              </Button>
             </TableCell>
           );
         }
