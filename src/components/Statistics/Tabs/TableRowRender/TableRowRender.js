@@ -42,6 +42,7 @@ export default function TableRowRender({
   setFilterIP,
   setFilterTimeSpent,
   setFilterScrollCoordinates,
+  setFilterClickCoordinates,
   doubleOutput,
   companyIDData,
   dataGoogleAccounts,
@@ -483,8 +484,23 @@ export default function TableRowRender({
                 whiteSpace: 'nowrap'
               }}
             >
-              <span style={{ color: '#555', marginRight: '8px' }}>{coords}</span>
-              <span style={{ color: '#009688', marginRight: '8px' }}>{dateFormatted}</span>
+              <Button
+                variant="text"
+                size="small"
+                onClick={() => setFilterClickCoordinates(coords)}
+                sx={{
+                  textTransform: 'none',
+                  padding: '2px 4px',
+                  minWidth: 'auto',
+                  color: '#555',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                  }
+                }}
+              >
+                {coords}
+              </Button>
+              <span style={{ color: '#009688', marginLeft: '8px', marginRight: '8px' }}>{dateFormatted}</span>
               {last4 && (
                 <span
                   style={{

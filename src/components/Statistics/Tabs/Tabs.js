@@ -18,6 +18,8 @@ const Tabs = ({
   filterTimeSpent,
   setFilterScrollCoordinates,
   filterScrollCoordinates,
+  setFilterClickCoordinates,
+  filterClickCoordinates,
   fixedHeaderContent,
   rowContent,
   loadMoreRows,
@@ -58,6 +60,8 @@ const Tabs = ({
             filterTimeSpent={filterTimeSpent}
             setFilterScrollCoordinates={setFilterScrollCoordinates}
             filterScrollCoordinates={filterScrollCoordinates}
+            setFilterClickCoordinates={setFilterClickCoordinates}
+            filterClickCoordinates={filterClickCoordinates}
             fixedHeaderContent={fixedHeaderContent}
             rowContent={rowContent}
             loadMoreRows={loadMoreRows}

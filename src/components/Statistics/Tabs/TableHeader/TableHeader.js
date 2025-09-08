@@ -40,6 +40,8 @@ export default function TableHeader({
   setFilterTimeSpent,
   filterScrollCoordinates,
   setFilterScrollCoordinates,
+  filterClickCoordinates,
+  setFilterClickCoordinates,
   allColumns,
   processedData,
   loadMoreRows,
@@ -258,6 +260,22 @@ export default function TableHeader({
                             onClick={(e) => {
                               e.stopPropagation();
                               setFilterScrollCoordinates(null);
+                            }}
+                          >
+                            <RestartAltIcon sx={{ width: '18px' }} />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+
+                      {/* Дополнительные элементы (например, Tooltips, Buttons) */}
+                      {column.dataKey === 'ClickCoordinates' && filterClickCoordinates && (
+                        <Tooltip title="Сбросить фильтр по координатам клика" arrow placement="top">
+                          <IconButton
+                            sx={{ padding: '5px 0', marginLeft: '0' }}
+                            color="success"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFilterClickCoordinates(null);
                             }}
                           >
                             <RestartAltIcon sx={{ width: '18px' }} />

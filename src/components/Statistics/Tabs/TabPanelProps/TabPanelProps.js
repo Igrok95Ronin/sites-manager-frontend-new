@@ -66,6 +66,8 @@ export default function FullWidthTabs({
   filterTimeSpent,
   setFilterScrollCoordinates,
   filterScrollCoordinates,
+  setFilterClickCoordinates,
+  filterClickCoordinates,
   fixedHeaderContent,
   rowContent,
   loadMoreRows,

@@ -59,7 +59,8 @@ const MemoizedTableHeader = React.memo(TableHeader, (prevProps, nextProps) => {
     prevProps.filterMotionDataRaw === nextProps.filterMotionDataRaw &&
     prevProps.filterIP === nextProps.filterIP &&
     prevProps.filterTimeSpent === nextProps.filterTimeSpent &&
-    prevProps.filterScrollCoordinates === nextProps.filterScrollCoordinates
+    prevProps.filterScrollCoordinates === nextProps.filterScrollCoordinates &&
+    prevProps.filterClickCoordinates === nextProps.filterClickCoordinates
   );
 });
 
@@ -200,6 +201,7 @@ export default function ReactVirtualizedTable() {
   const [filterIP, setFilterIP] = useLocalStorageDataKeys('filterIP', null); // Состояние для фильтрации по IP
   const [filterTimeSpent, setFilterTimeSpent] = useLocalStorageDataKeys('filterTimeSpent', null); // Состояние для фильтрации по TimeSpent
   const [filterScrollCoordinates, setFilterScrollCoordinates] = useLocalStorageDataKeys('filterScrollCoordinates', null); // Состояние для фильтрации по ScrollCoordinates
+  const [filterClickCoordinates, setFilterClickCoordinates] = useLocalStorageDataKeys('filterClickCoordinates', null); // Состояние для фильтрации по ClickCoordinates (X:Y)
 
   // Данные CompanyID
   const [companyIDData, setCompanyIDData] = useState([]);
@@ -322,7 +324,7 @@ export default function ReactVirtualizedTable() {
     // Предварительно подготавливаем значения фильтров для оптимизации
     const hasSearchQuery = Boolean(debouncedSearchQuery);
     const searchQueryLower = hasSearchQuery ? debouncedSearchQuery.toLowerCase() : '';
-    const hasFilters = Boolean(filterByDomain || filterCompanyID || filterAccountID || filterKeyword || filterFingerprint || filterMotionDataRaw || filterIP || filterTimeSpent || filterScrollCoordinates);
+    const hasFilters = Boolean(filterByDomain || filterCompanyID || filterAccountID || filterKeyword || filterFingerprint || filterMotionDataRaw || filterIP || filterTimeSpent || filterScrollCoordinates || filterClickCoordinates);
 
     // Если нет фильтров и поискового запроса, возвращаем исходный массив
     if (!hasSearchQuery && !hasFilters) {
@@ -360,6 +362,22 @@ export default function ReactVirtualizedTable() {
         const itemValue = parseFloat(item.ScrollCoordinates);
         if (filterValue !== itemValue) {
           return false;
+        }
+      }
+      if (filterClickCoordinates !== null && filterClickCoordinates !== undefined) {
+        // Извлекаем X и Y из фильтра (формат "X:123 Y:456")
+        const filterMatch = filterClickCoordinates.match(/X:(\d+)\s+Y:(\d+)/);
+        if (filterMatch) {
+          const filterX = filterMatch[1];
+          const filterY = filterMatch[2];
+          
+          // Извлекаем X и Y из значения элемента
+          const itemValue = item.ClickCoordinates || '';
+          const itemMatch = itemValue.match(/X:(\d+)\s+Y:(\d+)/);
+          
+          if (!itemMatch || itemMatch[1] !== filterX || itemMatch[2] !== filterY) {
+            return false;
+          }
         }
       }
       if (filterMotionDataRaw) {
@@ -409,6 +427,7 @@ export default function ReactVirtualizedTable() {
     filterIP,
     filterTimeSpent,
     filterScrollCoordinates,
+    filterClickCoordinates,
   ]);
 
   const processedData = useMemo(() => {
@@ -623,6 +642,8 @@ export default function ReactVirtualizedTable() {
         filterTimeSpent={filterTimeSpent}
         setFilterScrollCoordinates={setFilterScrollCoordinates}
         filterScrollCoordinates={filterScrollCoordinates}
+        setFilterClickCoordinates={setFilterClickCoordinates}
+        filterClickCoordinates={filterClickCoordinates}
         fixedHeaderContent={() => (
           <MemoizedTableHeader
             visibleColumns={visibleColumns}
@@ -651,6 +672,8 @@ export default function ReactVirtualizedTable() {
             setFilterTimeSpent={setFilterTimeSpent}
             filterScrollCoordinates={filterScrollCoordinates}
             setFilterScrollCoordinates={setFilterScrollCoordinates}
+            filterClickCoordinates={filterClickCoordinates}
+            setFilterClickCoordinates={setFilterClickCoordinates}
             allColumns={allColumns}
             processedData={processedData}
             loadMoreRows={loadMoreRows}
@@ -682,6 +705,7 @@ export default function ReactVirtualizedTable() {
             setFilterIP={setFilterIP}
             setFilterTimeSpent={setFilterTimeSpent}
             setFilterScrollCoordinates={setFilterScrollCoordinates}
+            setFilterClickCoordinates={setFilterClickCoordinates}
             doubleOutput={doubleOutput}
             companyIDData={companyIDData}
             dataGoogleAccounts={dataGoogleAccounts}
