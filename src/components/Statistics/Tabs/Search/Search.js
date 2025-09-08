@@ -24,6 +24,8 @@ const Search = ({
   setStartDate,
   endDate,
   setEndDate,
+  hasActiveFilters,
+  resetAllFilters,
 }) => {
   // Используем кастомный хук для сохранения limit
   const [localLimit, setLocalLimit] = useLocalStorage('search_limit', limit);

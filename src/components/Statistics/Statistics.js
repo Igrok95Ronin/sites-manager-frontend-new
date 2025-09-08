@@ -207,6 +207,58 @@ export default function ReactVirtualizedTable() {
   const [companyIDData, setCompanyIDData] = useState([]);
   // Данные GoogleAC
   const [dataGoogleAccounts, setDataGoogleAccounts] = useState([]);
+  
+  // Проверка наличия активных фильтров
+  const hasActiveFilters = useMemo(() => {
+    return Boolean(
+      filterByDomain || 
+      filterCompanyID || 
+      filterAccountID || 
+      filterKeyword || 
+      filterFingerprint || 
+      filterMotionDataRaw || 
+      filterIP || 
+      filterTimeSpent || 
+      filterScrollCoordinates || 
+      filterClickCoordinates
+    );
+  }, [
+    filterByDomain,
+    filterCompanyID,
+    filterAccountID,
+    filterKeyword,
+    filterFingerprint,
+    filterMotionDataRaw,
+    filterIP,
+    filterTimeSpent,
+    filterScrollCoordinates,
+    filterClickCoordinates
+  ]);
+  
+  // Функция сброса всех фильтров
+  const resetAllFilters = useCallback(() => {
+    setFilterByDomain(null);
+    setFilterCompanyID(null);
+    setFilterAccountID(null);
+    setFilterKeyword(null);
+    setFilterFingerprint(null);
+    setFilterMotionDataRaw(null);
+    setFilterIP(null);
+    setFilterTimeSpent(null);
+    setFilterScrollCoordinates(null);
+    setFilterClickCoordinates(null);
+  }, [
+    setFilterByDomain,
+    setFilterCompanyID,
+    setFilterAccountID,
+    setFilterKeyword,
+    setFilterFingerprint,
+    setFilterMotionDataRaw,
+    setFilterIP,
+    setFilterTimeSpent,
+    setFilterScrollCoordinates,
+    setFilterClickCoordinates
+  ]);
   // -----------------------------------
   // (C) Загрузка данных
   // -----------------------------------
@@ -745,6 +797,8 @@ export default function ReactVirtualizedTable() {
         endDate={endDate}
         setEndDate={setEndDate}
         visibleTabs={visibleTabs}
+        hasActiveFilters={hasActiveFilters}
+        resetAllFilters={resetAllFilters}
       />
       <CompanyNames setCompanyIDData={setCompanyIDData} />
       <GoogleAccounts setDataGoogleAccounts={setDataGoogleAccounts} />

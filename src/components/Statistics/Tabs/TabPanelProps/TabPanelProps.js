@@ -7,6 +7,8 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import { TableVirtuoso } from 'react-virtuoso';
+import { Tooltip, IconButton } from '@mui/material';
+import FilterAltOffIcon from '@mui/icons-material/FilterAltOff';
 
 import Search from '../Search/Search';
 import Spinner from '../../../Spinner/Spinner';
@@ -86,6 +88,8 @@ export default function FullWidthTabs({
   endDate,
   setEndDate,
   visibleTabs,
+  hasActiveFilters,
+  resetAllFilters,
 }) {
   const theme = useTheme();
   const [value, setValue] = React.useState(0);
@@ -183,8 +187,28 @@ export default function FullWidthTabs({
               setStartDate={setStartDate}
               endDate={endDate}
               setEndDate={setEndDate}
+              hasActiveFilters={hasActiveFilters}
+              resetAllFilters={resetAllFilters}
             />
-            <div className="tabPanelProps__settings">{ColumnSelector}</div>
+            <div className="tabPanelProps__settings">
+              {hasActiveFilters && (
+                <Tooltip title="Сбросить все фильтры" arrow>
+                  <IconButton
+                    sx={{ 
+                      color: '#f44336',
+                      '&:hover': {
+                        backgroundColor: 'rgba(244, 67, 54, 0.08)',
+                      },
+                      marginRight: '10px'
+                    }}
+                    onClick={resetAllFilters}
+                  >
+                    <FilterAltOffIcon />
+                  </IconButton>
+                </Tooltip>
+              )}
+              {ColumnSelector}
+            </div>
           </div>
 
           <Paper style={{ height: '84vh', width: '100%' }}>

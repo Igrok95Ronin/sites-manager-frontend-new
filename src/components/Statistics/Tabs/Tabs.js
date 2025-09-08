@@ -39,6 +39,8 @@ const Tabs = ({
   endDate,
   setEndDate,
   visibleTabs,
+  hasActiveFilters,
+  resetAllFilters,
 }) => {
   return (
     <section className="tabs">
@@ -81,6 +83,8 @@ const Tabs = ({
             endDate={endDate}
             setEndDate={setEndDate}
             visibleTabs={visibleTabs}
+            hasActiveFilters={hasActiveFilters}
+            resetAllFilters={resetAllFilters}
           />
         </div>
       </div>
